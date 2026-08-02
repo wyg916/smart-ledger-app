@@ -1,0 +1,6 @@
+{
+  "fixture_version": 1,
+  "synthetic": true,
+  "corruption": ["invalid_magic", "truncated_ciphertext", "invalid_gcm_tag", "manifest_count_mismatch"],
+  "expected": {"restore_rejected": true, "live_database_unchanged": true, "temporary_files_removed": true}
+}

@@ -1,0 +1,16 @@
+{
+  "fixture_version": 1,
+  "synthetic": true,
+  "source_schema": "room_v1",
+  "books": [{"legacy_id": 1, "name": "测试账本"}],
+  "categories": [
+    {"legacy_id": 1, "name": "虚构工资", "type": "income", "enabled": true},
+    {"legacy_id": 2, "name": "虚构餐饮", "type": "expense", "enabled": true}
+  ],
+  "transactions": [
+    {"legacy_id": 1, "book_id": 1, "category_id": 1, "type": "income", "amount_minor": 100000, "occurred_at": "2026-01-01T01:00:00Z", "note": "虚构收入"},
+    {"legacy_id": 2, "book_id": 1, "category_id": 2, "type": "expense", "amount_minor": 3500, "occurred_at": "2026-01-02T04:30:00Z", "note": "虚构午餐"}
+  ],
+  "legacy_settings": {"currency_code": "CNY"},
+  "expected": {"transaction_count": 2, "income_minor": 100000, "expense_minor": 3500, "balance_minor": 96500}
+}

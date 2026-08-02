@@ -1,0 +1,7 @@
+{
+  "fixture_version": 1,
+  "synthetic": true,
+  "devices": ["00000000-0000-4000-8000-000000000001", "00000000-0000-4000-8000-000000000002"],
+  "operations": ["device_a_create", "device_a_push", "device_b_pull", "device_b_update", "device_b_push", "device_a_pull"],
+  "expected": {"converged": true, "duplicate_count": 0, "cursor_monotonic": true}
+}

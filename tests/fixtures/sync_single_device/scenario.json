@@ -1,0 +1,7 @@
+{
+  "fixture_version": 1,
+  "synthetic": true,
+  "device_id": "00000000-0000-4000-8000-000000000001",
+  "operations": ["create_transaction", "push", "retry_same_push", "pull"],
+  "expected": {"cloud_transaction_count": 1, "duplicate_count": 0, "outbox_pending": 0}
+}

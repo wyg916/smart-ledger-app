@@ -1,0 +1,8 @@
+{
+  "fixture_version": 1,
+  "synthetic": true,
+  "source_schema": "room_v1",
+  "category": {"legacy_id": 9, "name": "历史分类", "enabled": false},
+  "referencing_transactions": [{"legacy_id": 90, "category_id": 9, "amount_minor": 8800}],
+  "expected": {"category_preserved": true, "category_enabled": false, "transaction_preserved": true}
+}

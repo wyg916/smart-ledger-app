@@ -1,0 +1,10 @@
+{
+  "fixture_version": 1,
+  "synthetic": true,
+  "generator": "deterministic_room_v1",
+  "seed": 20260802,
+  "transaction_count": 10000,
+  "date_range": ["2024-01-01T00:00:00Z", "2026-07-31T23:59:59Z"],
+  "amount_minor_range": [1, 999999],
+  "expected": {"transaction_count": 10000, "reconcile_generated_totals": true}
+}

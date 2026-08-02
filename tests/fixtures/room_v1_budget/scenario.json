@@ -1,0 +1,11 @@
+{
+  "fixture_version": 1,
+  "synthetic": true,
+  "source_schema": "room_v1_plus_datastore",
+  "legacy_settings": {
+    "monthly_budget_minor": 300000,
+    "category_budgets": [{"category_legacy_id": 2, "amount_minor": 80000}],
+    "auto_backup_enabled": true
+  },
+  "expected": {"budget_count": 1, "category_budget_count": 1, "monthly_budget_minor": 300000}
+}

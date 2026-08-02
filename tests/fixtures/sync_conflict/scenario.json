@@ -1,0 +1,9 @@
+{
+  "fixture_version": 1,
+  "synthetic": true,
+  "entity_id": "10000000-0000-4000-8000-000000000001",
+  "base_version": 3,
+  "device_a_change": {"version": 4, "note": "虚构设备A修改"},
+  "device_b_change": {"version": 4, "note": "虚构设备B修改"},
+  "expected": {"requires_frozen_conflict_policy": true, "result_must_be_deterministic": true}
+}

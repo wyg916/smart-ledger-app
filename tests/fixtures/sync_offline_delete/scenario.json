@@ -1,0 +1,7 @@
+{
+  "fixture_version": 1,
+  "synthetic": true,
+  "entity_id": "20000000-0000-4000-8000-000000000001",
+  "operations": ["device_a_offline_delete", "device_b_offline_update", "device_a_reconnect", "device_b_reconnect"],
+  "expected": {"deleted_at_propagated": true, "entity_not_resurrected": true}
+}

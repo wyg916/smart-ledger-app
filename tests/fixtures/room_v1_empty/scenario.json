@@ -1,0 +1,10 @@
+{
+  "fixture_version": 1,
+  "synthetic": true,
+  "source_schema": "room_v1",
+  "books": [],
+  "categories": [],
+  "transactions": [],
+  "legacy_settings": {},
+  "expected": {"transaction_count": 0, "income_minor": 0, "expense_minor": 0}
+}

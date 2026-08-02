@@ -1,0 +1,88 @@
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.mobileprovision
+google-services.json
+GoogleService-Info.plist
+local.properties
+docs/private/
+secrets/
+credentials/
+
+# Databases and user data
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.ledgerbackup
+*.zip.enc
+backups/
+uploads/
+user-data/
+
+# Flutter / Dart
+.dart_tool/
+.packages
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+coverage/
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/ephemeral/
+macos/Flutter/ephemeral/
+
+# Android / Gradle
+.gradle/
+**/.gradle/
+**/build/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+htmlcov/
+.coverage
+
+# Node
+node_modules/
+
+# IDE / OS
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.example.json
+*.iml
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Generated
+*.log
+*.apk
+*.aab
+*.apks
+*.ipa
+reports/generated/
+artifacts/
+dist/
+.tmp/
+tmp/
+temp/
