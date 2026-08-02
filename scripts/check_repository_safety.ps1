@@ -20,7 +20,7 @@ try {
         foreach ($relativePath in $relativePaths) {
             $fullPath = Join-Path $repoRoot $relativePath
             if (Test-Path -LiteralPath $fullPath -PathType Leaf) {
-                Get-Item -LiteralPath $fullPath
+                Get-Item -LiteralPath $fullPath -Force
             }
         }
     )
