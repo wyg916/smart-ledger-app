@@ -5,7 +5,7 @@
 ## 仓库
 - GitHub：`wyg916/smart-ledger-app`
 - 仓库可见性：Public。
-- 目标默认分支：`main`（首次基线推送前仓库为空）。
+- 默认分支：`main`；开发前基线已于 2026-08-02 推送。
 - 本地仓库：`E:\移动端开发\smart-ledger-app`
 - 旧项目来源：`E:\移动端开发\记账统计`
 
@@ -27,9 +27,9 @@
 - [x] 13 个 Screen 与 13 个 ViewModel 初始清单
 - [x] 测试文件数量初查；执行被本机缺少 JDK 17 阻断
 - [ ] 是否存在真实用户或真实数据
-- [x] 文件名、大文件和高置信秘密模式扫描；135 个候选文件通过，发现项仅为 `.env.example` 占位值和单元测试虚构密码
+- [x] 文件名、大文件和高置信秘密模式扫描；135 个候选文件在本地和 GitHub Actions 均通过，发现项仅为 `.env.example` 占位值和单元测试虚构密码
 - [ ] Flutter、Python、PostgreSQL、Docker、Xcode 环境
-- [ ] GitHub Actions 状态
+- [x] GitHub Actions `Repository Safety` 基线工作流；Flutter、后端和旧 Android 构建工作流待 P1/P0 补充
 - [ ] 服务器域名、HTTPS、备份和端口条件
 
 ## 当前门禁
