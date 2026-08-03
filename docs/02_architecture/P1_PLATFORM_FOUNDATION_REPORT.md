@@ -52,7 +52,7 @@ APK 位于 `apps/mobile/build/app/outputs/flutter-apk/app-debug.apk`，构建目
 |---|---|
 | Ruff format | 10 个文件通过 |
 | Ruff lint | 通过 |
-| mypy strict | 6 个源文件通过 |
+| mypy strict | 9 个源文件通过 |
 | pytest | 4/4 通过 |
 | Compose config | 通过；API/数据库端口仅绑定本机 |
 | 容器 | API 与 PostgreSQL 16 均 healthy |
