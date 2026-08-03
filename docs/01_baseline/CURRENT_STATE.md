@@ -23,8 +23,9 @@
 - 2026-08-03 已在仓库外新增 macOS 完整备份，见 `PRE_REFACTOR_BACKUP.md`。
 - 已完成 P0 静态事实审计与本机环境审计，见 `P0_AUDIT_REPORT.md`。
 - 2026-08-03 已完成 P0-CLOSEOUT：JDK 17、Android SDK、adb、Gradle 8.7 Wrapper、clean、现有测试、Debug APK、哈希和 API 34 ARM64 模拟器安装启动均通过；结论为 `PASS`，见 `P0_CLOSEOUT_REPORT.md`。
-- 本地 `main` 已以 fast-forward 合并 P0-CLOSEOUT，HEAD 为 `e1573c96abda96905204fbeea045e3263309e58a`；因本机 GitHub HTTPS 凭据不可用，`origin/main` 推送未完成。
-- 已创建本地分支 `p1/platform-foundation`，远端同样尚未推送。
+- 本地 `main` 已以 fast-forward 合并 P0-CLOSEOUT，且 `origin/main` 已通过普通推送同步为 `e1573c96abda96905204fbeea045e3263309e58a`。
+- GitHub CLI 身份认证已由用户完成并配置为 Git HTTPS 凭据助手；未在仓库记录 Token、Cookie 或凭据文件。
+- `p1/platform-foundation` 已通过普通推送创建于远端；P1A 工程 HEAD `e77836901e32e25767c449c8512a89f789eb4244` 的 Flutter、FastAPI 与旧 Android Actions 均通过。
 - 已安装 Flutter 3.44.8 / Dart 3.12.2、uv 0.12.1 / Python 3.12.13、Docker Desktop 4.84.0 / Engine 29.6.2 / Compose 5.3.1。
 - Android SDK 已补齐 Platform 36、Build Tools 36.0.0、NDK 28.2 和 CMake 3.22.1；Flutter doctor 的 Android toolchain 为通过。
 - `apps/mobile/` 已建立 Flutter Material 3 + Riverpod + go_router + Drift 骨架。临时开发 applicationId 为 `com.smartledger.dev.smart_ledger`，不是最终生产包名。
@@ -43,15 +44,15 @@
 - [ ] 是否存在真实用户或真实数据
 - [x] 文件名、大文件和高置信秘密模式扫描；135 个候选文件在本地和 GitHub Actions 均通过，发现项仅为 `.env.example` 占位值和单元测试虚构密码
 - [x] Flutter、Python、Docker、Xcode 环境已审计；Android、Python、Docker 已就绪，完整 Xcode 仍阻断
-- [x] GitHub Actions `Repository Safety`、Flutter、后端和旧 Android 基础工作流已建立
+- [x] GitHub Actions `Repository Safety`、Flutter、后端和旧 Android 基础工作流已建立；本轮适用的远端运行全部通过
 - [ ] 服务器域名、HTTPS、备份和端口条件
 
 ## 当前门禁
 
-P0-CLOSEOUT 的本地 fast-forward 已完成，P1A 的移动端、后端、数据库和容器
-技术门禁均取得现场成功证据。阶段总体仍为 `PARTIAL`：`origin/main` 和
-`p1/platform-foundation` 因 GitHub 凭据缺失尚未推送。完成正常非强制推送并确认
-远端分支后，才允许进入 P1B。
+P0-CLOSEOUT 已同步到 `origin/main`，P1A 的移动端、后端、数据库、容器、远端分支和
+适用 GitHub Actions 门禁均取得成功证据，阶段结论为 `P1A = PASS`。P1A 只建立平台
+工程骨架，不代表交易、账户、分类、预算、同步、AI 或发布能力完成；P1B 尚未开始，
+只有后续获得明确授权才可进入。
 
 `IOS_TOOLCHAIN = BLOCKED`：需安装完整 Xcode、执行首次初始化并安装 CocoaPods，
 在此之前不允许进入正式 iOS 构建或发布阶段。真实用户、正式签名、最终标识和商店

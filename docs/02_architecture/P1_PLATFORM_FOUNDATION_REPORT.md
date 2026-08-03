@@ -2,7 +2,7 @@
 
 执行日期：2026-08-03
 
-结论：**PARTIAL**
+结论：**PASS**
 
 `IOS_TOOLCHAIN = BLOCKED`
 
@@ -12,9 +12,9 @@ Flutter Android、FastAPI、PostgreSQL 16、Alembic、Docker Compose、CI 和文
 均已建立并取得本机运行证据。未实现记账、登录、预算、统计、同步、Outbox、AI、
 Agent、RAG、向量数据库、正式签名或发布能力，也未修改旧 Android 工程。
 
-P1A 未标记 PASS 的原因不是代码或本地平台门禁：本机 GitHub HTTPS 凭据不可用，
-已验收 P0 无法推送到 `origin/main`，P1 分支也无法推送。完成正常非强制推送前，
-不允许进入 P1B。
+GitHub CLI 身份认证已由用户完成，并已配置为 Git HTTPS 凭据助手；未在仓库或本文档
+记录 Token、Cookie 或凭据文件。P0 已正常推送到 `origin/main`，P1 分支已正常创建于
+远端，适用于 P1A 工程提交的远端 CI 全部通过。P1A 已关闭，但本轮未开始 P1B。
 
 ## 工具链
 
@@ -70,13 +70,31 @@ Docker 首次拉取 Python 镜像时出现一次 Docker Hub token 请求超时�
 开发构建和本地测试，不含正式签名、生产地址或密钥。仓库安全工作流继续保留。
 
 `.gitignore` 覆盖环境文件、签名材料、数据库、Docker 数据、Flutter/Gradle/Python
-缓存、IDE、APK/AAB、IPA 和 Xcode 构建产物。提交前扫描 239 个候选文件：禁止文件
+缓存、IDE、APK/AAB、IPA 和 Xcode 构建产物。关闭前扫描 236 个候选文件：禁止文件
 0、大于 20 MiB 文件 0、高置信秘密模式命中 0；`git diff --check` 通过。
+
+| 分支 / HEAD | 工作流 | Run ID | 结果 |
+|---|---|---:|---|
+| `main` / `e1573c96abda96905204fbeea045e3263309e58a` | Repository Safety | 30799345265 | success |
+| `p1/platform-foundation` / `e77836901e32e25767c449c8512a89f789eb4244` | FastAPI foundation | 30799370994 | success |
+| `p1/platform-foundation` / `e77836901e32e25767c449c8512a89f789eb4244` | Flutter foundation | 30799371021 | success |
+| `p1/platform-foundation` / `e77836901e32e25767c449c8512a89f789eb4244` | Legacy Android baseline | 30799370999 | success |
+
+FastAPI 的 Ruff format、Ruff lint、mypy 和 pytest，Flutter 的格式、analyze、test 和
+无签名 Debug APK，以及旧 Android 的单元测试和无签名 Debug APK 均在 Actions 通过。
+本轮没有 CI 失败，因此没有 CI 修复提交。`Repository Safety` 的 push 触发范围仅包含
+`main`，所以 P1 推送未触发该工作流；这属于工作流触发条件，不记为通过。关闭文档
+提交只修改文档，也不满足三个工程工作流的路径过滤条件；适用的工程 CI 证据对应其
+直接前序 P1A 工程 HEAD `e77836901e32e25767c449c8512a89f789eb4244`。
 
 ## Git 与阶段门禁
 
-- 本地 `main` 已 fast-forward 到 P0 HEAD `e1573c96abda96905204fbeea045e3263309e58a`。
-- `git push origin main` 失败：HTTPS 无法取得 GitHub 用户名，未产生远端写入。
-- 本地 `p1/platform-foundation` 已创建；其首次推送同样因凭据缺失失败。
+- 本地 `main` 和 `origin/main` 均为 P0 HEAD `e1573c96abda96905204fbeea045e3263309e58a`。
+- `git push origin main` 正常完成，退出码 0，未使用 force 参数。
+- `git push -u origin p1/platform-foundation` 正常完成，退出码 0；远端已包含完整 P1A
+  工程 HEAD `e77836901e32e25767c449c8512a89f789eb4244`。
+- 关闭文档使用提交 `docs(p1): close platform foundation remote gate` 并普通推送；其
+  最终 SHA 以 Git 远端引用及本轮关闭汇报为准（提交无法在自身内容中记录自身 SHA）。
 - 未 force push、未 reset、未删除远端分支、未创建 Release、未合并 P1 到 main。
-- P1A 结论为 `PARTIAL`，当前不允许进入 P1B。
+- P1A 结论为 `PASS`；正式包名、签名、真实用户与商店资源仍未确认。
+- `IOS_TOOLCHAIN = BLOCKED`；P1B 尚未开始，只有后续获得明确授权才可进入。

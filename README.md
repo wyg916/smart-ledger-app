@@ -22,13 +22,14 @@ tests/fixtures/             匿名化测试数据
 
 ## 当前阶段
 
-P1A Platform Foundation 已完成本地技术骨架和运行验收：Flutter Android、
-FastAPI、PostgreSQL 16、Alembic、Docker Compose 与三组 CI 工作流均已建立。
-由于本机 GitHub HTTPS 凭据不可用，`origin/main` 与 P1 分支尚未推送，因此
-阶段结论为 `PARTIAL`。完整事实见 `docs/01_baseline/CURRENT_STATE.md` 和
+P1A Platform Foundation 已完成技术骨架、运行验收、远端同步和 GitHub Actions
+验证：Flutter Android、FastAPI、PostgreSQL 16、Alembic、Docker Compose 与三组
+工程 CI 工作流均已建立，阶段结论为 `PASS`；`IOS_TOOLCHAIN = BLOCKED`。完整事实见
+`docs/01_baseline/CURRENT_STATE.md` 和
 `docs/02_architecture/P1_PLATFORM_FOUNDATION_REPORT.md`。
 
 本阶段只提供平台骨架，不代表记账、登录、同步、统计、AI 或发布功能已经完成。
+正式包名、签名、真实用户和商店资源仍未确认，P1B 尚未开始。
 
 ## 本地启动
 
