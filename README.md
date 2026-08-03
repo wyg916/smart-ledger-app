@@ -22,16 +22,16 @@ tests/fixtures/             匿名化测试数据
 
 ## 当前阶段
 
-P1B Core Local Ledger 已完成本地数据契约、Drift Schema 2、账户与分类管理，以及收入、
-支出、转账、筛选、汇总、编辑、逻辑删除和持久化闭环。Flutter 本地 26/26 测试、
-Android 34 ARM64 模拟器真实交互、FastAPI/Compose 回归和 main 适用 GitHub Actions
-均通过；P1B 已 fast-forward 进入 `origin/main` 并正式关闭，阶段结论为 `PASS`；
-`IOS_TOOLCHAIN = BLOCKED`。完整事实见
-`docs/01_baseline/CURRENT_STATE.md`、`docs/03_data/P1B_LOCAL_LEDGER_CONTRACT.md` 和
-`docs/03_data/P1B_IMPLEMENTATION_REPORT.md`。
+P1C Local Budget & Analytics 已在 `p1c/local-budget-analytics` 完成本地预算与确定性统计
+闭环：Drift Schema 3、Schema 2→3 保真迁移、月度总预算/单分类预算、预算 CRUD/启停/
+Tombstone、使用额与超支、月度收支净额/环比、日趋势、分类排行、账户余额和三类筛选。
+Flutter 本地 39/39 测试、42.33% 行覆盖率、Debug APK、Android 34 ARM64 保留 P1B 数据
+升级交互以及 FastAPI/Compose 回归均通过；`IOS_TOOLCHAIN = BLOCKED`。完整事实见
+`docs/01_baseline/CURRENT_STATE.md`、`docs/04_budget_analytics/P1C_BUDGET_ANALYTICS_CONTRACT.md`
+和 `docs/04_budget_analytics/P1C_IMPLEMENTATION_REPORT.md`。
 
-本阶段仍不包含登录、云同步、预算、统计图表、AI、正式旧库迁移、正式签名或发布能力。
-正式包名、签名、真实用户和商店资源仍未确认；不得自动进入 P1C。
+P1C 不包含登录、云同步、后端业务表、备份恢复、应用锁、目标、AI、正式旧库迁移、正式
+签名或发布能力。正式包名、签名、真实用户和商店资源仍未确认；不得自动进入下一阶段。
 
 ## 本地启动
 

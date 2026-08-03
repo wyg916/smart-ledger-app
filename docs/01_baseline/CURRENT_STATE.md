@@ -50,6 +50,20 @@
   `30807188699`、main Flutter Run `30807541069` 与 main Repository Safety Run
   `30807541194` 均通过；P1B 没有修改后端、基础设施或旧 Android，P1B 已正式关闭。
 - 完整 Xcode 与 CocoaPods 仍未就绪，`IOS_TOOLCHAIN = BLOCKED`；本轮未声称 iOS 构建通过。
+- 用户已于 2026-08-03 明确授权 P1C；分支 `p1c/local-budget-analytics` 从 main
+  `1384e94577ea09b5b97f517fc9e799be514ea8a9` 创建并普通推送。
+- P1C 已冻结预算与统计契约，建立 Drift Schema 3 和真实 Schema 2→3 保真迁移；新增
+  月度总预算/单分类预算、CRUD、启停、Tombstone、进度与超支，以及月度收支净额、环比、
+  日趋势、收入/支出分类排行、账户余额和月份/账户/分类筛选。
+- P1C Flutter format/analyze、39/39 测试、42.33% 行覆盖率和 Debug APK 通过；APK 为
+  187,940,313 字节，SHA-256 为
+  `566cb783ad4bdd65205dbe8376b314bec666f7bc79cc7a6fbf71dc8e28a8b033`。
+- API 34 ARM64 模拟器使用 `adb install -r` 从既有 P1B 数据升级：P1B 账户、分类和交易
+  保留；总/分类预算及支出、收入、转账、编辑、删除、统计、空月份和冷启动持久化交互通过；
+  最终 App 观察未命中 FATAL、ANR、SQLite 或 migration 错误。
+- P1C 未修改 FastAPI、PostgreSQL、Docker 业务或旧 Android；Ruff、mypy、pytest 4/4 和
+  Compose config 回归通过。工程 HEAD `d408157bfef19777d3de254b5ab85c522f47c647`
+  的 Flutter Run `30814256211` 已通过。
 
 ## 待审计
 - [x] macOS 旧 Android 可复现构建（JDK 17、Android SDK 34、官方 HTTPS Wrapper、clean/test/assembleDebug）
@@ -65,10 +79,10 @@
 
 ## 当前门禁
 
-P0-CLOSEOUT、P1A 与 P1B 已同步到 `origin/main`。P1B 的本地数据契约、Drift Schema 2、
-账户/分类管理、基础交易闭环、测试、Android 模拟器、回归检查和适用 GitHub Actions
-均取得成功证据，阶段结论为 `P1B = PASS`，P1B 正式关闭且 P1C 尚未开始。P1B 不代表真实旧库迁移、登录、同步、
-预算、统计图表、AI 或发布能力完成；只有后续获得明确授权才可进入 P1C。
+P0-CLOSEOUT、P1A 与 P1B 已同步到 `origin/main`。P1C 已在
+`p1c/local-budget-analytics` 完成本地预算、统计、Schema 3、自动化与 Android 升级验收；
+远端工程门禁和最终分支同步已通过，阶段结论为 `P1C = PASS`。P1C 不代表真实旧库迁移、
+登录、同步、后端业务表、备份、应用锁、目标、AI 或发布能力完成；不得自动进入下一阶段。
 
 `IOS_TOOLCHAIN = BLOCKED`：需安装完整 Xcode、执行首次初始化并安装 CocoaPods，
 在此之前不允许进入正式 iOS 构建或发布阶段。真实用户、正式签名、最终标识和商店
