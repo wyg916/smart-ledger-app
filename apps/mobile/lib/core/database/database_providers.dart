@@ -6,6 +6,11 @@ import 'package:smart_ledger/core/time/ledger_time.dart';
 import 'package:smart_ledger/features/accounts/data/drift_account_repository.dart';
 import 'package:smart_ledger/features/accounts/domain/account_use_cases.dart';
 import 'package:smart_ledger/features/accounts/domain/ledger_account.dart';
+import 'package:smart_ledger/features/analytics/data/drift_analytics_repository.dart';
+import 'package:smart_ledger/features/analytics/domain/ledger_analytics.dart';
+import 'package:smart_ledger/features/budgets/data/drift_budget_repository.dart';
+import 'package:smart_ledger/features/budgets/domain/budget_use_cases.dart';
+import 'package:smart_ledger/features/budgets/domain/ledger_budget.dart';
 import 'package:smart_ledger/features/categories/data/drift_category_repository.dart';
 import 'package:smart_ledger/features/categories/domain/category_use_cases.dart';
 import 'package:smart_ledger/features/categories/domain/ledger_category.dart';
@@ -53,6 +58,18 @@ final transactionRepositoryProvider = Provider<TransactionRepository>((ref) {
   );
 });
 
+final budgetRepositoryProvider = Provider<BudgetRepository>((ref) {
+  return DriftBudgetRepository(
+    ref.watch(appDatabaseProvider),
+    ref.watch(ledgerClockProvider),
+    ref.watch(entityIdGeneratorProvider),
+  );
+});
+
+final analyticsRepositoryProvider = Provider<AnalyticsRepository>((ref) {
+  return DriftAnalyticsRepository(ref.watch(appDatabaseProvider));
+});
+
 final saveAccountUseCaseProvider = Provider<SaveAccountUseCase>(
   (ref) => SaveAccountUseCase(ref.watch(accountRepositoryProvider)),
 );
@@ -61,6 +78,9 @@ final saveCategoryUseCaseProvider = Provider<SaveCategoryUseCase>(
 );
 final saveTransactionUseCaseProvider = Provider<SaveTransactionUseCase>(
   (ref) => SaveTransactionUseCase(ref.watch(transactionRepositoryProvider)),
+);
+final saveBudgetUseCaseProvider = Provider<SaveBudgetUseCase>(
+  (ref) => SaveBudgetUseCase(ref.watch(budgetRepositoryProvider)),
 );
 
 final localLedgerBootstrapProvider = FutureProvider<void>((ref) async {

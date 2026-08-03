@@ -4262,6 +4262,1216 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   }
 }
 
+class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, Budget> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BudgetsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ledgerIdMeta = const VerificationMeta(
+    'ledgerId',
+  );
+  @override
+  late final GeneratedColumn<String> ledgerId = GeneratedColumn<String>(
+    'ledger_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES ledgers (id) ON DELETE RESTRICT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _scopeTypeMeta = const VerificationMeta(
+    'scopeType',
+  );
+  @override
+  late final GeneratedColumn<String> scopeType = GeneratedColumn<String>(
+    'scope_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoryIdMeta = const VerificationMeta(
+    'categoryId',
+  );
+  @override
+  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
+    'category_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES categories (id) ON DELETE RESTRICT',
+    ),
+  );
+  static const VerificationMeta _yearMonthMeta = const VerificationMeta(
+    'yearMonth',
+  );
+  @override
+  late final GeneratedColumn<String> yearMonth = GeneratedColumn<String>(
+    'year_month',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _amountMinorMeta = const VerificationMeta(
+    'amountMinor',
+  );
+  @override
+  late final GeneratedColumn<int> amountMinor = GeneratedColumn<int>(
+    'amount_minor',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _currencyCodeMeta = const VerificationMeta(
+    'currencyCode',
+  );
+  @override
+  late final GeneratedColumn<String> currencyCode = GeneratedColumn<String>(
+    'currency_code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _timeZoneIdMeta = const VerificationMeta(
+    'timeZoneId',
+  );
+  @override
+  late final GeneratedColumn<String> timeZoneId = GeneratedColumn<String>(
+    'time_zone_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _periodTypeMeta = const VerificationMeta(
+    'periodType',
+  );
+  @override
+  late final GeneratedColumn<String> periodType = GeneratedColumn<String>(
+    'period_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('monthly'),
+  );
+  static const VerificationMeta _startDateLocalMeta = const VerificationMeta(
+    'startDateLocal',
+  );
+  @override
+  late final GeneratedColumn<String> startDateLocal = GeneratedColumn<String>(
+    'start_date_local',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _endDateLocalMeta = const VerificationMeta(
+    'endDateLocal',
+  );
+  @override
+  late final GeneratedColumn<String> endDateLocal = GeneratedColumn<String>(
+    'end_date_local',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _alertThresholdsJsonMeta =
+      const VerificationMeta('alertThresholdsJson');
+  @override
+  late final GeneratedColumn<String> alertThresholdsJson =
+      GeneratedColumn<String>(
+        'alert_thresholds_json',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('[0.8,1.0]'),
+      );
+  static const VerificationMeta _isActiveMeta = const VerificationMeta(
+    'isActive',
+  );
+  @override
+  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
+    'is_active',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_active" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _createdAtMsMeta = const VerificationMeta(
+    'createdAtMs',
+  );
+  @override
+  late final GeneratedColumn<int> createdAtMs = GeneratedColumn<int>(
+    'created_at_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMsMeta = const VerificationMeta(
+    'updatedAtMs',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAtMs = GeneratedColumn<int>(
+    'updated_at_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMsMeta = const VerificationMeta(
+    'deletedAtMs',
+  );
+  @override
+  late final GeneratedColumn<int> deletedAtMs = GeneratedColumn<int>(
+    'deleted_at_ms',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _lastModifiedDeviceIdMeta =
+      const VerificationMeta('lastModifiedDeviceId');
+  @override
+  late final GeneratedColumn<String> lastModifiedDeviceId =
+      GeneratedColumn<String>(
+        'last_modified_device_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('pending'),
+  );
+  static const VerificationMeta _legacyIdMeta = const VerificationMeta(
+    'legacyId',
+  );
+  @override
+  late final GeneratedColumn<int> legacyId = GeneratedColumn<int>(
+    'legacy_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    ledgerId,
+    name,
+    scopeType,
+    categoryId,
+    yearMonth,
+    amountMinor,
+    currencyCode,
+    timeZoneId,
+    periodType,
+    startDateLocal,
+    endDateLocal,
+    alertThresholdsJson,
+    isActive,
+    createdAtMs,
+    updatedAtMs,
+    deletedAtMs,
+    version,
+    lastModifiedDeviceId,
+    syncStatus,
+    legacyId,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'budgets';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Budget> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('ledger_id')) {
+      context.handle(
+        _ledgerIdMeta,
+        ledgerId.isAcceptableOrUnknown(data['ledger_id']!, _ledgerIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ledgerIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('scope_type')) {
+      context.handle(
+        _scopeTypeMeta,
+        scopeType.isAcceptableOrUnknown(data['scope_type']!, _scopeTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_scopeTypeMeta);
+    }
+    if (data.containsKey('category_id')) {
+      context.handle(
+        _categoryIdMeta,
+        categoryId.isAcceptableOrUnknown(data['category_id']!, _categoryIdMeta),
+      );
+    }
+    if (data.containsKey('year_month')) {
+      context.handle(
+        _yearMonthMeta,
+        yearMonth.isAcceptableOrUnknown(data['year_month']!, _yearMonthMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_yearMonthMeta);
+    }
+    if (data.containsKey('amount_minor')) {
+      context.handle(
+        _amountMinorMeta,
+        amountMinor.isAcceptableOrUnknown(
+          data['amount_minor']!,
+          _amountMinorMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_amountMinorMeta);
+    }
+    if (data.containsKey('currency_code')) {
+      context.handle(
+        _currencyCodeMeta,
+        currencyCode.isAcceptableOrUnknown(
+          data['currency_code']!,
+          _currencyCodeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_currencyCodeMeta);
+    }
+    if (data.containsKey('time_zone_id')) {
+      context.handle(
+        _timeZoneIdMeta,
+        timeZoneId.isAcceptableOrUnknown(
+          data['time_zone_id']!,
+          _timeZoneIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_timeZoneIdMeta);
+    }
+    if (data.containsKey('period_type')) {
+      context.handle(
+        _periodTypeMeta,
+        periodType.isAcceptableOrUnknown(data['period_type']!, _periodTypeMeta),
+      );
+    }
+    if (data.containsKey('start_date_local')) {
+      context.handle(
+        _startDateLocalMeta,
+        startDateLocal.isAcceptableOrUnknown(
+          data['start_date_local']!,
+          _startDateLocalMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_startDateLocalMeta);
+    }
+    if (data.containsKey('end_date_local')) {
+      context.handle(
+        _endDateLocalMeta,
+        endDateLocal.isAcceptableOrUnknown(
+          data['end_date_local']!,
+          _endDateLocalMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_endDateLocalMeta);
+    }
+    if (data.containsKey('alert_thresholds_json')) {
+      context.handle(
+        _alertThresholdsJsonMeta,
+        alertThresholdsJson.isAcceptableOrUnknown(
+          data['alert_thresholds_json']!,
+          _alertThresholdsJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_active')) {
+      context.handle(
+        _isActiveMeta,
+        isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
+      );
+    }
+    if (data.containsKey('created_at_ms')) {
+      context.handle(
+        _createdAtMsMeta,
+        createdAtMs.isAcceptableOrUnknown(
+          data['created_at_ms']!,
+          _createdAtMsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMsMeta);
+    }
+    if (data.containsKey('updated_at_ms')) {
+      context.handle(
+        _updatedAtMsMeta,
+        updatedAtMs.isAcceptableOrUnknown(
+          data['updated_at_ms']!,
+          _updatedAtMsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMsMeta);
+    }
+    if (data.containsKey('deleted_at_ms')) {
+      context.handle(
+        _deletedAtMsMeta,
+        deletedAtMs.isAcceptableOrUnknown(
+          data['deleted_at_ms']!,
+          _deletedAtMsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    }
+    if (data.containsKey('last_modified_device_id')) {
+      context.handle(
+        _lastModifiedDeviceIdMeta,
+        lastModifiedDeviceId.isAcceptableOrUnknown(
+          data['last_modified_device_id']!,
+          _lastModifiedDeviceIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    }
+    if (data.containsKey('legacy_id')) {
+      context.handle(
+        _legacyIdMeta,
+        legacyId.isAcceptableOrUnknown(data['legacy_id']!, _legacyIdMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Budget map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Budget(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      ledgerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ledger_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      scopeType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}scope_type'],
+      )!,
+      categoryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category_id'],
+      ),
+      yearMonth: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}year_month'],
+      )!,
+      amountMinor: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}amount_minor'],
+      )!,
+      currencyCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}currency_code'],
+      )!,
+      timeZoneId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}time_zone_id'],
+      )!,
+      periodType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}period_type'],
+      )!,
+      startDateLocal: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}start_date_local'],
+      )!,
+      endDateLocal: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}end_date_local'],
+      )!,
+      alertThresholdsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}alert_thresholds_json'],
+      ),
+      isActive: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_active'],
+      )!,
+      createdAtMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at_ms'],
+      )!,
+      updatedAtMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at_ms'],
+      )!,
+      deletedAtMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}deleted_at_ms'],
+      ),
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+      lastModifiedDeviceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_modified_device_id'],
+      ),
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+      legacyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}legacy_id'],
+      ),
+    );
+  }
+
+  @override
+  $BudgetsTable createAlias(String alias) {
+    return $BudgetsTable(attachedDatabase, alias);
+  }
+}
+
+class Budget extends DataClass implements Insertable<Budget> {
+  final String id;
+  final String ledgerId;
+  final String name;
+  final String scopeType;
+  final String? categoryId;
+  final String yearMonth;
+  final int amountMinor;
+  final String currencyCode;
+  final String timeZoneId;
+  final String periodType;
+  final String startDateLocal;
+  final String endDateLocal;
+  final String? alertThresholdsJson;
+  final bool isActive;
+  final int createdAtMs;
+  final int updatedAtMs;
+  final int? deletedAtMs;
+  final int version;
+  final String? lastModifiedDeviceId;
+  final String syncStatus;
+  final int? legacyId;
+  const Budget({
+    required this.id,
+    required this.ledgerId,
+    required this.name,
+    required this.scopeType,
+    this.categoryId,
+    required this.yearMonth,
+    required this.amountMinor,
+    required this.currencyCode,
+    required this.timeZoneId,
+    required this.periodType,
+    required this.startDateLocal,
+    required this.endDateLocal,
+    this.alertThresholdsJson,
+    required this.isActive,
+    required this.createdAtMs,
+    required this.updatedAtMs,
+    this.deletedAtMs,
+    required this.version,
+    this.lastModifiedDeviceId,
+    required this.syncStatus,
+    this.legacyId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['ledger_id'] = Variable<String>(ledgerId);
+    map['name'] = Variable<String>(name);
+    map['scope_type'] = Variable<String>(scopeType);
+    if (!nullToAbsent || categoryId != null) {
+      map['category_id'] = Variable<String>(categoryId);
+    }
+    map['year_month'] = Variable<String>(yearMonth);
+    map['amount_minor'] = Variable<int>(amountMinor);
+    map['currency_code'] = Variable<String>(currencyCode);
+    map['time_zone_id'] = Variable<String>(timeZoneId);
+    map['period_type'] = Variable<String>(periodType);
+    map['start_date_local'] = Variable<String>(startDateLocal);
+    map['end_date_local'] = Variable<String>(endDateLocal);
+    if (!nullToAbsent || alertThresholdsJson != null) {
+      map['alert_thresholds_json'] = Variable<String>(alertThresholdsJson);
+    }
+    map['is_active'] = Variable<bool>(isActive);
+    map['created_at_ms'] = Variable<int>(createdAtMs);
+    map['updated_at_ms'] = Variable<int>(updatedAtMs);
+    if (!nullToAbsent || deletedAtMs != null) {
+      map['deleted_at_ms'] = Variable<int>(deletedAtMs);
+    }
+    map['version'] = Variable<int>(version);
+    if (!nullToAbsent || lastModifiedDeviceId != null) {
+      map['last_modified_device_id'] = Variable<String>(lastModifiedDeviceId);
+    }
+    map['sync_status'] = Variable<String>(syncStatus);
+    if (!nullToAbsent || legacyId != null) {
+      map['legacy_id'] = Variable<int>(legacyId);
+    }
+    return map;
+  }
+
+  BudgetsCompanion toCompanion(bool nullToAbsent) {
+    return BudgetsCompanion(
+      id: Value(id),
+      ledgerId: Value(ledgerId),
+      name: Value(name),
+      scopeType: Value(scopeType),
+      categoryId: categoryId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(categoryId),
+      yearMonth: Value(yearMonth),
+      amountMinor: Value(amountMinor),
+      currencyCode: Value(currencyCode),
+      timeZoneId: Value(timeZoneId),
+      periodType: Value(periodType),
+      startDateLocal: Value(startDateLocal),
+      endDateLocal: Value(endDateLocal),
+      alertThresholdsJson: alertThresholdsJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(alertThresholdsJson),
+      isActive: Value(isActive),
+      createdAtMs: Value(createdAtMs),
+      updatedAtMs: Value(updatedAtMs),
+      deletedAtMs: deletedAtMs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAtMs),
+      version: Value(version),
+      lastModifiedDeviceId: lastModifiedDeviceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastModifiedDeviceId),
+      syncStatus: Value(syncStatus),
+      legacyId: legacyId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(legacyId),
+    );
+  }
+
+  factory Budget.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Budget(
+      id: serializer.fromJson<String>(json['id']),
+      ledgerId: serializer.fromJson<String>(json['ledgerId']),
+      name: serializer.fromJson<String>(json['name']),
+      scopeType: serializer.fromJson<String>(json['scopeType']),
+      categoryId: serializer.fromJson<String?>(json['categoryId']),
+      yearMonth: serializer.fromJson<String>(json['yearMonth']),
+      amountMinor: serializer.fromJson<int>(json['amountMinor']),
+      currencyCode: serializer.fromJson<String>(json['currencyCode']),
+      timeZoneId: serializer.fromJson<String>(json['timeZoneId']),
+      periodType: serializer.fromJson<String>(json['periodType']),
+      startDateLocal: serializer.fromJson<String>(json['startDateLocal']),
+      endDateLocal: serializer.fromJson<String>(json['endDateLocal']),
+      alertThresholdsJson: serializer.fromJson<String?>(
+        json['alertThresholdsJson'],
+      ),
+      isActive: serializer.fromJson<bool>(json['isActive']),
+      createdAtMs: serializer.fromJson<int>(json['createdAtMs']),
+      updatedAtMs: serializer.fromJson<int>(json['updatedAtMs']),
+      deletedAtMs: serializer.fromJson<int?>(json['deletedAtMs']),
+      version: serializer.fromJson<int>(json['version']),
+      lastModifiedDeviceId: serializer.fromJson<String?>(
+        json['lastModifiedDeviceId'],
+      ),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+      legacyId: serializer.fromJson<int?>(json['legacyId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'ledgerId': serializer.toJson<String>(ledgerId),
+      'name': serializer.toJson<String>(name),
+      'scopeType': serializer.toJson<String>(scopeType),
+      'categoryId': serializer.toJson<String?>(categoryId),
+      'yearMonth': serializer.toJson<String>(yearMonth),
+      'amountMinor': serializer.toJson<int>(amountMinor),
+      'currencyCode': serializer.toJson<String>(currencyCode),
+      'timeZoneId': serializer.toJson<String>(timeZoneId),
+      'periodType': serializer.toJson<String>(periodType),
+      'startDateLocal': serializer.toJson<String>(startDateLocal),
+      'endDateLocal': serializer.toJson<String>(endDateLocal),
+      'alertThresholdsJson': serializer.toJson<String?>(alertThresholdsJson),
+      'isActive': serializer.toJson<bool>(isActive),
+      'createdAtMs': serializer.toJson<int>(createdAtMs),
+      'updatedAtMs': serializer.toJson<int>(updatedAtMs),
+      'deletedAtMs': serializer.toJson<int?>(deletedAtMs),
+      'version': serializer.toJson<int>(version),
+      'lastModifiedDeviceId': serializer.toJson<String?>(lastModifiedDeviceId),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+      'legacyId': serializer.toJson<int?>(legacyId),
+    };
+  }
+
+  Budget copyWith({
+    String? id,
+    String? ledgerId,
+    String? name,
+    String? scopeType,
+    Value<String?> categoryId = const Value.absent(),
+    String? yearMonth,
+    int? amountMinor,
+    String? currencyCode,
+    String? timeZoneId,
+    String? periodType,
+    String? startDateLocal,
+    String? endDateLocal,
+    Value<String?> alertThresholdsJson = const Value.absent(),
+    bool? isActive,
+    int? createdAtMs,
+    int? updatedAtMs,
+    Value<int?> deletedAtMs = const Value.absent(),
+    int? version,
+    Value<String?> lastModifiedDeviceId = const Value.absent(),
+    String? syncStatus,
+    Value<int?> legacyId = const Value.absent(),
+  }) => Budget(
+    id: id ?? this.id,
+    ledgerId: ledgerId ?? this.ledgerId,
+    name: name ?? this.name,
+    scopeType: scopeType ?? this.scopeType,
+    categoryId: categoryId.present ? categoryId.value : this.categoryId,
+    yearMonth: yearMonth ?? this.yearMonth,
+    amountMinor: amountMinor ?? this.amountMinor,
+    currencyCode: currencyCode ?? this.currencyCode,
+    timeZoneId: timeZoneId ?? this.timeZoneId,
+    periodType: periodType ?? this.periodType,
+    startDateLocal: startDateLocal ?? this.startDateLocal,
+    endDateLocal: endDateLocal ?? this.endDateLocal,
+    alertThresholdsJson: alertThresholdsJson.present
+        ? alertThresholdsJson.value
+        : this.alertThresholdsJson,
+    isActive: isActive ?? this.isActive,
+    createdAtMs: createdAtMs ?? this.createdAtMs,
+    updatedAtMs: updatedAtMs ?? this.updatedAtMs,
+    deletedAtMs: deletedAtMs.present ? deletedAtMs.value : this.deletedAtMs,
+    version: version ?? this.version,
+    lastModifiedDeviceId: lastModifiedDeviceId.present
+        ? lastModifiedDeviceId.value
+        : this.lastModifiedDeviceId,
+    syncStatus: syncStatus ?? this.syncStatus,
+    legacyId: legacyId.present ? legacyId.value : this.legacyId,
+  );
+  Budget copyWithCompanion(BudgetsCompanion data) {
+    return Budget(
+      id: data.id.present ? data.id.value : this.id,
+      ledgerId: data.ledgerId.present ? data.ledgerId.value : this.ledgerId,
+      name: data.name.present ? data.name.value : this.name,
+      scopeType: data.scopeType.present ? data.scopeType.value : this.scopeType,
+      categoryId: data.categoryId.present
+          ? data.categoryId.value
+          : this.categoryId,
+      yearMonth: data.yearMonth.present ? data.yearMonth.value : this.yearMonth,
+      amountMinor: data.amountMinor.present
+          ? data.amountMinor.value
+          : this.amountMinor,
+      currencyCode: data.currencyCode.present
+          ? data.currencyCode.value
+          : this.currencyCode,
+      timeZoneId: data.timeZoneId.present
+          ? data.timeZoneId.value
+          : this.timeZoneId,
+      periodType: data.periodType.present
+          ? data.periodType.value
+          : this.periodType,
+      startDateLocal: data.startDateLocal.present
+          ? data.startDateLocal.value
+          : this.startDateLocal,
+      endDateLocal: data.endDateLocal.present
+          ? data.endDateLocal.value
+          : this.endDateLocal,
+      alertThresholdsJson: data.alertThresholdsJson.present
+          ? data.alertThresholdsJson.value
+          : this.alertThresholdsJson,
+      isActive: data.isActive.present ? data.isActive.value : this.isActive,
+      createdAtMs: data.createdAtMs.present
+          ? data.createdAtMs.value
+          : this.createdAtMs,
+      updatedAtMs: data.updatedAtMs.present
+          ? data.updatedAtMs.value
+          : this.updatedAtMs,
+      deletedAtMs: data.deletedAtMs.present
+          ? data.deletedAtMs.value
+          : this.deletedAtMs,
+      version: data.version.present ? data.version.value : this.version,
+      lastModifiedDeviceId: data.lastModifiedDeviceId.present
+          ? data.lastModifiedDeviceId.value
+          : this.lastModifiedDeviceId,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+      legacyId: data.legacyId.present ? data.legacyId.value : this.legacyId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Budget(')
+          ..write('id: $id, ')
+          ..write('ledgerId: $ledgerId, ')
+          ..write('name: $name, ')
+          ..write('scopeType: $scopeType, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('yearMonth: $yearMonth, ')
+          ..write('amountMinor: $amountMinor, ')
+          ..write('currencyCode: $currencyCode, ')
+          ..write('timeZoneId: $timeZoneId, ')
+          ..write('periodType: $periodType, ')
+          ..write('startDateLocal: $startDateLocal, ')
+          ..write('endDateLocal: $endDateLocal, ')
+          ..write('alertThresholdsJson: $alertThresholdsJson, ')
+          ..write('isActive: $isActive, ')
+          ..write('createdAtMs: $createdAtMs, ')
+          ..write('updatedAtMs: $updatedAtMs, ')
+          ..write('deletedAtMs: $deletedAtMs, ')
+          ..write('version: $version, ')
+          ..write('lastModifiedDeviceId: $lastModifiedDeviceId, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('legacyId: $legacyId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+    id,
+    ledgerId,
+    name,
+    scopeType,
+    categoryId,
+    yearMonth,
+    amountMinor,
+    currencyCode,
+    timeZoneId,
+    periodType,
+    startDateLocal,
+    endDateLocal,
+    alertThresholdsJson,
+    isActive,
+    createdAtMs,
+    updatedAtMs,
+    deletedAtMs,
+    version,
+    lastModifiedDeviceId,
+    syncStatus,
+    legacyId,
+  ]);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Budget &&
+          other.id == this.id &&
+          other.ledgerId == this.ledgerId &&
+          other.name == this.name &&
+          other.scopeType == this.scopeType &&
+          other.categoryId == this.categoryId &&
+          other.yearMonth == this.yearMonth &&
+          other.amountMinor == this.amountMinor &&
+          other.currencyCode == this.currencyCode &&
+          other.timeZoneId == this.timeZoneId &&
+          other.periodType == this.periodType &&
+          other.startDateLocal == this.startDateLocal &&
+          other.endDateLocal == this.endDateLocal &&
+          other.alertThresholdsJson == this.alertThresholdsJson &&
+          other.isActive == this.isActive &&
+          other.createdAtMs == this.createdAtMs &&
+          other.updatedAtMs == this.updatedAtMs &&
+          other.deletedAtMs == this.deletedAtMs &&
+          other.version == this.version &&
+          other.lastModifiedDeviceId == this.lastModifiedDeviceId &&
+          other.syncStatus == this.syncStatus &&
+          other.legacyId == this.legacyId);
+}
+
+class BudgetsCompanion extends UpdateCompanion<Budget> {
+  final Value<String> id;
+  final Value<String> ledgerId;
+  final Value<String> name;
+  final Value<String> scopeType;
+  final Value<String?> categoryId;
+  final Value<String> yearMonth;
+  final Value<int> amountMinor;
+  final Value<String> currencyCode;
+  final Value<String> timeZoneId;
+  final Value<String> periodType;
+  final Value<String> startDateLocal;
+  final Value<String> endDateLocal;
+  final Value<String?> alertThresholdsJson;
+  final Value<bool> isActive;
+  final Value<int> createdAtMs;
+  final Value<int> updatedAtMs;
+  final Value<int?> deletedAtMs;
+  final Value<int> version;
+  final Value<String?> lastModifiedDeviceId;
+  final Value<String> syncStatus;
+  final Value<int?> legacyId;
+  final Value<int> rowid;
+  const BudgetsCompanion({
+    this.id = const Value.absent(),
+    this.ledgerId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.scopeType = const Value.absent(),
+    this.categoryId = const Value.absent(),
+    this.yearMonth = const Value.absent(),
+    this.amountMinor = const Value.absent(),
+    this.currencyCode = const Value.absent(),
+    this.timeZoneId = const Value.absent(),
+    this.periodType = const Value.absent(),
+    this.startDateLocal = const Value.absent(),
+    this.endDateLocal = const Value.absent(),
+    this.alertThresholdsJson = const Value.absent(),
+    this.isActive = const Value.absent(),
+    this.createdAtMs = const Value.absent(),
+    this.updatedAtMs = const Value.absent(),
+    this.deletedAtMs = const Value.absent(),
+    this.version = const Value.absent(),
+    this.lastModifiedDeviceId = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.legacyId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  BudgetsCompanion.insert({
+    required String id,
+    required String ledgerId,
+    required String name,
+    required String scopeType,
+    this.categoryId = const Value.absent(),
+    required String yearMonth,
+    required int amountMinor,
+    required String currencyCode,
+    required String timeZoneId,
+    this.periodType = const Value.absent(),
+    required String startDateLocal,
+    required String endDateLocal,
+    this.alertThresholdsJson = const Value.absent(),
+    this.isActive = const Value.absent(),
+    required int createdAtMs,
+    required int updatedAtMs,
+    this.deletedAtMs = const Value.absent(),
+    this.version = const Value.absent(),
+    this.lastModifiedDeviceId = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.legacyId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       ledgerId = Value(ledgerId),
+       name = Value(name),
+       scopeType = Value(scopeType),
+       yearMonth = Value(yearMonth),
+       amountMinor = Value(amountMinor),
+       currencyCode = Value(currencyCode),
+       timeZoneId = Value(timeZoneId),
+       startDateLocal = Value(startDateLocal),
+       endDateLocal = Value(endDateLocal),
+       createdAtMs = Value(createdAtMs),
+       updatedAtMs = Value(updatedAtMs);
+  static Insertable<Budget> custom({
+    Expression<String>? id,
+    Expression<String>? ledgerId,
+    Expression<String>? name,
+    Expression<String>? scopeType,
+    Expression<String>? categoryId,
+    Expression<String>? yearMonth,
+    Expression<int>? amountMinor,
+    Expression<String>? currencyCode,
+    Expression<String>? timeZoneId,
+    Expression<String>? periodType,
+    Expression<String>? startDateLocal,
+    Expression<String>? endDateLocal,
+    Expression<String>? alertThresholdsJson,
+    Expression<bool>? isActive,
+    Expression<int>? createdAtMs,
+    Expression<int>? updatedAtMs,
+    Expression<int>? deletedAtMs,
+    Expression<int>? version,
+    Expression<String>? lastModifiedDeviceId,
+    Expression<String>? syncStatus,
+    Expression<int>? legacyId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (ledgerId != null) 'ledger_id': ledgerId,
+      if (name != null) 'name': name,
+      if (scopeType != null) 'scope_type': scopeType,
+      if (categoryId != null) 'category_id': categoryId,
+      if (yearMonth != null) 'year_month': yearMonth,
+      if (amountMinor != null) 'amount_minor': amountMinor,
+      if (currencyCode != null) 'currency_code': currencyCode,
+      if (timeZoneId != null) 'time_zone_id': timeZoneId,
+      if (periodType != null) 'period_type': periodType,
+      if (startDateLocal != null) 'start_date_local': startDateLocal,
+      if (endDateLocal != null) 'end_date_local': endDateLocal,
+      if (alertThresholdsJson != null)
+        'alert_thresholds_json': alertThresholdsJson,
+      if (isActive != null) 'is_active': isActive,
+      if (createdAtMs != null) 'created_at_ms': createdAtMs,
+      if (updatedAtMs != null) 'updated_at_ms': updatedAtMs,
+      if (deletedAtMs != null) 'deleted_at_ms': deletedAtMs,
+      if (version != null) 'version': version,
+      if (lastModifiedDeviceId != null)
+        'last_modified_device_id': lastModifiedDeviceId,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (legacyId != null) 'legacy_id': legacyId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  BudgetsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? ledgerId,
+    Value<String>? name,
+    Value<String>? scopeType,
+    Value<String?>? categoryId,
+    Value<String>? yearMonth,
+    Value<int>? amountMinor,
+    Value<String>? currencyCode,
+    Value<String>? timeZoneId,
+    Value<String>? periodType,
+    Value<String>? startDateLocal,
+    Value<String>? endDateLocal,
+    Value<String?>? alertThresholdsJson,
+    Value<bool>? isActive,
+    Value<int>? createdAtMs,
+    Value<int>? updatedAtMs,
+    Value<int?>? deletedAtMs,
+    Value<int>? version,
+    Value<String?>? lastModifiedDeviceId,
+    Value<String>? syncStatus,
+    Value<int?>? legacyId,
+    Value<int>? rowid,
+  }) {
+    return BudgetsCompanion(
+      id: id ?? this.id,
+      ledgerId: ledgerId ?? this.ledgerId,
+      name: name ?? this.name,
+      scopeType: scopeType ?? this.scopeType,
+      categoryId: categoryId ?? this.categoryId,
+      yearMonth: yearMonth ?? this.yearMonth,
+      amountMinor: amountMinor ?? this.amountMinor,
+      currencyCode: currencyCode ?? this.currencyCode,
+      timeZoneId: timeZoneId ?? this.timeZoneId,
+      periodType: periodType ?? this.periodType,
+      startDateLocal: startDateLocal ?? this.startDateLocal,
+      endDateLocal: endDateLocal ?? this.endDateLocal,
+      alertThresholdsJson: alertThresholdsJson ?? this.alertThresholdsJson,
+      isActive: isActive ?? this.isActive,
+      createdAtMs: createdAtMs ?? this.createdAtMs,
+      updatedAtMs: updatedAtMs ?? this.updatedAtMs,
+      deletedAtMs: deletedAtMs ?? this.deletedAtMs,
+      version: version ?? this.version,
+      lastModifiedDeviceId: lastModifiedDeviceId ?? this.lastModifiedDeviceId,
+      syncStatus: syncStatus ?? this.syncStatus,
+      legacyId: legacyId ?? this.legacyId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (ledgerId.present) {
+      map['ledger_id'] = Variable<String>(ledgerId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (scopeType.present) {
+      map['scope_type'] = Variable<String>(scopeType.value);
+    }
+    if (categoryId.present) {
+      map['category_id'] = Variable<String>(categoryId.value);
+    }
+    if (yearMonth.present) {
+      map['year_month'] = Variable<String>(yearMonth.value);
+    }
+    if (amountMinor.present) {
+      map['amount_minor'] = Variable<int>(amountMinor.value);
+    }
+    if (currencyCode.present) {
+      map['currency_code'] = Variable<String>(currencyCode.value);
+    }
+    if (timeZoneId.present) {
+      map['time_zone_id'] = Variable<String>(timeZoneId.value);
+    }
+    if (periodType.present) {
+      map['period_type'] = Variable<String>(periodType.value);
+    }
+    if (startDateLocal.present) {
+      map['start_date_local'] = Variable<String>(startDateLocal.value);
+    }
+    if (endDateLocal.present) {
+      map['end_date_local'] = Variable<String>(endDateLocal.value);
+    }
+    if (alertThresholdsJson.present) {
+      map['alert_thresholds_json'] = Variable<String>(
+        alertThresholdsJson.value,
+      );
+    }
+    if (isActive.present) {
+      map['is_active'] = Variable<bool>(isActive.value);
+    }
+    if (createdAtMs.present) {
+      map['created_at_ms'] = Variable<int>(createdAtMs.value);
+    }
+    if (updatedAtMs.present) {
+      map['updated_at_ms'] = Variable<int>(updatedAtMs.value);
+    }
+    if (deletedAtMs.present) {
+      map['deleted_at_ms'] = Variable<int>(deletedAtMs.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (lastModifiedDeviceId.present) {
+      map['last_modified_device_id'] = Variable<String>(
+        lastModifiedDeviceId.value,
+      );
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (legacyId.present) {
+      map['legacy_id'] = Variable<int>(legacyId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BudgetsCompanion(')
+          ..write('id: $id, ')
+          ..write('ledgerId: $ledgerId, ')
+          ..write('name: $name, ')
+          ..write('scopeType: $scopeType, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('yearMonth: $yearMonth, ')
+          ..write('amountMinor: $amountMinor, ')
+          ..write('currencyCode: $currencyCode, ')
+          ..write('timeZoneId: $timeZoneId, ')
+          ..write('periodType: $periodType, ')
+          ..write('startDateLocal: $startDateLocal, ')
+          ..write('endDateLocal: $endDateLocal, ')
+          ..write('alertThresholdsJson: $alertThresholdsJson, ')
+          ..write('isActive: $isActive, ')
+          ..write('createdAtMs: $createdAtMs, ')
+          ..write('updatedAtMs: $updatedAtMs, ')
+          ..write('deletedAtMs: $deletedAtMs, ')
+          ..write('version: $version, ')
+          ..write('lastModifiedDeviceId: $lastModifiedDeviceId, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('legacyId: $legacyId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4271,6 +5481,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LedgerTransactionsTable ledgerTransactions =
       $LedgerTransactionsTable(this);
   late final $AppSettingsTable appSettings = $AppSettingsTable(this);
+  late final $BudgetsTable budgets = $BudgetsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4281,6 +5492,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     categories,
     ledgerTransactions,
     appSettings,
+    budgets,
   ];
 }
 
@@ -4376,6 +5588,25 @@ final class $$LedgersTableReferences
     final cache = $_typedResult.readTableOrNull(
       _ledgerTransactionsRefsTable($_db),
     );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$BudgetsTable, List<Budget>> _budgetsRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.budgets,
+    aliasName: 'ledgers__id__budgets__ledger_id',
+  );
+
+  $$BudgetsTableProcessedTableManager get budgetsRefs {
+    final manager = $$BudgetsTableTableManager(
+      $_db,
+      $_db.budgets,
+    ).filter((f) => f.ledgerId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_budgetsRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -4522,6 +5753,31 @@ class $$LedgersTableFilterComposer
           }) => $$LedgerTransactionsTableFilterComposer(
             $db: $db,
             $table: $db.ledgerTransactions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> budgetsRefs(
+    Expression<bool> Function($$BudgetsTableFilterComposer f) f,
+  ) {
+    final $$BudgetsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.budgets,
+      getReferencedColumn: (t) => t.ledgerId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BudgetsTableFilterComposer(
+            $db: $db,
+            $table: $db.budgets,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -4746,6 +6002,31 @@ class $$LedgersTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> budgetsRefs<T extends Object>(
+    Expression<T> Function($$BudgetsTableAnnotationComposer a) f,
+  ) {
+    final $$BudgetsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.budgets,
+      getReferencedColumn: (t) => t.ledgerId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BudgetsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.budgets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$LedgersTableTableManager
@@ -4765,6 +6046,7 @@ class $$LedgersTableTableManager
             bool accountsRefs,
             bool categoriesRefs,
             bool ledgerTransactionsRefs,
+            bool budgetsRefs,
           })
         > {
   $$LedgersTableTableManager(_$AppDatabase db, $LedgersTable table)
@@ -4855,6 +6137,7 @@ class $$LedgersTableTableManager
                 accountsRefs = false,
                 categoriesRefs = false,
                 ledgerTransactionsRefs = false,
+                budgetsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -4862,6 +6145,7 @@ class $$LedgersTableTableManager
                     if (accountsRefs) db.accounts,
                     if (categoriesRefs) db.categories,
                     if (ledgerTransactionsRefs) db.ledgerTransactions,
+                    if (budgetsRefs) db.budgets,
                   ],
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
@@ -4929,6 +6213,27 @@ class $$LedgersTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (budgetsRefs)
+                        await $_getPrefetchedData<
+                          Ledger,
+                          $LedgersTable,
+                          Budget
+                        >(
+                          currentTable: table,
+                          referencedTable: $$LedgersTableReferences
+                              ._budgetsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$LedgersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).budgetsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.ledgerId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -4953,6 +6258,7 @@ typedef $$LedgersTableProcessedTableManager =
         bool accountsRefs,
         bool categoriesRefs,
         bool ledgerTransactionsRefs,
+        bool budgetsRefs,
       })
     >;
 typedef $$AccountsTableCreateCompanionBuilder =
@@ -5778,6 +7084,25 @@ final class $$CategoriesTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$BudgetsTable, List<Budget>> _budgetsRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.budgets,
+    aliasName: 'categories__id__budgets__category_id',
+  );
+
+  $$BudgetsTableProcessedTableManager get budgetsRefs {
+    final manager = $$BudgetsTableTableManager(
+      $_db,
+      $_db.budgets,
+    ).filter((f) => f.categoryId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_budgetsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$CategoriesTableFilterComposer
@@ -5908,6 +7233,31 @@ class $$CategoriesTableFilterComposer
           }) => $$LedgerTransactionsTableFilterComposer(
             $db: $db,
             $table: $db.ledgerTransactions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> budgetsRefs(
+    Expression<bool> Function($$BudgetsTableFilterComposer f) f,
+  ) {
+    final $$BudgetsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.budgets,
+      getReferencedColumn: (t) => t.categoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BudgetsTableFilterComposer(
+            $db: $db,
+            $table: $db.budgets,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -6152,6 +7502,31 @@ class $$CategoriesTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> budgetsRefs<T extends Object>(
+    Expression<T> Function($$BudgetsTableAnnotationComposer a) f,
+  ) {
+    final $$BudgetsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.budgets,
+      getReferencedColumn: (t) => t.categoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BudgetsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.budgets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$CategoriesTableTableManager
@@ -6167,7 +7542,11 @@ class $$CategoriesTableTableManager
           $$CategoriesTableUpdateCompanionBuilder,
           (Category, $$CategoriesTableReferences),
           Category,
-          PrefetchHooks Function({bool ledgerId, bool ledgerTransactionsRefs})
+          PrefetchHooks Function({
+            bool ledgerId,
+            bool ledgerTransactionsRefs,
+            bool budgetsRefs,
+          })
         > {
   $$CategoriesTableTableManager(_$AppDatabase db, $CategoriesTable table)
     : super(
@@ -6269,11 +7648,16 @@ class $$CategoriesTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({ledgerId = false, ledgerTransactionsRefs = false}) {
+              ({
+                ledgerId = false,
+                ledgerTransactionsRefs = false,
+                budgetsRefs = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (ledgerTransactionsRefs) db.ledgerTransactions,
+                    if (budgetsRefs) db.budgets,
                   ],
                   addJoins:
                       <
@@ -6331,6 +7715,27 @@ class $$CategoriesTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (budgetsRefs)
+                        await $_getPrefetchedData<
+                          Category,
+                          $CategoriesTable,
+                          Budget
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CategoriesTableReferences
+                              ._budgetsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CategoriesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).budgetsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.categoryId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -6351,7 +7756,11 @@ typedef $$CategoriesTableProcessedTableManager =
       $$CategoriesTableUpdateCompanionBuilder,
       (Category, $$CategoriesTableReferences),
       Category,
-      PrefetchHooks Function({bool ledgerId, bool ledgerTransactionsRefs})
+      PrefetchHooks Function({
+        bool ledgerId,
+        bool ledgerTransactionsRefs,
+        bool budgetsRefs,
+      })
     >;
 typedef $$LedgerTransactionsTableCreateCompanionBuilder =
     LedgerTransactionsCompanion Function({
@@ -7475,6 +8884,737 @@ typedef $$AppSettingsTableProcessedTableManager =
       AppSetting,
       PrefetchHooks Function()
     >;
+typedef $$BudgetsTableCreateCompanionBuilder =
+    BudgetsCompanion Function({
+      required String id,
+      required String ledgerId,
+      required String name,
+      required String scopeType,
+      Value<String?> categoryId,
+      required String yearMonth,
+      required int amountMinor,
+      required String currencyCode,
+      required String timeZoneId,
+      Value<String> periodType,
+      required String startDateLocal,
+      required String endDateLocal,
+      Value<String?> alertThresholdsJson,
+      Value<bool> isActive,
+      required int createdAtMs,
+      required int updatedAtMs,
+      Value<int?> deletedAtMs,
+      Value<int> version,
+      Value<String?> lastModifiedDeviceId,
+      Value<String> syncStatus,
+      Value<int?> legacyId,
+      Value<int> rowid,
+    });
+typedef $$BudgetsTableUpdateCompanionBuilder =
+    BudgetsCompanion Function({
+      Value<String> id,
+      Value<String> ledgerId,
+      Value<String> name,
+      Value<String> scopeType,
+      Value<String?> categoryId,
+      Value<String> yearMonth,
+      Value<int> amountMinor,
+      Value<String> currencyCode,
+      Value<String> timeZoneId,
+      Value<String> periodType,
+      Value<String> startDateLocal,
+      Value<String> endDateLocal,
+      Value<String?> alertThresholdsJson,
+      Value<bool> isActive,
+      Value<int> createdAtMs,
+      Value<int> updatedAtMs,
+      Value<int?> deletedAtMs,
+      Value<int> version,
+      Value<String?> lastModifiedDeviceId,
+      Value<String> syncStatus,
+      Value<int?> legacyId,
+      Value<int> rowid,
+    });
+
+final class $$BudgetsTableReferences
+    extends BaseReferences<_$AppDatabase, $BudgetsTable, Budget> {
+  $$BudgetsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $LedgersTable _ledgerIdTable(_$AppDatabase db) =>
+      db.ledgers.createAlias('budgets__ledger_id__ledgers__id');
+
+  $$LedgersTableProcessedTableManager get ledgerId {
+    final $_column = $_itemColumn<String>('ledger_id')!;
+
+    final manager = $$LedgersTableTableManager(
+      $_db,
+      $_db.ledgers,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_ledgerIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $CategoriesTable _categoryIdTable(_$AppDatabase db) =>
+      db.categories.createAlias('budgets__category_id__categories__id');
+
+  $$CategoriesTableProcessedTableManager? get categoryId {
+    final $_column = $_itemColumn<String>('category_id');
+    if ($_column == null) return null;
+    final manager = $$CategoriesTableTableManager(
+      $_db,
+      $_db.categories,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_categoryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$BudgetsTableFilterComposer
+    extends Composer<_$AppDatabase, $BudgetsTable> {
+  $$BudgetsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get scopeType => $composableBuilder(
+    column: $table.scopeType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get yearMonth => $composableBuilder(
+    column: $table.yearMonth,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get amountMinor => $composableBuilder(
+    column: $table.amountMinor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get currencyCode => $composableBuilder(
+    column: $table.currencyCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get timeZoneId => $composableBuilder(
+    column: $table.timeZoneId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get periodType => $composableBuilder(
+    column: $table.periodType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get startDateLocal => $composableBuilder(
+    column: $table.startDateLocal,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get endDateLocal => $composableBuilder(
+    column: $table.endDateLocal,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get alertThresholdsJson => $composableBuilder(
+    column: $table.alertThresholdsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAtMs => $composableBuilder(
+    column: $table.createdAtMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAtMs => $composableBuilder(
+    column: $table.updatedAtMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get deletedAtMs => $composableBuilder(
+    column: $table.deletedAtMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastModifiedDeviceId => $composableBuilder(
+    column: $table.lastModifiedDeviceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get legacyId => $composableBuilder(
+    column: $table.legacyId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$LedgersTableFilterComposer get ledgerId {
+    final $$LedgersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ledgerId,
+      referencedTable: $db.ledgers,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LedgersTableFilterComposer(
+            $db: $db,
+            $table: $db.ledgers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CategoriesTableFilterComposer get categoryId {
+    final $$CategoriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableFilterComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$BudgetsTableOrderingComposer
+    extends Composer<_$AppDatabase, $BudgetsTable> {
+  $$BudgetsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get scopeType => $composableBuilder(
+    column: $table.scopeType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get yearMonth => $composableBuilder(
+    column: $table.yearMonth,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get amountMinor => $composableBuilder(
+    column: $table.amountMinor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get currencyCode => $composableBuilder(
+    column: $table.currencyCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get timeZoneId => $composableBuilder(
+    column: $table.timeZoneId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get periodType => $composableBuilder(
+    column: $table.periodType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get startDateLocal => $composableBuilder(
+    column: $table.startDateLocal,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get endDateLocal => $composableBuilder(
+    column: $table.endDateLocal,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get alertThresholdsJson => $composableBuilder(
+    column: $table.alertThresholdsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAtMs => $composableBuilder(
+    column: $table.createdAtMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAtMs => $composableBuilder(
+    column: $table.updatedAtMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get deletedAtMs => $composableBuilder(
+    column: $table.deletedAtMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastModifiedDeviceId => $composableBuilder(
+    column: $table.lastModifiedDeviceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get legacyId => $composableBuilder(
+    column: $table.legacyId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$LedgersTableOrderingComposer get ledgerId {
+    final $$LedgersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ledgerId,
+      referencedTable: $db.ledgers,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LedgersTableOrderingComposer(
+            $db: $db,
+            $table: $db.ledgers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CategoriesTableOrderingComposer get categoryId {
+    final $$CategoriesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableOrderingComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$BudgetsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BudgetsTable> {
+  $$BudgetsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get scopeType =>
+      $composableBuilder(column: $table.scopeType, builder: (column) => column);
+
+  GeneratedColumn<String> get yearMonth =>
+      $composableBuilder(column: $table.yearMonth, builder: (column) => column);
+
+  GeneratedColumn<int> get amountMinor => $composableBuilder(
+    column: $table.amountMinor,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get currencyCode => $composableBuilder(
+    column: $table.currencyCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get timeZoneId => $composableBuilder(
+    column: $table.timeZoneId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get periodType => $composableBuilder(
+    column: $table.periodType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get startDateLocal => $composableBuilder(
+    column: $table.startDateLocal,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get endDateLocal => $composableBuilder(
+    column: $table.endDateLocal,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get alertThresholdsJson => $composableBuilder(
+    column: $table.alertThresholdsJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isActive =>
+      $composableBuilder(column: $table.isActive, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAtMs => $composableBuilder(
+    column: $table.createdAtMs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get updatedAtMs => $composableBuilder(
+    column: $table.updatedAtMs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get deletedAtMs => $composableBuilder(
+    column: $table.deletedAtMs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<String> get lastModifiedDeviceId => $composableBuilder(
+    column: $table.lastModifiedDeviceId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get legacyId =>
+      $composableBuilder(column: $table.legacyId, builder: (column) => column);
+
+  $$LedgersTableAnnotationComposer get ledgerId {
+    final $$LedgersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ledgerId,
+      referencedTable: $db.ledgers,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LedgersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.ledgers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CategoriesTableAnnotationComposer get categoryId {
+    final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$BudgetsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BudgetsTable,
+          Budget,
+          $$BudgetsTableFilterComposer,
+          $$BudgetsTableOrderingComposer,
+          $$BudgetsTableAnnotationComposer,
+          $$BudgetsTableCreateCompanionBuilder,
+          $$BudgetsTableUpdateCompanionBuilder,
+          (Budget, $$BudgetsTableReferences),
+          Budget,
+          PrefetchHooks Function({bool ledgerId, bool categoryId})
+        > {
+  $$BudgetsTableTableManager(_$AppDatabase db, $BudgetsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BudgetsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$BudgetsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$BudgetsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> ledgerId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> scopeType = const Value.absent(),
+                Value<String?> categoryId = const Value.absent(),
+                Value<String> yearMonth = const Value.absent(),
+                Value<int> amountMinor = const Value.absent(),
+                Value<String> currencyCode = const Value.absent(),
+                Value<String> timeZoneId = const Value.absent(),
+                Value<String> periodType = const Value.absent(),
+                Value<String> startDateLocal = const Value.absent(),
+                Value<String> endDateLocal = const Value.absent(),
+                Value<String?> alertThresholdsJson = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
+                Value<int> createdAtMs = const Value.absent(),
+                Value<int> updatedAtMs = const Value.absent(),
+                Value<int?> deletedAtMs = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<String?> lastModifiedDeviceId = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<int?> legacyId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BudgetsCompanion(
+                id: id,
+                ledgerId: ledgerId,
+                name: name,
+                scopeType: scopeType,
+                categoryId: categoryId,
+                yearMonth: yearMonth,
+                amountMinor: amountMinor,
+                currencyCode: currencyCode,
+                timeZoneId: timeZoneId,
+                periodType: periodType,
+                startDateLocal: startDateLocal,
+                endDateLocal: endDateLocal,
+                alertThresholdsJson: alertThresholdsJson,
+                isActive: isActive,
+                createdAtMs: createdAtMs,
+                updatedAtMs: updatedAtMs,
+                deletedAtMs: deletedAtMs,
+                version: version,
+                lastModifiedDeviceId: lastModifiedDeviceId,
+                syncStatus: syncStatus,
+                legacyId: legacyId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String ledgerId,
+                required String name,
+                required String scopeType,
+                Value<String?> categoryId = const Value.absent(),
+                required String yearMonth,
+                required int amountMinor,
+                required String currencyCode,
+                required String timeZoneId,
+                Value<String> periodType = const Value.absent(),
+                required String startDateLocal,
+                required String endDateLocal,
+                Value<String?> alertThresholdsJson = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
+                required int createdAtMs,
+                required int updatedAtMs,
+                Value<int?> deletedAtMs = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<String?> lastModifiedDeviceId = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<int?> legacyId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BudgetsCompanion.insert(
+                id: id,
+                ledgerId: ledgerId,
+                name: name,
+                scopeType: scopeType,
+                categoryId: categoryId,
+                yearMonth: yearMonth,
+                amountMinor: amountMinor,
+                currencyCode: currencyCode,
+                timeZoneId: timeZoneId,
+                periodType: periodType,
+                startDateLocal: startDateLocal,
+                endDateLocal: endDateLocal,
+                alertThresholdsJson: alertThresholdsJson,
+                isActive: isActive,
+                createdAtMs: createdAtMs,
+                updatedAtMs: updatedAtMs,
+                deletedAtMs: deletedAtMs,
+                version: version,
+                lastModifiedDeviceId: lastModifiedDeviceId,
+                syncStatus: syncStatus,
+                legacyId: legacyId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$BudgetsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({ledgerId = false, categoryId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (ledgerId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.ledgerId,
+                                referencedTable: $$BudgetsTableReferences
+                                    ._ledgerIdTable(db),
+                                referencedColumn: $$BudgetsTableReferences
+                                    ._ledgerIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+                    if (categoryId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.categoryId,
+                                referencedTable: $$BudgetsTableReferences
+                                    ._categoryIdTable(db),
+                                referencedColumn: $$BudgetsTableReferences
+                                    ._categoryIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$BudgetsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BudgetsTable,
+      Budget,
+      $$BudgetsTableFilterComposer,
+      $$BudgetsTableOrderingComposer,
+      $$BudgetsTableAnnotationComposer,
+      $$BudgetsTableCreateCompanionBuilder,
+      $$BudgetsTableUpdateCompanionBuilder,
+      (Budget, $$BudgetsTableReferences),
+      Budget,
+      PrefetchHooks Function({bool ledgerId, bool categoryId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -7489,4 +9629,6 @@ class $AppDatabaseManager {
       $$LedgerTransactionsTableTableManager(_db, _db.ledgerTransactions);
   $$AppSettingsTableTableManager get appSettings =>
       $$AppSettingsTableTableManager(_db, _db.appSettings);
+  $$BudgetsTableTableManager get budgets =>
+      $$BudgetsTableTableManager(_db, _db.budgets);
 }

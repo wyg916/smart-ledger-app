@@ -6,7 +6,7 @@ on:
       - "apps/mobile/**"
       - ".github/workflows/flutter.yml"
   push:
-    branches: [main, "p1/**", "p1b/**"]
+    branches: [main, "p1/**", "p1b/**", "p1c/**"]
     paths:
       - "apps/mobile/**"
       - ".github/workflows/flutter.yml"

@@ -1,6 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:smart_ledger/features/accounts/presentation/accounts_page.dart';
+import 'package:smart_ledger/features/analytics/presentation/analytics_page.dart';
+import 'package:smart_ledger/features/budgets/presentation/budget_detail_page.dart';
+import 'package:smart_ledger/features/budgets/presentation/budget_form_page.dart';
+import 'package:smart_ledger/features/budgets/presentation/budgets_page.dart';
 import 'package:smart_ledger/features/categories/presentation/categories_page.dart';
 import 'package:smart_ledger/features/transactions/presentation/ledger_home_page.dart';
 import 'package:smart_ledger/features/transactions/presentation/transaction_detail_page.dart';
@@ -18,6 +22,32 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/categories',
         builder: (context, state) => const CategoriesPage(),
+      ),
+      GoRoute(
+        path: '/analytics',
+        builder: (context, state) => const AnalyticsPage(),
+      ),
+      GoRoute(
+        path: '/budgets',
+        builder: (context, state) => const BudgetsPage(),
+        routes: [
+          GoRoute(
+            path: 'new',
+            builder: (context, state) => const BudgetFormPage(),
+          ),
+          GoRoute(
+            path: ':id',
+            builder: (context, state) =>
+                BudgetDetailPage(budgetId: state.pathParameters['id']!),
+            routes: [
+              GoRoute(
+                path: 'edit',
+                builder: (context, state) =>
+                    BudgetFormPage(budgetId: state.pathParameters['id']!),
+              ),
+            ],
+          ),
+        ],
       ),
       GoRoute(
         path: '/transactions/new',
