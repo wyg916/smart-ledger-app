@@ -6,7 +6,7 @@ on:
       - "apps/mobile/**"
       - ".github/workflows/flutter.yml"
   push:
-    branches: [main, "p1/**"]
+    branches: [main, "p1/**", "p1b/**"]
     paths:
       - "apps/mobile/**"
       - ".github/workflows/flutter.yml"
@@ -32,6 +32,9 @@ jobs:
       - name: Resolve dependencies
         working-directory: apps/mobile
         run: flutter pub get
+      - name: Generate Drift code
+        working-directory: apps/mobile
+        run: dart run build_runner build --delete-conflicting-outputs
       - name: Check formatting
         working-directory: apps/mobile
         run: dart format --output=none --set-exit-if-changed lib test
