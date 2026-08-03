@@ -1,6 +1,6 @@
 # 旧 Android 项目清单
 
-基线日期：2026-08-02
+基线日期：2026-08-02；复核日期：2026-08-03
 
 本文件记录开发前准备阶段已经核实的事实。完整 P0 审计仍以 `CODEX_FIRST_PROMPT.md` 的执行结果为准。
 
@@ -51,6 +51,8 @@
 | APK `aapt dump badging` | PASS | `com.offline.ledger`，1.0.0(1)，min 26，target/compile 34 |
 | 文件清单生成 | PASS | `LOCAL_FILE_INVENTORY.txt`，脱敏副本 84 个文件 |
 | `testDebugUnitTest` | BLOCKED | 本机未安装/未配置 JDK 17，`JAVA_HOME is not set`；尚未执行到 Gradle 配置阶段 |
+| 原工程既有测试报告 | PASS（历史证据） | 2026-02-18 生成的 XML 显示 3 个测试、0 failure、0 error；不是本轮重新执行结果 |
+| macOS 本轮 `testDebugUnitTest` | BLOCKED | Java 启动器报告无 Java Runtime；未发现 Android SDK；Wrapper 仍指向 `E:/gradle-8.7-bin.zip` |
 
 ## 风险
 | 风险 | 等级 | 证据 | 处理建议 |
@@ -62,3 +64,5 @@
 | 分类外键 RESTRICT 与删除交互冲突 | 高 | `TransactionEntity` 外键 | 新版使用禁用/逻辑删除，保留历史引用 |
 | 自动化测试仅 2 个文件 | 高 | `app/src/test` | P0 建立回归矩阵，P2 补迁移和数据层测试 |
 | 当前仅有 Debug APK | 高 | `LEGACY_APK_MANIFEST.md` | 重建可复现 Release、签名和商店流水线 |
+| 冷启动锁屏存在异步窗口 | 极高 | `AppLockManager` 初始 `_locked=false`，随后异步读取设置 | 新版启动壳必须先进入安全门，再允许渲染财务页面 |
+| 正式签名状态未知 | 极高 | Gradle 未配置 release signing，仓库扫描无签名文件 | 只在仓库外确认签名存在性、受控位置与哈希，不收集密码 |
