@@ -27,7 +27,7 @@ void main() {
   tearDown(() => harness.close());
 
   test(
-    'creates schema version 2 with foreign keys and required tables',
+    'creates schema version 3 with foreign keys and required tables',
     () async {
       expect(harness.database.schemaVersion, AppDatabase.currentSchemaVersion);
       expect(await harness.database.ping(), 1);
@@ -44,6 +44,7 @@ void main() {
           'categories',
           'transactions',
           'app_settings',
+          'budgets',
         ]),
       );
     },

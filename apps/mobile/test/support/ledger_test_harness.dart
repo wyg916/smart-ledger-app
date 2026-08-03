@@ -5,6 +5,8 @@ import 'package:smart_ledger/core/database/entity_id.dart';
 import 'package:smart_ledger/core/database/local_ledger_bootstrapper.dart';
 import 'package:smart_ledger/core/time/ledger_time.dart';
 import 'package:smart_ledger/features/accounts/data/drift_account_repository.dart';
+import 'package:smart_ledger/features/analytics/data/drift_analytics_repository.dart';
+import 'package:smart_ledger/features/budgets/data/drift_budget_repository.dart';
 import 'package:smart_ledger/features/categories/data/drift_category_repository.dart';
 import 'package:smart_ledger/features/transactions/data/drift_transaction_repository.dart';
 
@@ -33,6 +35,8 @@ final class LedgerTestHarness {
     required this.clock,
     required this.ids,
     required this.accounts,
+    required this.analytics,
+    required this.budgets,
     required this.categories,
     required this.transactions,
   });
@@ -41,6 +45,8 @@ final class LedgerTestHarness {
   final MutableTestClock clock;
   final CountingUuidGenerator ids;
   final DriftAccountRepository accounts;
+  final DriftAnalyticsRepository analytics;
+  final DriftBudgetRepository budgets;
   final DriftCategoryRepository categories;
   final DriftTransactionRepository transactions;
 
@@ -59,6 +65,8 @@ final class LedgerTestHarness {
       clock: clock,
       ids: ids,
       accounts: DriftAccountRepository(database, clock, ids),
+      analytics: DriftAnalyticsRepository(database),
+      budgets: DriftBudgetRepository(database, clock, ids),
       categories: DriftCategoryRepository(database, clock, ids),
       transactions: DriftTransactionRepository(database, clock, ids),
     );
