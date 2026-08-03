@@ -38,6 +38,8 @@ try {
         'AIza[0-9A-Za-z_-]{30,}',
         'gh[pousr]_[0-9A-Za-z_]{20,}',
         'sk-[0-9A-Za-z_-]{20,}',
+        'Authorization\s*:\s*Bearer\s+[0-9A-Za-z_-]{20,}',
+        'MOONSHOT_API_KEY\s*=\s*[0-9A-Za-z_-]{20,}',
         '-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----'
     )
     $secretFindings = New-Object System.Collections.Generic.List[string]

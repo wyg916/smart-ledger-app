@@ -6,7 +6,7 @@ on:
       - "services/api/**"
       - ".github/workflows/api.yml"
   push:
-    branches: [main, "p1/**"]
+    branches: [main, "p1/**", "p1d/**"]
     paths:
       - "services/api/**"
       - ".github/workflows/api.yml"
@@ -18,6 +18,10 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      KIMI_PROVIDER: fake
+      KIMI_AI_ENABLED: "true"
+      KIMI_LIVE_TEST: "false"
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v7
