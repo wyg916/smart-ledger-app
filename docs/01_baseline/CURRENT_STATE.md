@@ -72,7 +72,23 @@
   推送；`origin/main` 的 P1C 最终工程 SHA 为
   `ad51835d25dd66b64553184a5f050af2d34050b3`。main Flutter Run `30816470054` 与
   Repository Safety Run `30816469579` 均在该 SHA 通过；FastAPI 和 Legacy Android 因
-  路径过滤不适用、未触发。P1C 已正式关闭，P1D 尚未开始。
+  路径过滤不适用、未触发。P1C 已正式关闭；随后用户已授权 P1D，见下文。
+- 用户已明确授权 P1D-AI-LITE；分支 `p1d/kimi-ai-lite` 从 main
+  `c8c656be20a4322cca94c70451f0798099b926f0` 创建。已实现月度总结、预算解释、财务规划
+  三个聚合 AI 场景，Kimi/Fake Provider、严格 JSON Schema + Pydantic、一次修复/重试、
+  生产 fail-closed、隐私日志和 Flutter 离线/超时/429/无效输出降级。
+- 受控模型清单仅返回 `kimi-k2.6`、`kimi-k2.7-code`；K3 不可用，三场景使用
+  `kimi-k2.6` 且关闭 thinking。真实 Kimi 三场景结构化/Pydantic 验证通过，未输出提示词、
+  回答正文、Key 或内部推理。
+- 用户追加的 P1D 体验范围已落地：AI 文案温柔知性、甜美但克制且不淡化风险；默认分类
+  扩至 14 个支出和 8 个收入；Flutter 使用奶油黄/珊瑚/薄荷色 Material 3 主题和原创零钱
+  精灵；13 个当前路由页面已有 4 张成套 UI 参考板。
+- P1D 本地门禁：FastAPI 26/26、Flutter 52/52、行覆盖率最近 45.20%、Release APK
+  61,480,250 字节，SHA-256
+  `7ad3552fc42029d5c0131a254682001e343b52698b0771e8b0ab42405b03fa9e`。Android 34
+  ARM64 使用 `adb install -r` 保留合成收入 100.00 与预算 500.00；真实 AI、无服务、429、
+  40 秒超时、冷启动、22 分类均通过，logcat 未命中 FATAL、ANR、SQLite/migration 或 Key。
+- P1D 当前状态为本地和 Android 门禁通过、等待分支 CI 与 main fast-forward；尚未正式关闭。
 
 ## 待审计
 - [x] macOS 旧 Android 可复现构建（JDK 17、Android SDK 34、官方 HTTPS Wrapper、clean/test/assembleDebug）
@@ -88,10 +104,10 @@
 
 ## 当前门禁
 
-P0-CLOSEOUT、P1A、P1B 与 P1C 已同步到 `origin/main`。P1C 本地预算、统计、Schema 3、
-自动化与 Android 升级验收、独立复核、fast-forward 主线合入和 main CI 均已通过，阶段
-结论为 `P1C = PASS` 且已正式关闭。P1D 尚未开始。P1C 不代表真实旧库迁移、登录、同步、
-后端业务表、备份、应用锁、目标、AI 或发布能力完成；不得自动进入下一阶段。
+P0-CLOSEOUT、P1A、P1B 与 P1C 已同步到 `origin/main` 并正式关闭。P1D 本地实现、真实
+Kimi、Android release 与安全门禁已通过，当前等待分支 CI、fast-forward 合入和 main CI；
+这些完成前不得宣布 P1D 关闭。P1D 不代表真实旧库迁移、登录、同步、后端业务表、备份、
+应用锁、通用聊天、Agent、RAG 或发布能力完成；不得自动进入下一阶段。
 
 `IOS_TOOLCHAIN = BLOCKED`：需安装完整 Xcode、执行首次初始化并安装 CocoaPods，
 在此之前不允许进入正式 iOS 构建或发布阶段。真实用户、正式签名、最终标识和商店

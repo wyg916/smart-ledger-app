@@ -22,19 +22,17 @@ tests/fixtures/             匿名化测试数据
 
 ## 当前阶段
 
-P1C Local Budget & Analytics 已以 fast-forward 合入并普通推送至 `origin/main`，最终工程
-SHA 为 `ad51835d25dd66b64553184a5f050af2d34050b3`。本地预算与确定性统计闭环包括 Drift
-Schema 3、Schema 2→3 保真迁移、月度总预算/单分类预算、预算 CRUD/启停/Tombstone、
-使用额与超支、月度收支净额/环比、日趋势、分类排行、账户余额和三类筛选。独立复核、
-Flutter 本地 39/39 测试、42.33% 行覆盖率、Debug APK、Android 34 ARM64 保留 P1B 数据
-升级交互、FastAPI/Compose 回归、main Flutter Run `30816470054` 和 Repository Safety Run
-`30816469579` 均通过，P1C 已正式关闭；`IOS_TOOLCHAIN = BLOCKED`。完整事实见
-`docs/01_baseline/CURRENT_STATE.md`、`docs/04_budget_analytics/P1C_BUDGET_ANALYTICS_CONTRACT.md`
-和 `docs/04_budget_analytics/P1C_IMPLEMENTATION_REPORT.md`。
+P1C Local Budget & Analytics 已在 `origin/main` 正式关闭。P1D Kimi AI Lite 正在
+`p1d/kimi-ai-lite` 完成合入门禁：三类聚合 AI 场景、严格结构化输出、隐私边界、离线/超时/
+429 降级、Android release 联网、温柔知性文案、22 个内置收支分类和统一暖色轻卡通主题均已
+完成本地与 Android 验收。FastAPI 26/26、Flutter 52/52、真实 Kimi 三场景、Release APK、
+冷启动留存和安全扫描已通过；分支/主线 CI 与最终 fast-forward 状态以
+`docs/05_ai/P1D_KIMI_AI_IMPLEMENTATION_REPORT.md` 为准。完整配置和隐私说明见
+`docs/05_ai/KIMI_PROVIDER_CONFIGURATION.md` 与 `docs/05_ai/AI_PRIVACY_AND_DEGRADATION.md`。
 
-P1C 不包含登录、云同步、后端业务表、备份恢复、应用锁、目标、AI、正式旧库迁移、正式
-签名或发布能力。P1D 尚未开始；正式包名、签名、真实用户和商店资源仍未确认，不得自动
-进入下一阶段。
+P1D 不包含登录、云同步、后端业务表、备份恢复、应用锁、正式旧库迁移、通用聊天、Agent、
+RAG、正式签名或发布能力。`IOS_TOOLCHAIN = BLOCKED`；正式包名、签名、真实用户和商店资源
+仍未确认，不得自动进入下一阶段。
 
 ## 本地启动
 
@@ -42,7 +40,7 @@ P1C 不包含登录、云同步、后端业务表、备份恢复、应用锁、�
 cd apps/mobile
 flutter pub get
 flutter test
-flutter run
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8001
 
 cd services/api
 uv sync --frozen

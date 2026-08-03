@@ -19,8 +19,9 @@ dart run build_runner build
 dart format --output=none --set-exit-if-changed .
 flutter analyze
 flutter test
-flutter build apk --debug
-flutter run --dart-define=APP_ENV=development
+flutter build apk --release --dart-define=API_BASE_URL=http://10.0.2.2:8001
+flutter run --dart-define=APP_ENV=development \
+  --dart-define=API_BASE_URL=http://10.0.2.2:8001
 ```
 
 SQLite 使用 `package:sqlite3` 官方支持的系统库 hook 模式，避免构建时依赖外部
@@ -39,10 +40,12 @@ uv run ruff format --check .
 uv run ruff check .
 uv run mypy .
 uv run pytest
-uv run uvicorn app.main:app --reload
+uv run uvicorn app.main:app --reload --port 8001
 ```
 
 `.env` 只供本地使用且已被 Git 忽略。日志和健康接口不得输出数据库 DSN。
+Kimi Key 只保存于该文件或秘密存储，Flutter 不持有 Key。真实 smoke 默认禁用；配置和
+命令见 `docs/05_ai/KIMI_PROVIDER_CONFIGURATION.md`。
 
 ## Docker Compose 与数据库
 
