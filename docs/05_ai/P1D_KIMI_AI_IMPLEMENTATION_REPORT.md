@@ -1,6 +1,6 @@
 # P1D Kimi AI Lite 实现报告
 
-状态：本地与 Android 门禁通过，等待分支/主线 CI 关闭
+状态：本地、Android 与分支 CI 通过，等待主线门禁关闭
 日期：2026-08-03
 分支：`p1d/kimi-ai-lite`
 起点：`c8c656be20a4322cca94c70451f0798099b926f0`
@@ -41,6 +41,10 @@ P1D 已完成三条本地确定性数据 → FastAPI → Kimi → 严格结构�
 | Compose config/up/health | PASS（合入前复跑） |
 | Repository secret scan | tracked 0；history 0；`.env` ignored，mode 600 |
 
+分支远端门禁：FastAPI Run `30833339810` PASS，Flutter Run `30833339698` PASS，
+代码头 Repository Safety Run `30833340623` PASS，文档头 Repository Safety Run
+`30833534342` PASS。
+
 ## 真实 Kimi 受控验证
 
 模型清单为 `kimi-k2.6`、`kimi-k2.7-code`；K3 不可用，所以三场景均显式路由到
@@ -71,7 +75,6 @@ P1D 已完成三条本地确定性数据 → FastAPI → Kimi → 严格结构�
 
 ## 待关闭门禁
 
-- 普通推送 P1D 分支并等待 Flutter、FastAPI、Repository Safety 全部通过。
 - 确认 `main` 未分叉后只做 fast-forward；普通推送 main 并等待适用主线 CI。
 - 把最终工程 SHA 与 CI Run ID 回填本报告和 `CURRENT_STATE.md`，再宣布 P1D 关闭。
 - `IOS_TOOLCHAIN = BLOCKED`；不声称 iOS 构建或发布通过。

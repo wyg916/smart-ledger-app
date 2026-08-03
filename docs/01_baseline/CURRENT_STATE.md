@@ -88,7 +88,8 @@
   `7ad3552fc42029d5c0131a254682001e343b52698b0771e8b0ab42405b03fa9e`。Android 34
   ARM64 使用 `adb install -r` 保留合成收入 100.00 与预算 500.00；真实 AI、无服务、429、
   40 秒超时、冷启动、22 分类均通过，logcat 未命中 FATAL、ANR、SQLite/migration 或 Key。
-- P1D 当前状态为本地和 Android 门禁通过、等待分支 CI 与 main fast-forward；尚未正式关闭。
+- P1D 分支 FastAPI Run `30833339810`、Flutter Run `30833339698`、最终文档头 Repository
+  Safety Run `30833534342` 均通过；当前等待 main fast-forward 与主线 CI，尚未正式关闭。
 
 ## 待审计
 - [x] macOS 旧 Android 可复现构建（JDK 17、Android SDK 34、官方 HTTPS Wrapper、clean/test/assembleDebug）
