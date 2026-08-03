@@ -89,7 +89,10 @@
   ARM64 使用 `adb install -r` 保留合成收入 100.00 与预算 500.00；真实 AI、无服务、429、
   40 秒超时、冷启动、22 分类均通过，logcat 未命中 FATAL、ANR、SQLite/migration 或 Key。
 - P1D 分支 FastAPI Run `30833339810`、Flutter Run `30833339698`、最终文档头 Repository
-  Safety Run `30833534342` 均通过；当前等待 main fast-forward 与主线 CI，尚未正式关闭。
+  Safety Run `30833534342` 均通过。`origin/main` 未分叉，已从 `c8c656b` 使用
+  `git merge --ff-only` 合入 P1D 工程 SHA `db8a1f78c417bbfa3f8346d0464052fa3d8b2b50` 并
+  普通推送；main FastAPI Run `30834204550`、Flutter Run `30834203471`、Repository
+  Safety Run `30834202262` 全部通过。P1D 已正式关闭。
 
 ## 待审计
 - [x] macOS 旧 Android 可复现构建（JDK 17、Android SDK 34、官方 HTTPS Wrapper、clean/test/assembleDebug）
@@ -105,9 +108,9 @@
 
 ## 当前门禁
 
-P0-CLOSEOUT、P1A、P1B 与 P1C 已同步到 `origin/main` 并正式关闭。P1D 本地实现、真实
-Kimi、Android release 与安全门禁已通过，当前等待分支 CI、fast-forward 合入和 main CI；
-这些完成前不得宣布 P1D 关闭。P1D 不代表真实旧库迁移、登录、同步、后端业务表、备份、
+P0-CLOSEOUT、P1A、P1B、P1C 与 P1D 已同步到 `origin/main` 并正式关闭。P1D 本地实现、
+真实 Kimi、Android release、分支 CI、fast-forward 合入和 main CI 均已通过，阶段结论为
+`P1D = PASS`。P1D 不代表真实旧库迁移、登录、同步、后端业务表、备份、
 应用锁、通用聊天、Agent、RAG 或发布能力完成；不得自动进入下一阶段。
 
 `IOS_TOOLCHAIN = BLOCKED`：需安装完整 Xcode、执行首次初始化并安装 CocoaPods，

@@ -1,6 +1,6 @@
 # P1D Kimi AI Lite 实现报告
 
-状态：本地、Android 与分支 CI 通过，等待主线门禁关闭
+状态：`P1D = PASS`，已 fast-forward 合入 main 并关闭主线门禁
 日期：2026-08-03
 分支：`p1d/kimi-ai-lite`
 起点：`c8c656be20a4322cca94c70451f0798099b926f0`
@@ -73,8 +73,11 @@ P1D 已完成三条本地确定性数据 → FastAPI → Kimi → 严格结构�
 说明：本 AVD 在本轮开始时没有可证明的历史 P1C 新包状态；因此先通过真实 UI 创建合成收入
 和预算基线，再用两次 `adb install -r` 与冷启动证明 P1D 更新不清库。未声称处理真实用户数据。
 
-## 待关闭门禁
+## 主线门禁关闭
 
-- 确认 `main` 未分叉后只做 fast-forward；普通推送 main 并等待适用主线 CI。
-- 把最终工程 SHA 与 CI Run ID 回填本报告和 `CURRENT_STATE.md`，再宣布 P1D 关闭。
-- `IOS_TOOLCHAIN = BLOCKED`；不声称 iOS 构建或发布通过。
+`origin/main` 在合入前仍为起点 `c8c656be20a4322cca94c70451f0798099b926f0`，与 P1D
+关系为 `0 6`，已使用 `git merge --ff-only` 合入并普通推送。P1D 工程/集成 SHA 为
+`db8a1f78c417bbfa3f8346d0464052fa3d8b2b50`。main FastAPI Run `30834204550`、Flutter
+Run `30834203471`、Repository Safety Run `30834202262` 全部 PASS，P1D 主线门禁关闭。
+
+`IOS_TOOLCHAIN = BLOCKED`；不声称 iOS 构建或发布通过。不得自动进入下一阶段。

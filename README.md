@@ -22,11 +22,12 @@ tests/fixtures/             匿名化测试数据
 
 ## 当前阶段
 
-P1C Local Budget & Analytics 已在 `origin/main` 正式关闭。P1D Kimi AI Lite 正在
-`p1d/kimi-ai-lite` 完成合入门禁：三类聚合 AI 场景、严格结构化输出、隐私边界、离线/超时/
+P1C Local Budget & Analytics 已在 `origin/main` 正式关闭。P1D Kimi AI Lite 也已通过
+`p1d/kimi-ai-lite` 独立门禁并 fast-forward 合入 main：三类聚合 AI 场景、严格结构化输出、隐私边界、离线/超时/
 429 降级、Android release 联网、温柔知性文案、22 个内置收支分类和统一暖色轻卡通主题均已
 完成本地与 Android 验收。FastAPI 26/26、Flutter 52/52、真实 Kimi 三场景、Release APK、
-冷启动留存和安全扫描已通过；分支/主线 CI 与最终 fast-forward 状态以
+冷启动留存和安全扫描已通过；main FastAPI Run `30834204550`、Flutter Run `30834203471`
+和 Repository Safety Run `30834202262` 均成功。最终 fast-forward 状态以
 `docs/05_ai/P1D_KIMI_AI_IMPLEMENTATION_REPORT.md` 为准。完整配置和隐私说明见
 `docs/05_ai/KIMI_PROVIDER_CONFIGURATION.md` 与 `docs/05_ai/AI_PRIVACY_AND_DEGRADATION.md`。
 
