@@ -5,7 +5,7 @@
 本文件记录开发前准备阶段已经核实的事实。完整 P0 审计仍以 `CODEX_FIRST_PROMPT.md` 的执行结果为准。
 
 ## 工程信息
-- Gradle：Wrapper 声明 8.7，但 `distributionUrl=file:///E:/gradle-8.7-bin.zip` 指向不存在的本机绝对路径。
+- Gradle：Wrapper 8.7；2026-08-03 已改为 Gradle 官方 HTTPS 分发地址并固定 SHA-256，macOS 现场执行成功。
 - Kotlin：1.9.24。
 - Android Gradle Plugin：8.4.2。
 - Compose Compiler：1.5.14；Compose BOM：2024.06.00。
@@ -50,14 +50,14 @@
 |---|---|---|
 | APK `aapt dump badging` | PASS | `com.offline.ledger`，1.0.0(1)，min 26，target/compile 34 |
 | 文件清单生成 | PASS | `LOCAL_FILE_INVENTORY.txt`，脱敏副本 84 个文件 |
-| `testDebugUnitTest` | BLOCKED | 本机未安装/未配置 JDK 17，`JAVA_HOME is not set`；尚未执行到 Gradle 配置阶段 |
+| `test` | PASS | 2026-08-03 在 macOS/Temurin 17 重新执行；Debug 3/3、Release 3/3，0 失败、0 跳过 |
 | 原工程既有测试报告 | PASS（历史证据） | 2026-02-18 生成的 XML 显示 3 个测试、0 failure、0 error；不是本轮重新执行结果 |
-| macOS 本轮 `testDebugUnitTest` | BLOCKED | Java 启动器报告无 Java Runtime；未发现 Android SDK；Wrapper 仍指向 `E:/gradle-8.7-bin.zip` |
+| macOS 本轮 `assembleDebug` | PASS | Debug APK 21,967,056 字节；SHA-256 与模拟器安装启动结果见 `P0_CLOSEOUT_REPORT.md` |
 
 ## 风险
 | 风险 | 等级 | 证据 | 处理建议 |
 |---|---|---|---|
-| Wrapper 依赖不存在的本机绝对路径 | 高 | `gradle-wrapper.properties` | P0 修复为官方 HTTPS 分发地址并校验 Wrapper |
+| Wrapper 依赖不存在的本机绝对路径 | 已关闭 | `gradle-wrapper.properties` | 已改为官方 HTTPS 分发地址、固定 SHA-256，并在 macOS 验证 |
 | 无 Room Schema 导出和 Migration | 极高 | `exportSchema=false`、未发现 Migration | 冻结 V1 Schema，补导出与迁移 Fixture |
 | 备份遗漏 DataStore | 极高 | ZIP 只写入 DB 与 meta | 先定义跨平台备份 V2，再实施桥接迁移 |
 | 恢复直接替换活动数据库 | 极高 | `BackupManager.restoreFromEncryptedBytes` | 临时库校验、对账、原子切换和可回滚 |
