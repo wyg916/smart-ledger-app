@@ -23,9 +23,10 @@ tests/fixtures/             匿名化测试数据
 ## 当前阶段
 
 P1B Core Local Ledger 已完成本地数据契约、Drift Schema 2、账户与分类管理，以及收入、
-支出、转账、筛选、汇总、编辑、逻辑删除和持久化闭环。Flutter 本地 25/25 测试、
-Android 34 ARM64 模拟器真实交互、FastAPI/Compose 回归和适用 GitHub Actions 均通过，
-阶段结论为 `PASS`；`IOS_TOOLCHAIN = BLOCKED`。完整事实见
+支出、转账、筛选、汇总、编辑、逻辑删除和持久化闭环。Flutter 本地 26/26 测试、
+Android 34 ARM64 模拟器真实交互、FastAPI/Compose 回归和 main 适用 GitHub Actions
+均通过；P1B 已 fast-forward 进入 `origin/main` 并正式关闭，阶段结论为 `PASS`；
+`IOS_TOOLCHAIN = BLOCKED`。完整事实见
 `docs/01_baseline/CURRENT_STATE.md`、`docs/03_data/P1B_LOCAL_LEDGER_CONTRACT.md` 和
 `docs/03_data/P1B_IMPLEMENTATION_REPORT.md`。
 

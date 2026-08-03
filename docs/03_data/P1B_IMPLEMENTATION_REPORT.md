@@ -35,11 +35,11 @@ Drift Schema 版本为 2，包含 `ledgers`、`accounts`、`categories`、`trans
 | 检查 | 结果 |
 |---|---|
 | `flutter pub get` | 通过 |
-| Drift 代码生成 | 通过；32 个输出 |
+| Drift 代码生成 | 通过；生成内容稳定 |
 | Dart format | 33 个文件，0 变更 |
 | Flutter analyze | No issues found |
-| Flutter test | 25/25 通过 |
-| Flutter coverage | 1,709 / 4,470 行，38.23% |
+| Flutter test | 26/26 通过 |
+| Flutter coverage | 1,711 / 4,470 行，38.28% |
 | Debug APK | 187,940,313 字节 |
 | APK SHA-256 | `2e2a32b3699c5b4c85681721b70f99c1296c62cdcf3380b5bbee61f629e04baf` |
 
@@ -73,20 +73,21 @@ P1B 未修改 FastAPI、PostgreSQL、Alembic 或 Docker 业务状态。回归结
 10 个文件通过、Ruff lint 通过、mypy strict 9 个源文件通过、pytest 4/4 通过，
 Docker Compose 配置校验通过。
 
-关闭前执行格式差异、安全模式、禁止产物和旧 Android 差异检查；未提交真实财务数据、
+关闭前执行格式差异、安全模式、禁止产物和旧 Android 差异检查；263 个候选文件扫描
+未发现禁入制品、大文件或秘密；未提交真实财务数据、
 数据库、APK、环境文件、Token、Cookie、签名材料或构建缓存。没有 force push、rebase、
-reset、clean、PR、Release、远端删除或对 `main` 的 P1B 合并。
+reset、clean、PR、Release 或远端删除。
 
 ## CI 与 Git 门禁
 
-Flutter 工作流已补充 Drift 代码生成步骤和 `p1b/**` 分支触发条件。P1B 工程 HEAD
-`8be54ec2f93f943c812de03f4ecaa8ad45a3a304` 的 Flutter format、analyze、25 个测试与
-无签名 Debug APK 在 GitHub Actions Run `30804449797` 通过。
+Flutter 工作流已补充 Drift 代码生成步骤和 `p1b/**` 分支触发条件。独立复核补充生产
+UUID 生成器批量唯一性测试后，P1B 最终工程 HEAD 为
+`821609117d72e6f555f761200e685c4d90074fa5`；分支 Flutter Run `30807188699` 通过。
 
-P1A 已先以 fast-forward 合并并正常推送到 `main`；`origin/main` 保持
-`03b1840bf9b413d408c5d8a8ad3741d6bfdab46a`。P1B 使用独立分支
-`p1b/core-local-ledger`，工程提交通过普通推送同步；最终文档提交 SHA 以 Git 远端引用
-和关闭汇报为准。
+P1B 已从 `origin/p1b/core-local-ledger` 以 fast-forward 合入 `main` 并普通推送；工程门禁
+时 `origin/main` 为 `821609117d72e6f555f761200e685c4d90074fa5`。该 main 工程 HEAD 的
+Flutter Run `30807541069` 与 Repository Safety Run `30807541194` 均通过。关闭文档提交
+后的最终 SHA 以 Git 远端引用和关闭汇报为准。
 
 ## 未完成与下一阶段门禁
 
@@ -94,4 +95,5 @@ P1A 已先以 fast-forward 合并并正常推送到 `main`；`origin/main` 保�
 通过。P1B 不处理真实旧数据库迁移、登录、云端业务表、同步、预算、统计图表、AI、
 正式包名、签名或商店发布。
 
-P1B 可以在本报告、最终工作树和远端 CI 全部关闭后结束；不得据此自动进入 P1C。
+P1B 已在本报告、最终工作树和 main 远端 CI 全部通过后正式关闭；P1C 尚未开始，且不得
+据此自动进入 P1C。正式包名、签名、真实用户和商店资源仍未冻结。
