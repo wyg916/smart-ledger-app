@@ -1,0 +1,49 @@
+name: smart-ledger-dev
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-smart_ledger_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-ledger_dev}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ledger_dev}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-54329}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ../../services/api
+      dockerfile: Dockerfile
+    environment:
+      SMART_LEDGER_ENVIRONMENT: development
+      SMART_LEDGER_DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-ledger_dev}:${POSTGRES_PASSWORD:-ledger_dev}@postgres:5432/${POSTGRES_DB:-smart_ledger_dev}
+    ports:
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=2)"
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  postgres-data:

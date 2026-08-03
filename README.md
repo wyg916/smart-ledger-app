@@ -21,14 +21,39 @@ tests/fixtures/             匿名化测试数据
 ```
 
 ## 当前阶段
-开发前基线准备。正式状态以 `docs/01_baseline/CURRENT_STATE.md` 为准。
+
+P1A Platform Foundation 已完成本地技术骨架和运行验收：Flutter Android、
+FastAPI、PostgreSQL 16、Alembic、Docker Compose 与三组 CI 工作流均已建立。
+由于本机 GitHub HTTPS 凭据不可用，`origin/main` 与 P1 分支尚未推送，因此
+阶段结论为 `PARTIAL`。完整事实见 `docs/01_baseline/CURRENT_STATE.md` 和
+`docs/02_architecture/P1_PLATFORM_FOUNDATION_REPORT.md`。
+
+本阶段只提供平台骨架，不代表记账、登录、同步、统计、AI 或发布功能已经完成。
+
+## 本地启动
+
+```bash
+cd apps/mobile
+flutter pub get
+flutter test
+flutter run
+
+cd services/api
+uv sync --frozen
+uv run pytest
+
+docker compose -f infra/docker/compose.yaml up -d --build
+```
+
+详细环境变量和命令见 `docs/02_architecture/LOCAL_DEVELOPMENT.md`。
 
 ## 必读
 1. `AGENTS.md`
 2. `docs/00_requirements/`
 3. `docs/01_baseline/CURRENT_STATE.md`
 4. `docs/02_architecture/DECISIONS.md`
-5. `docs/03_delivery/ACCEPTANCE_CRITERIA.md`
+5. `docs/02_architecture/LOCAL_DEVELOPMENT.md`
+6. `docs/03_delivery/ACCEPTANCE_CRITERIA.md`
 
 ## 机密信息
 不得提交密码、Token、密钥、证书、签名文件、真实数据库或真实用户财务数据。

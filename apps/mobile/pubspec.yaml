@@ -1,0 +1,30 @@
+name: smart_ledger
+description: "Smart Ledger mobile foundation"
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  drift: ^2.34.3
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.6.1
+  go_router: ^17.3.0
+  path: ^1.9.1
+  path_provider: ^2.1.6
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  drift_dev: ^2.34.5
+  build_runner: ^2.15.1
+
+flutter:
+  uses-material-design: true
+
+hooks:
+  user_defines:
+    sqlite3:
+      source: system

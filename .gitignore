@@ -41,6 +41,8 @@ ios/Pods/
 ios/.symlinks/
 ios/Flutter/ephemeral/
 macos/Flutter/ephemeral/
+DerivedData/
+*.xcarchive
 
 # Android / Gradle
 .gradle/
@@ -82,6 +84,8 @@ desktop.ini
 *.ipa
 reports/generated/
 artifacts/
+docker-data/
+infra/docker/data/
 dist/
 .tmp/
 tmp/

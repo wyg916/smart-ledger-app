@@ -1,0 +1,46 @@
+name: Flutter foundation
+
+on:
+  pull_request:
+    paths:
+      - "apps/mobile/**"
+      - ".github/workflows/flutter.yml"
+  push:
+    branches: [main, "p1/**"]
+    paths:
+      - "apps/mobile/**"
+      - ".github/workflows/flutter.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.44.8"
+          channel: stable
+          cache: true
+      - name: Resolve dependencies
+        working-directory: apps/mobile
+        run: flutter pub get
+      - name: Check formatting
+        working-directory: apps/mobile
+        run: dart format --output=none --set-exit-if-changed lib test
+      - name: Analyze
+        working-directory: apps/mobile
+        run: flutter analyze
+      - name: Test
+        working-directory: apps/mobile
+        run: flutter test
+      - name: Build unsigned debug APK
+        working-directory: apps/mobile
+        run: flutter build apk --debug

@@ -1,0 +1,41 @@
+name: FastAPI foundation
+
+on:
+  pull_request:
+    paths:
+      - "services/api/**"
+      - ".github/workflows/api.yml"
+  push:
+    branches: [main, "p1/**"]
+    paths:
+      - "services/api/**"
+      - ".github/workflows/api.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.12.1"
+          enable-cache: true
+      - name: Install Python and dependencies
+        working-directory: services/api
+        run: uv sync --frozen
+      - name: Ruff format
+        working-directory: services/api
+        run: uv run ruff format --check .
+      - name: Ruff lint
+        working-directory: services/api
+        run: uv run ruff check .
+      - name: Type check
+        working-directory: services/api
+        run: uv run mypy .
+      - name: Test
+        working-directory: services/api
+        run: uv run pytest
