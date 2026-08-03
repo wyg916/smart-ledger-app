@@ -33,6 +33,19 @@
 - `services/api/` 已建立 FastAPI + SQLAlchemy 2 + asyncpg + Alembic 骨架，Ruff、mypy 和 4 个 pytest 通过。
 - PostgreSQL 16 与 API Docker Compose 容器健康，Alembic 空基础版本和三个健康/版本接口现场通过；没有创建业务表。
 - 已建立 Flutter、FastAPI、旧 Android 三组 GitHub Actions 基础工作流。
+- P1A 已以 fast-forward 合并并正常推送；本地 `main` 与 `origin/main` 均为
+  `03b1840bf9b413d408c5d8a8ad3741d6bfdab46a`。
+- P1B 已在 `p1b/core-local-ledger` 完成 Drift Schema 2 与基础本地记账闭环：账户、分类、
+  收入、支出、单行转账、筛选、汇总、详情、编辑、Tombstone 删除和持久化均可用。
+- P1B 使用 UUID、Int64 最小金额单位、UTC epoch ms + IANA 时区、可注入 Clock、版本递增
+  和启用/禁用历史保留；正常 App 不 seed 演示交易。
+- Flutter format、analyze、25/25 测试、38.23% 行覆盖率和最终 Debug APK 通过；APK 为
+  187,940,313 字节，SHA-256 为
+  `2e2a32b3699c5b4c85681721b70f99c1296c62cdcf3380b5bbee61f629e04baf`。
+- API 34 ARM64 模拟器完成创建账户/分类、收入/支出、编辑、确认删除和冷启动持久化验证；
+  最终 logcat 未命中 SQLite 加载错误、FATAL 或应用 ANR。
+- P1B 工程 HEAD `8be54ec2f93f943c812de03f4ecaa8ad45a3a304` 的 Flutter Actions Run
+  `30804449797` 通过；P1B 没有修改后端、基础设施或旧 Android。
 - 完整 Xcode 与 CocoaPods 仍未就绪，`IOS_TOOLCHAIN = BLOCKED`；本轮未声称 iOS 构建通过。
 
 ## 待审计
@@ -49,10 +62,10 @@
 
 ## 当前门禁
 
-P0-CLOSEOUT 已同步到 `origin/main`，P1A 的移动端、后端、数据库、容器、远端分支和
-适用 GitHub Actions 门禁均取得成功证据，阶段结论为 `P1A = PASS`。P1A 只建立平台
-工程骨架，不代表交易、账户、分类、预算、同步、AI 或发布能力完成；P1B 尚未开始，
-只有后续获得明确授权才可进入。
+P0-CLOSEOUT 与 P1A 已同步到 `origin/main`。P1B 的本地数据契约、Drift Schema 2、
+账户/分类管理、基础交易闭环、测试、Android 模拟器、回归检查和适用 GitHub Actions
+均取得成功证据，阶段结论为 `P1B = PASS`。P1B 不代表真实旧库迁移、登录、同步、
+预算、统计图表、AI 或发布能力完成；只有后续获得明确授权才可进入 P1C。
 
 `IOS_TOOLCHAIN = BLOCKED`：需安装完整 Xcode、执行首次初始化并安装 CocoaPods，
 在此之前不允许进入正式 iOS 构建或发布阶段。真实用户、正式签名、最终标识和商店
