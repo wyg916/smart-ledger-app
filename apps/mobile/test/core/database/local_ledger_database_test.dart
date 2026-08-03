@@ -5,6 +5,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_ledger/core/database/app_database.dart'
     hide LedgerTransaction;
+import 'package:smart_ledger/core/database/entity_id.dart';
 import 'package:smart_ledger/core/database/local_ledger_bootstrapper.dart';
 import 'package:smart_ledger/core/errors/ledger_exception.dart';
 import 'package:smart_ledger/core/time/ledger_time.dart';
@@ -47,6 +48,17 @@ void main() {
       );
     },
   );
+
+  test('UUID generator produces unique RFC 4122 version 4 identifiers', () {
+    const generator = UuidEntityIdGenerator();
+    final ids = List.generate(128, (_) => generator.next());
+    final uuidV4 = RegExp(
+      r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
+    );
+
+    expect(ids.toSet(), hasLength(ids.length));
+    expect(ids, everyElement(matches(uuidV4)));
+  });
 
   test('migrates the empty P1A schema version 1 to schema version 2', () async {
     final directory = await Directory.systemTemp.createTemp(
