@@ -64,6 +64,15 @@
 - P1C 未修改 FastAPI、PostgreSQL、Docker 业务或旧 Android；Ruff、mypy、pytest 4/4 和
   Compose config 回归通过。工程 HEAD `d408157bfef19777d3de254b5ab85c522f47c647`
   的 Flutter Run `30814256211` 已通过。
+- P1C-MERGE 独立复核确认 Schema 2→3 不重建或清空 P1B 数据，预算唯一性、Int64 金额、
+  IANA 半开月界、收入/转账/Tombstone 排除、禁用分类历史、环比和确定性排行符合冻结
+  口径；Flutter format/analyze、39/39 测试、42.33% 覆盖率、Debug APK、13/13 定向测试、
+  FastAPI 4/4 和 Compose config 均再次通过，安全扫描未发现提交秘密或构建产物。
+- P1C 已从 `1384e94577ea09b5b97f517fc9e799be514ea8a9` 以 fast-forward 合入 main 并普通
+  推送；`origin/main` 的 P1C 最终工程 SHA 为
+  `ad51835d25dd66b64553184a5f050af2d34050b3`。main Flutter Run `30816470054` 与
+  Repository Safety Run `30816469579` 均在该 SHA 通过；FastAPI 和 Legacy Android 因
+  路径过滤不适用、未触发。P1C 已正式关闭，P1D 尚未开始。
 
 ## 待审计
 - [x] macOS 旧 Android 可复现构建（JDK 17、Android SDK 34、官方 HTTPS Wrapper、clean/test/assembleDebug）
@@ -79,10 +88,10 @@
 
 ## 当前门禁
 
-P0-CLOSEOUT、P1A 与 P1B 已同步到 `origin/main`。P1C 已在
-`p1c/local-budget-analytics` 完成本地预算、统计、Schema 3、自动化与 Android 升级验收；
-远端工程门禁和最终分支同步已通过，阶段结论为 `P1C = PASS`。P1C 不代表真实旧库迁移、
-登录、同步、后端业务表、备份、应用锁、目标、AI 或发布能力完成；不得自动进入下一阶段。
+P0-CLOSEOUT、P1A、P1B 与 P1C 已同步到 `origin/main`。P1C 本地预算、统计、Schema 3、
+自动化与 Android 升级验收、独立复核、fast-forward 主线合入和 main CI 均已通过，阶段
+结论为 `P1C = PASS` 且已正式关闭。P1D 尚未开始。P1C 不代表真实旧库迁移、登录、同步、
+后端业务表、备份、应用锁、目标、AI 或发布能力完成；不得自动进入下一阶段。
 
 `IOS_TOOLCHAIN = BLOCKED`：需安装完整 Xcode、执行首次初始化并安装 CocoaPods，
 在此之前不允许进入正式 iOS 构建或发布阶段。真实用户、正式签名、最终标识和商店

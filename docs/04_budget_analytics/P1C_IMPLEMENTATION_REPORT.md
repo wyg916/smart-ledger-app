@@ -2,7 +2,7 @@
 
 执行日期：2026-08-03
 
-工程结论：**PASS**
+工程结论：**PASS（已进入 main 并正式关闭）**
 
 `IOS_TOOLCHAIN = BLOCKED`
 
@@ -144,5 +144,33 @@ P1C 不代表完整 App 完成。custom/多分类组合预算、通知、目标�
 登录、同步、云端表、备份、锁、AI、正式包名/签名、iOS 构建和发布均未实现。
 完整 Xcode/CocoaPods 仍未就绪，`IOS_TOOLCHAIN = BLOCKED`。
 
-远端工程门禁、分支同步与安全扫描均通过，`P1C = PASS`，允许关闭。下一阶段仍必须获得
-用户明确授权，不得自动进入同步、备份、安全锁或 AI。
+## P1C-MERGE 独立复核与主线关闭
+
+独立复核再次确认 Schema 3、Schema 2→3 保真迁移、预算约束、整数金额、IANA 半开月界、
+收入/转账/Tombstone 排除、禁用分类历史、环比空基期与确定性排行符合冻结口径；UI 不
+访问 DAO 或 SQL，正常启动不 seed 预算，P1C 未修改 FastAPI、PostgreSQL、同步、AI 或旧
+Android 业务。统计仓储只读取上月初至本月末的有界收支事实，随后在仓储层生成确定性
+快照；该实现不会让 UI 加载无边界历史，也不改变冻结统计语义。
+
+主线合入前复核门禁结果：Flutter 依赖解析、代码生成、47 文件格式检查（0 变更）、analyze
+（0 issues）、39/39 测试、覆盖率 2,593/6,126 行（42.33%）和 Debug APK 均通过；迁移、
+预算、统计与 Widget 定向测试 13/13 通过。复核 APK 为 187,940,313 字节，SHA-256 为
+`a6794d8ba1ed0aacd8e2cf62232487ae2a785c0c0d8d283cda249d20b7885560`；这是本次独立重建
+产物，不替换前文分支验收 APK 的历史哈希。Ruff、mypy、pytest 4/4 和 Compose config
+再次通过。人工秘密/产物扫描与 main Repository Safety 均通过；本机缺少 PowerShell，
+因此未在 macOS 直接执行 PowerShell 安全脚本，远端 Run 已执行同一脚本。
+
+P1C 四个提交从 main `1384e94577ea09b5b97f517fc9e799be514ea8a9` 以 fast-forward
+合入，未产生 merge commit，并以普通 push 更新 `origin/main`。最终工程 SHA 为
+`ad51835d25dd66b64553184a5f050af2d34050b3`。首次两次 `git pull --ff-only` 因 GitHub
+443 连接超时失败，未修改任何引用；GitHub API 确认远端 main/P1C SHA 未漂移后完成本地
+fast-forward，普通 push 成功。未执行 force push、rebase、reset、squash 或 cherry-pick。
+
+该 SHA 的 main CI：Flutter foundation Run `30816470054` success（依赖、代码生成、格式、
+analyze、test、Debug APK 全部通过），Repository Safety Run `30816469579` success。FastAPI
+和 Legacy Android 因本次路径过滤不适用而未触发，不写作通过。CI 无失败、无修复提交。
+
+远端工程门禁、独立复核、主线同步与安全扫描均通过，`P1C = PASS` 并已正式关闭。P1D
+尚未开始；完整 Xcode/CocoaPods、正式包名、签名、真实用户和商店资源仍未冻结，
+`IOS_TOOLCHAIN = BLOCKED`。下一阶段仍必须获得用户明确授权，不得自动进入同步、备份、
+安全锁、AI 或发布。
