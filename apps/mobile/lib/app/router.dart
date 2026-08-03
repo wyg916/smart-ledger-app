@@ -6,6 +6,10 @@ import 'package:smart_ledger/features/budgets/presentation/budget_detail_page.da
 import 'package:smart_ledger/features/budgets/presentation/budget_form_page.dart';
 import 'package:smart_ledger/features/budgets/presentation/budgets_page.dart';
 import 'package:smart_ledger/features/categories/presentation/categories_page.dart';
+import 'package:smart_ledger/features/ai/presentation/ai_assistant_page.dart';
+import 'package:smart_ledger/features/ai/presentation/ai_budget_review_page.dart';
+import 'package:smart_ledger/features/ai/presentation/ai_financial_plan_page.dart';
+import 'package:smart_ledger/features/ai/presentation/ai_monthly_summary_page.dart';
 import 'package:smart_ledger/features/transactions/presentation/ledger_home_page.dart';
 import 'package:smart_ledger/features/transactions/presentation/transaction_detail_page.dart';
 import 'package:smart_ledger/features/transactions/presentation/transaction_form_page.dart';
@@ -46,6 +50,24 @@ final routerProvider = Provider<GoRouter>((ref) {
                     BudgetFormPage(budgetId: state.pathParameters['id']!),
               ),
             ],
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/ai',
+        builder: (context, state) => const AiAssistantPage(),
+        routes: [
+          GoRoute(
+            path: 'monthly-summary',
+            builder: (context, state) => const AiMonthlySummaryPage(),
+          ),
+          GoRoute(
+            path: 'budget-review',
+            builder: (context, state) => const AiBudgetReviewPage(),
+          ),
+          GoRoute(
+            path: 'financial-plan',
+            builder: (context, state) => const AiFinancialPlanPage(),
           ),
         ],
       ),

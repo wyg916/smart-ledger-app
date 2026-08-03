@@ -21,3 +21,5 @@ const _configuredEnvironment = String.fromEnvironment(
 final appEnvironmentProvider = Provider<AppEnvironment>(
   (ref) => AppEnvironment.fromName(_configuredEnvironment),
 );
+
+const apiBaseUrl = String.fromEnvironment('API_BASE_URL', defaultValue: '');

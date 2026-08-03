@@ -64,6 +64,8 @@ final class AccountBalanceOverview {
 final class AnalyticsSnapshot {
   const AnalyticsSnapshot({
     required this.month,
+    required this.currencyCode,
+    required this.timeZoneId,
     required this.income,
     required this.expense,
     required this.dailyTrend,
@@ -73,6 +75,8 @@ final class AnalyticsSnapshot {
   });
 
   final LedgerMonth month;
+  final String currencyCode;
+  final String timeZoneId;
   final MonthMetric income;
   final MonthMetric expense;
   final List<DailyTrendPoint> dailyTrend;

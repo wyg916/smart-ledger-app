@@ -6,6 +6,8 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from app.ai.errors import AiError
+from app.ai.routes import router as ai_router
 from app.config import get_settings
 from app.database import dispose_engine
 from app.routes import router
@@ -20,6 +22,32 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 settings = get_settings()
 app = FastAPI(title=settings.app_name, version=settings.app_version, lifespan=lifespan)
 app.include_router(router)
+app.include_router(ai_router)
+
+
+@app.middleware("http")
+async def limit_ai_request_size(request: Request, call_next: Any) -> Any:
+    if request.url.path.startswith("/api/v1/ai/") and request.method == "POST":
+        content_length = request.headers.get("content-length")
+        if content_length is not None and int(content_length) > 32_768:
+            return JSONResponse(
+                status_code=413,
+                content={
+                    "error": {
+                        "code": "AI_REQUEST_TOO_LARGE",
+                        "message": "AI request body is too large",
+                    }
+                },
+            )
+    return await call_next(request)
+
+
+@app.exception_handler(AiError)
+async def ai_exception_handler(_: Request, exc: AiError) -> JSONResponse:
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"error": {"code": exc.code, "message": exc.message}},
+    )
 
 
 @app.exception_handler(HTTPException)

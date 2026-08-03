@@ -17,6 +17,12 @@ class LedgerHomePage extends ConsumerWidget {
         title: const Text('智能记账'),
         actions: [
           IconButton(
+            key: const Key('ai-action'),
+            onPressed: () => context.push('/ai'),
+            icon: const Icon(Icons.auto_awesome_outlined),
+            tooltip: 'AI 助手',
+          ),
+          IconButton(
             key: const Key('analytics-action'),
             onPressed: () => context.push('/analytics'),
             icon: const Icon(Icons.analytics_outlined),

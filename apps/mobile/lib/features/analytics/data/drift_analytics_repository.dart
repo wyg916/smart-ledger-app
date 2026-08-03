@@ -66,14 +66,20 @@ final class DriftAnalyticsRepository implements AnalyticsRepository {
         )
         .watch()
         .asyncMap(
-          (rows) =>
-              _buildSnapshot(rows, filter, ledger.timeZoneId, currentRange),
+          (rows) => _buildSnapshot(
+            rows,
+            filter,
+            ledger.currencyCode,
+            ledger.timeZoneId,
+            currentRange,
+          ),
         );
   }
 
   Future<AnalyticsSnapshot> _buildSnapshot(
     List<QueryRow> rows,
     AnalyticsFilter filter,
+    String currencyCode,
     String timeZoneId,
     UtcMonthRange currentRange,
   ) async {
@@ -146,6 +152,8 @@ final class DriftAnalyticsRepository implements AnalyticsRepository {
     });
     return AnalyticsSnapshot(
       month: filter.month,
+      currencyCode: currencyCode,
+      timeZoneId: timeZoneId,
       income: MonthMetric(
         currentMinor: income,
         previousMinor: previousIncome,
