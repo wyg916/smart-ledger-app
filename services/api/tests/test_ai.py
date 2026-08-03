@@ -6,6 +6,7 @@ import httpx
 import pytest
 
 from app.ai.errors import AiError, map_upstream_status
+from app.ai.prompts.v1.system import SYSTEM_PROMPT
 from app.ai.providers.base import AiScenario, ProviderResult
 from app.ai.providers.fake import FakeProvider
 from app.ai.routes import get_ai_provider
@@ -103,6 +104,15 @@ def plan_payload() -> dict[str, Any]:
     }
 
 
+def test_prompt_requires_warm_but_truthful_tone() -> None:
+    assert "温柔、知性、甜美但克制" in SYSTEM_PROMPT
+    assert "不制造\n焦虑" in SYSTEM_PROMPT
+    assert "不能为了温柔而淡化事实" in SYSTEM_PROMPT
+    assert "不得虚构、重算或修改确定性金额" in SYSTEM_PROMPT
+    assert "不得展示 income_minor" in SYSTEM_PROMPT
+    assert "自然、易懂的中文" in SYSTEM_PROMPT
+
+
 async def test_status_is_non_sensitive(client: httpx.AsyncClient) -> None:
     override()
     response = await client.get("/api/v1/ai/status")
@@ -136,6 +146,7 @@ async def test_three_scenarios_use_fake_provider(
     assert body["usage"] == {"prompt_tokens": 10, "completion_tokens": 20, "total_tokens": 30}
     assert "reasoning_content" not in body
     assert "amount_minor" not in body["result"]
+    assert "整理好啦" in body["result"]["summary"]
 
 
 async def test_disabled_and_production_fail_closed(client: httpx.AsyncClient) -> None:

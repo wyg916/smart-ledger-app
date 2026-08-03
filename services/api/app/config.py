@@ -22,7 +22,7 @@ class Settings(BaseSettings):
         default="https://api.moonshot.cn/v1", validation_alias="KIMI_BASE_URL"
     )
     kimi_fast_model: str = Field(default="kimi-k2.6", validation_alias="KIMI_FAST_MODEL")
-    kimi_reasoning_model: str = Field(default="kimi-k3", validation_alias="KIMI_REASONING_MODEL")
+    kimi_reasoning_model: str = Field(default="kimi-k2.6", validation_alias="KIMI_REASONING_MODEL")
     kimi_ai_enabled: bool = Field(default=False, validation_alias="KIMI_AI_ENABLED")
     kimi_provider: str = Field(default="kimi", validation_alias="KIMI_PROVIDER")
     kimi_live_test: bool = Field(default=False, validation_alias="KIMI_LIVE_TEST")

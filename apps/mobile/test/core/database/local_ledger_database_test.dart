@@ -61,6 +61,42 @@ void main() {
     expect(ids, everyElement(matches(uuidV4)));
   });
 
+  test('bootstrap provides rich categories and remains idempotent', () async {
+    var rows = await harness.database.select(harness.database.categories).get();
+    expect(rows, hasLength(22));
+    expect(rows.where((item) => item.categoryType == 'expense'), hasLength(14));
+    expect(rows.where((item) => item.categoryType == 'income'), hasLength(8));
+    expect(
+      rows.map((item) => item.name),
+      containsAll([
+        '餐饮',
+        '购物',
+        '住房',
+        '医疗',
+        '旅行',
+        '宠物',
+        '工资',
+        '奖金',
+        '兼职',
+        '理财收益',
+        '报销',
+        '退款',
+      ]),
+    );
+
+    const foodId = '00000000-0000-4000-8000-000000000301';
+    await harness.categories.setEnabled(foodId, false);
+    await LocalLedgerBootstrapper(
+      harness.database,
+      harness.clock,
+      const FixedLedgerTimeZone('Asia/Shanghai'),
+    ).initialize();
+
+    rows = await harness.database.select(harness.database.categories).get();
+    expect(rows, hasLength(22));
+    expect((await harness.categories.getById(foodId))?.enabled, isFalse);
+  });
+
   test('migrates the empty P1A schema version 1 to schema version 2', () async {
     final directory = await Directory.systemTemp.createTemp(
       'smart-ledger-migration-',

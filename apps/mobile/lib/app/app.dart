@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smart_ledger/app/ledger_theme.dart';
 import 'package:smart_ledger/app/router.dart';
 
 class SmartLedgerApp extends ConsumerWidget {
@@ -10,10 +11,7 @@ class SmartLedgerApp extends ConsumerWidget {
     return MaterialApp.router(
       title: '智能记账',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF176B55)),
-        useMaterial3: true,
-      ),
+      theme: buildLedgerTheme(),
       routerConfig: ref.watch(routerProvider),
     );
   }

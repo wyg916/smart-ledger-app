@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:smart_ledger/app/ledger_theme.dart';
+import 'package:smart_ledger/app/ledger_visuals.dart';
 import 'package:smart_ledger/core/database/database_providers.dart';
 import 'package:smart_ledger/core/money/money.dart';
 import 'package:smart_ledger/features/transactions/domain/ledger_transaction.dart';
@@ -13,41 +15,7 @@ class LedgerHomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final bootstrap = ref.watch(localLedgerBootstrapProvider);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('智能记账'),
-        actions: [
-          IconButton(
-            key: const Key('ai-action'),
-            onPressed: () => context.push('/ai'),
-            icon: const Icon(Icons.auto_awesome_outlined),
-            tooltip: 'AI 助手',
-          ),
-          IconButton(
-            key: const Key('analytics-action'),
-            onPressed: () => context.push('/analytics'),
-            icon: const Icon(Icons.analytics_outlined),
-            tooltip: '统计分析',
-          ),
-          IconButton(
-            key: const Key('budgets-action'),
-            onPressed: () => context.push('/budgets'),
-            icon: const Icon(Icons.savings_outlined),
-            tooltip: '预算管理',
-          ),
-          IconButton(
-            key: const Key('accounts-action'),
-            onPressed: () => context.push('/accounts'),
-            icon: const Icon(Icons.account_balance_wallet_outlined),
-            tooltip: '账户管理',
-          ),
-          IconButton(
-            key: const Key('categories-action'),
-            onPressed: () => context.push('/categories'),
-            icon: const Icon(Icons.category_outlined),
-            tooltip: '分类管理',
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('我的小账本')),
       floatingActionButton: FloatingActionButton.extended(
         key: const Key('add-transaction'),
         onPressed: bootstrap.hasValue
@@ -88,6 +56,10 @@ class _LedgerBody extends ConsumerWidget {
             key: const Key('ledger-list'),
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
             children: [
+              const _WelcomeCard(),
+              const SizedBox(height: 10),
+              const _QuickActions(),
+              const SizedBox(height: 18),
               Row(
                 children: [
                   IconButton(
@@ -219,10 +191,10 @@ class _LedgerBody extends ConsumerWidget {
                   padding: EdgeInsets.only(top: 52),
                   child: Column(
                     children: [
-                      Icon(Icons.receipt_long_outlined, size: 48),
+                      LedgerBuddy(size: 68),
                       SizedBox(height: 12),
                       Text('本月暂无记录', key: Key('empty-ledger')),
-                      Text('点击“记一笔”新增收入、支出或转账'),
+                      Text('从第一笔开始，慢慢把生活理清楚吧'),
                     ],
                   ),
                 )
@@ -249,7 +221,13 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = switch (label) {
+      '收入' => LedgerPalette.mintSoft,
+      '支出' => LedgerPalette.coralSoft,
+      _ => LedgerPalette.honeySoft,
+    };
     return Card(
+      color: color,
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -294,7 +272,10 @@ class _TransactionTile extends StatelessWidget {
         leading: Icon(
           item.type == LedgerTransactionType.transfer
               ? Icons.swap_horiz
-              : Icons.receipt_outlined,
+              : categoryIcon(title),
+          color: item.type == LedgerTransactionType.income
+              ? LedgerPalette.mint
+              : LedgerPalette.coral,
         ),
         title: Text(title),
         subtitle: Text(
@@ -306,6 +287,124 @@ class _TransactionTile extends StatelessWidget {
       ),
     );
   }
+}
+
+class _WelcomeCard extends StatelessWidget {
+  const _WelcomeCard();
+
+  @override
+  Widget build(BuildContext context) => Card(
+    color: LedgerPalette.honeySoft,
+    child: const Padding(
+      padding: EdgeInsets.all(18),
+      child: Row(
+        children: [
+          LedgerBuddy(size: 64),
+          SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '今天也一起好好记账吧',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                ),
+                SizedBox(height: 5),
+                Text('每一笔都算数，也不必一次做到完美。'),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _QuickActions extends StatelessWidget {
+  const _QuickActions();
+
+  @override
+  Widget build(BuildContext context) => SingleChildScrollView(
+    scrollDirection: Axis.horizontal,
+    child: Row(
+      children: [
+        _QuickAction(
+          key: const Key('ai-action'),
+          label: 'AI 陪伴',
+          icon: Icons.auto_awesome_rounded,
+          color: LedgerPalette.coralSoft,
+          onTap: () => context.push('/ai'),
+        ),
+        _QuickAction(
+          key: const Key('analytics-action'),
+          label: '统计',
+          icon: Icons.insights_rounded,
+          color: LedgerPalette.mintSoft,
+          onTap: () => context.push('/analytics'),
+        ),
+        _QuickAction(
+          key: const Key('budgets-action'),
+          label: '预算',
+          icon: Icons.savings_rounded,
+          color: LedgerPalette.honeySoft,
+          onTap: () => context.push('/budgets'),
+        ),
+        _QuickAction(
+          key: const Key('accounts-action'),
+          label: '账户',
+          icon: Icons.account_balance_wallet_rounded,
+          color: LedgerPalette.skySoft,
+          onTap: () => context.push('/accounts'),
+        ),
+        _QuickAction(
+          key: const Key('categories-action'),
+          label: '分类',
+          icon: Icons.category_rounded,
+          color: LedgerPalette.coralSoft,
+          onTap: () => context.push('/categories'),
+        ),
+      ],
+    ),
+  );
+}
+
+class _QuickAction extends StatelessWidget {
+  const _QuickAction({
+    super.key,
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(right: 10),
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Ink(
+        width: 76,
+        padding: const EdgeInsets.symmetric(vertical: 11),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, size: 25),
+            const SizedBox(height: 5),
+            Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 class _ErrorState extends StatelessWidget {

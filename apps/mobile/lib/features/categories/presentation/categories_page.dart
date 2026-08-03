@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:smart_ledger/app/ledger_visuals.dart';
 import 'package:smart_ledger/core/database/database_providers.dart';
 import 'package:smart_ledger/features/categories/domain/ledger_category.dart';
 import 'package:smart_ledger/features/transactions/presentation/ledger_providers.dart';
@@ -50,6 +51,10 @@ class _CategoriesPageState extends ConsumerState<CategoriesPage> {
                       (item) => Card(
                         child: ListTile(
                           key: Key('category-${item.id}'),
+                          leading: CircleAvatar(
+                            backgroundColor: categoryTint(item.name),
+                            child: Icon(categoryIcon(item.name)),
+                          ),
                           title: Text(item.name),
                           subtitle: item.systemKey == null
                               ? null

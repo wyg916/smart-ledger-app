@@ -27,17 +27,23 @@ class FakeProvider:
             }[scenario]
             content = {
                 "title": label,
-                "summary": "基于确定性摘要生成的合成测试结论。",
+                "summary": "已经为你整理好啦：这份结论只依据本地确定性聚合，可以安心核对。",
                 "insights": [
                     {
-                        "type": "neutral",
-                        "title": "摘要可信",
-                        "detail": "仅使用聚合数据进行解释。",
+                        "type": "positive",
+                        "title": "数据边界很清楚",
+                        "detail": "你保留了完整的本地账目，AI 这里只使用聚合数据帮你读懂趋势。",
                         "evidence": "确定性金额由客户端提供",
                     }
                 ],
-                "actions": [{"priority": 1, "title": "持续记录", "detail": "保持稳定记账习惯。"}],
-                "risk_tips": ["建议仅作一般性财务信息参考。"],
+                "actions": [
+                    {
+                        "priority": 1,
+                        "title": "轻松保持记录",
+                        "detail": "可以继续按现在的节奏记账，让下一次回顾更从容。",
+                    }
+                ],
+                "risk_tips": ["温柔提醒：建议仍需结合你的实际情况判断。"],
                 "disclaimer": "AI 结果仅供一般性财务信息参考，不构成投资、法律或税务建议。",
             }
         return ProviderResult(

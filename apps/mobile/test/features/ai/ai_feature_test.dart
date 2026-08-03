@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,6 +21,26 @@ import 'package:smart_ledger/features/analytics/domain/ledger_analytics.dart';
 import '../../support/ledger_test_harness.dart';
 
 void main() {
+  test(
+    'Android release networking is declared and cleartext stays scoped',
+    () async {
+      final manifest = await File(
+        'android/app/src/main/AndroidManifest.xml',
+      ).readAsString();
+      final networkSecurity = await File(
+        'android/app/src/main/res/xml/network_security_config.xml',
+      ).readAsString();
+      expect(manifest, contains('android.permission.INTERNET'));
+      expect(manifest, contains('@xml/network_security_config'));
+      expect(networkSecurity, contains('cleartextTrafficPermitted="false"'));
+      expect(networkSecurity, contains('>10.0.2.2</domain>'));
+      expect(
+        networkSecurity,
+        isNot(contains('cleartextTrafficPermitted="true" />')),
+      );
+    },
+  );
+
   test('DTO uses Int64 aggregates and excludes raw identity fields', () {
     final json = monthlyAiRequest(_snapshot()).toJson();
     expect(json['income_minor'], isA<int>());
@@ -58,6 +79,7 @@ void main() {
     await tester.tap(find.byKey(const Key('ai-action')));
     await tester.pumpAndSettle();
     expect(find.text('月度消费总结'), findsOneWidget);
+    expect(find.text('想看懂哪一部分呢？'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('ai-monthly-entry')));
     await tester.pumpAndSettle();

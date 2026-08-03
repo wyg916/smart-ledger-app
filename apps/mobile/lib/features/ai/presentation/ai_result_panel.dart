@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:smart_ledger/app/ledger_theme.dart';
+import 'package:smart_ledger/app/ledger_visuals.dart';
 import 'package:smart_ledger/features/ai/domain/ai_models.dart';
 
 class AiResultPanel extends StatelessWidget {
@@ -13,7 +15,27 @@ class AiResultPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(result.title, style: Theme.of(context).textTheme.titleLarge),
+          Row(
+            children: [
+              const LedgerBuddy(size: 48),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '给你整理好啦',
+                      style: TextStyle(color: LedgerPalette.mutedInk),
+                    ),
+                    Text(
+                      result.title,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 8),
           Text(result.summary),
           for (final insight in result.insights) ...[
@@ -26,6 +48,11 @@ class AiResultPanel extends StatelessWidget {
             const SizedBox(height: 10),
             Text('${action.priority}. ${action.title}'),
             Text(action.detail),
+          ],
+          if (result.riskTips.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            const Text('温柔提醒', style: TextStyle(fontWeight: FontWeight.w800)),
+            for (final tip in result.riskTips) Text('• $tip'),
           ],
           const Divider(),
           Text(result.disclaimer, key: const Key('ai-disclaimer')),
@@ -48,11 +75,21 @@ class AiFailurePanel extends StatelessWidget {
   Widget build(BuildContext context) => Card(
     key: Key('ai-failure-${failure.kind.name}'),
     child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      child: Row(
         children: [
-          Text(failure.message),
-          const Text('本地确定性结果仍可使用。', key: Key('ai-fallback')),
+          const LedgerBuddy(size: 38),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(failure.message),
+                const Text('别担心，本地确定性结果仍然安全可用。', key: Key('ai-fallback')),
+              ],
+            ),
+          ),
           TextButton(
             key: const Key('ai-retry'),
             onPressed: onRetry,

@@ -1,4 +1,5 @@
 import asyncio
+import os
 from time import monotonic
 from typing import Any
 
@@ -89,8 +90,11 @@ async def main() -> int:
         return 1
     print(f"routing fast={fast_model} reasoning={reasoning_model}")
     service = AiService(provider)
+    scenario_filter = os.getenv("KIMI_SMOKE_SCENARIO", "").strip()
     failed = False
     for scenario, payload in synthetic_payloads().items():
+        if scenario_filter and scenario.value != scenario_filter:
+            continue
         model = reasoning_model if scenario is AiScenario.financial_plan else fast_model
         started = monotonic()
         try:

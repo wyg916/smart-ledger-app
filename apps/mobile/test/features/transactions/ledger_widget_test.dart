@@ -211,6 +211,11 @@ void main() {
       await tester.enterText(find.byKey(const Key('category-name')), '测试购物');
       await tester.tap(find.byKey(const Key('save-category')));
       await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('测试购物'),
+        200,
+        scrollable: find.byType(Scrollable).last,
+      );
       expect(find.text('测试购物'), findsOneWidget);
       await disposeLedger(tester, harness);
     },
