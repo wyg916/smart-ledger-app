@@ -9,11 +9,11 @@
 
 ## 工程
 
-- [ ] 强制登录与所有路由 AuthGuard
-- [ ] 多账号独立数据库及 Schema 4 显式绑定
-- [ ] 号码/微信真实 Provider 与审核账号
-- [ ] 账号删除和公开 `/account-deletion`
-- [ ] compileSdk/targetSdk 36，format/analyze/test/build 全绿
+- [x] 强制登录与所有路由 AuthGuard（单测 + API 36 模拟器）
+- [x] 多账号独立数据库及 Schema 4 显式绑定（自动化保留测试）
+- [ ] 号码/微信真实 Provider 与生产审核账号（代码/Fake 完成，真实外部条件阻断）
+- [ ] 账号删除和公开 `/account-deletion`（代码通过，公网部署阻断）
+- [x] compileSdk/targetSdk 36，format/analyze/test/build 全绿
 - [ ] 正式签名 AAB/APK、签名校验、hash、mapping 和 symbols 私有归档
 - [ ] API 36 模拟器与至少两种 Android 版本真机验收
 

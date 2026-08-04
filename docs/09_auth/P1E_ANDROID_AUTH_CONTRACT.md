@@ -64,5 +64,5 @@ App 内二次确认后创建并确认幂等删除请求。确认时撤销 token/
 
 ## 生产失败关闭
 
-Production 缂少 JWT、Provider、数据库或 HTTPS 配置时服务不得启动或认证接口返回不可用；生产严禁
+Production 缺少 JWT、Provider、数据库或 HTTPS 配置时服务不得启动或认证接口返回不可用；生产严禁
 Fake Provider。AI 在 production 仅接受有效 App Access Token，内部指标仍使用独立内部凭据。
