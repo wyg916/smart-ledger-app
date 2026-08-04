@@ -46,7 +46,7 @@ def token_digest(token: str) -> str:
 
 
 async def register_installation(
-    session: AsyncSession, request: InstallationRequest
+    session: AsyncSession, request: InstallationRequest, user_id: str | None = None
 ) -> tuple[AnalyticsInstallation, str]:
     installation_id = str(request.installation_id)
     actor_id = str(request.anonymous_actor_id)
@@ -57,6 +57,7 @@ async def register_installation(
         installation = AnalyticsInstallation(
             installation_id=installation_id,
             anonymous_actor_id=actor_id,
+            user_id=user_id,
             token_hash=token_digest(token),
             platform=request.platform,
             app_version=request.app_version,
@@ -66,6 +67,7 @@ async def register_installation(
         session.add(installation)
     else:
         installation.anonymous_actor_id = actor_id
+        installation.user_id = user_id
         installation.token_hash = token_digest(token)
         installation.platform = request.platform
         installation.app_version = request.app_version
@@ -96,6 +98,7 @@ async def start_session(
                 session_id=session_id,
                 installation_id=installation.installation_id,
                 anonymous_actor_id=installation.anonymous_actor_id,
+                user_id=installation.user_id,
                 started_at=request.started_at.astimezone(UTC),
             )
         )
@@ -136,6 +139,7 @@ async def ingest_events(
                 event_id=event_id,
                 installation_id=installation.installation_id,
                 anonymous_actor_id=installation.anonymous_actor_id,
+                user_id=installation.user_id,
                 session_id=str(item.session_id),
                 event_name=item.event_name,
                 occurred_at=item.occurred_at.astimezone(UTC),
@@ -188,14 +192,18 @@ async def metrics_overview(session: AsyncSession, days: int) -> MetricsOverview:
 
     events = [row for row in event_rows if _aware(row.occurred_at) >= window_start]
     active_by_date: dict[date, set[str]] = defaultdict(set)
+
+    def identity(row: AnalyticsEvent) -> str:
+        return row.user_id or row.anonymous_actor_id
+
     for event in event_rows:
         occurred = _aware(event.occurred_at)
         if event.event_name in ACTIVE_EVENT_NAMES:
-            active_by_date[occurred.date()].add(event.anonymous_actor_id)
+            active_by_date[occurred.date()].add(identity(event))
 
     def actors_since(start: datetime) -> set[str]:
         return {
-            row.anonymous_actor_id
+            identity(row)
             for row in event_rows
             if row.event_name in ACTIVE_EVENT_NAMES and _aware(row.occurred_at) >= start
         }
@@ -224,7 +232,7 @@ async def metrics_overview(session: AsyncSession, days: int) -> MetricsOverview:
         returned = sum(
             1
             for row in mature
-            if row.anonymous_actor_id
+            if (row.user_id or row.anonymous_actor_id)
             in active_by_date.get(_aware(row.first_seen_at).date() + timedelta(days=offset), set())
         )
         return _safe_rate(returned, len(mature))
@@ -239,15 +247,20 @@ async def metrics_overview(session: AsyncSession, days: int) -> MetricsOverview:
         ),
         sessions=len(sessions),
         sessions_per_active_actor=_safe_rate(len(sessions), len(active_window)),
-        transaction_users=len({row.anonymous_actor_id for row in transaction_events}),
+        transaction_users=len({identity(row) for row in transaction_events}),
         transaction_count=len(transaction_events),
         quick_category_usage_rate=_safe_rate(len(quick_events), len(transaction_events)),
-        natural_language_users=len({row.anonymous_actor_id for row in nl_submitted}),
+        natural_language_users=len({identity(row) for row in nl_submitted}),
         natural_language_confirmation_rate=_safe_rate(len(nl_confirmed), len(nl_submitted)),
-        ai_users=len({row.anonymous_actor_id for row in ai_submitted}),
+        ai_users=len({identity(row) for row in ai_submitted}),
         ai_success_rate=_safe_rate(len(ai_success), len(ai_submitted)),
-        image_analysis_users=len({row.anonymous_actor_id for row in image_submitted}),
+        image_analysis_users=len({identity(row) for row in image_submitted}),
         image_analysis_success_rate=_safe_rate(len(image_success), len(image_submitted)),
         d1_retention=retention(1),
         d7_retention=retention(7),
+        identity_scope=(
+            "authenticated_user"
+            if any(row.user_id is not None for row in events)
+            else "anonymous_actor"
+        ),
     )

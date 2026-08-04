@@ -93,4 +93,4 @@ class MetricsOverview(StrictModel):
     image_analysis_success_rate: float | None
     d1_retention: float | None
     d7_retention: float | None
-    identity_scope: Literal["anonymous_actor"] = "anonymous_actor"
+    identity_scope: Literal["anonymous_actor", "authenticated_user"] = "anonymous_actor"

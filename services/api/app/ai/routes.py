@@ -28,6 +28,7 @@ from app.ai.schemas import (
     TransactionDraftResult,
 )
 from app.ai.services import AiService
+from app.auth.dependencies import OptionalCurrentUser
 from app.config import Settings, get_settings
 
 router = APIRouter(prefix="/api/v1/ai", tags=["ai"])
@@ -41,8 +42,8 @@ def get_ai_provider(settings: Annotated[Settings, Depends(get_settings)]) -> AiP
     return KimiProvider(api_key=settings.moonshot_api_key, base_url=settings.kimi_base_url)
 
 
-def _ensure_available(settings: Settings) -> None:
-    if settings.environment == "production":
+def _ensure_available(settings: Settings, authenticated: bool) -> None:
+    if settings.environment == "production" and not authenticated:
         raise AiError(
             "AI_PRODUCTION_AUTH_REQUIRED",
             "AI is unavailable in production without authentication",
@@ -64,9 +65,10 @@ async def _generate(
     payload: Any,
     settings: Settings,
     provider: AiProvider,
+    authenticated: bool,
 ) -> AiResponse:
     try:
-        _ensure_available(settings)
+        _ensure_available(settings, authenticated)
         model = (
             settings.kimi_reasoning_model
             if scenario is AiScenario.financial_plan
@@ -84,9 +86,10 @@ async def _generate_typed[ResultT: StrictModel](
     provider: AiProvider,
     result_type: type[ResultT],
     model: str,
+    authenticated: bool,
 ) -> tuple[ResultT, str, Any]:
     try:
-        _ensure_available(settings)
+        _ensure_available(settings, authenticated)
         return await AiService(provider).generate_typed(scenario, model, payload, result_type)
     except AiError as exc:
         _raise_http(exc)
@@ -111,23 +114,38 @@ SettingsDependency = Annotated[Settings, Depends(get_settings)]
 
 @router.post("/monthly-summary", response_model=AiResponse)
 async def monthly_summary(
-    payload: MonthlySummaryRequest, settings: SettingsDependency, provider: ProviderDependency
+    payload: MonthlySummaryRequest,
+    settings: SettingsDependency,
+    provider: ProviderDependency,
+    current: OptionalCurrentUser,
 ) -> AiResponse:
-    return await _generate(AiScenario.monthly_summary, payload, settings, provider)
+    return await _generate(
+        AiScenario.monthly_summary, payload, settings, provider, current is not None
+    )
 
 
 @router.post("/budget-review", response_model=AiResponse)
 async def budget_review(
-    payload: BudgetReviewRequest, settings: SettingsDependency, provider: ProviderDependency
+    payload: BudgetReviewRequest,
+    settings: SettingsDependency,
+    provider: ProviderDependency,
+    current: OptionalCurrentUser,
 ) -> AiResponse:
-    return await _generate(AiScenario.budget_review, payload, settings, provider)
+    return await _generate(
+        AiScenario.budget_review, payload, settings, provider, current is not None
+    )
 
 
 @router.post("/financial-plan", response_model=AiResponse)
 async def financial_plan(
-    payload: FinancialPlanRequest, settings: SettingsDependency, provider: ProviderDependency
+    payload: FinancialPlanRequest,
+    settings: SettingsDependency,
+    provider: ProviderDependency,
+    current: OptionalCurrentUser,
 ) -> AiResponse:
-    return await _generate(AiScenario.financial_plan, payload, settings, provider)
+    return await _generate(
+        AiScenario.financial_plan, payload, settings, provider, current is not None
+    )
 
 
 @router.post("/chat", response_model=ChatResponse)
@@ -135,6 +153,7 @@ async def chat(
     payload: ChatRequest,
     settings: SettingsDependency,
     provider: ProviderDependency,
+    current: OptionalCurrentUser,
 ) -> ChatResponse:
     result, model, usage = await _generate_typed(
         AiScenario.chat,
@@ -143,6 +162,7 @@ async def chat(
         provider,
         ChatResult,
         settings.kimi_chat_model,
+        current is not None,
     )
     return ChatResponse(result=result, model=model, usage=usage)
 
@@ -152,6 +172,7 @@ async def parse_transaction(
     payload: ParseTransactionRequest,
     settings: SettingsDependency,
     provider: ProviderDependency,
+    current: OptionalCurrentUser,
 ) -> ParseTransactionResponse:
     try:
         ZoneInfo(payload.timezone)
@@ -169,6 +190,7 @@ async def parse_transaction(
         provider,
         TransactionDraftResult,
         settings.kimi_fast_model,
+        current is not None,
     )
     allowed = {(category.name, category.transaction_type) for category in payload.categories}
     if (
@@ -227,6 +249,7 @@ def _validated_image(raw: bytes, content_type: str | None) -> tuple[bytes, str]:
 async def analyze_image(
     settings: SettingsDependency,
     provider: ProviderDependency,
+    current: OptionalCurrentUser,
     image: Annotated[UploadFile, File()],
 ) -> ImageAnalysisResponse:
     raw = b""
@@ -246,6 +269,7 @@ async def analyze_image(
             provider,
             ImageAnalysisResult,
             settings.kimi_vision_model,
+            current is not None,
         )
         return ImageAnalysisResponse(result=result, model=model, usage=usage)
     finally:

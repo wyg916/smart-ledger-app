@@ -1,6 +1,7 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Any
+from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
@@ -10,13 +11,19 @@ from app.ai.errors import AiError
 from app.ai.routes import router as ai_router
 from app.analytics.routes import internal_router
 from app.analytics.routes import router as analytics_router
+from app.auth.routes import account_router
+from app.auth.routes import router as auth_router
 from app.config import get_settings
 from app.database import dispose_engine
+from app.public_routes import router as public_router
 from app.routes import router
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    errors = get_settings().production_configuration_errors()
+    if errors:
+        raise RuntimeError(f"Production configuration invalid: {','.join(errors)}")
     yield
     await dispose_engine()
 
@@ -27,14 +34,36 @@ app.include_router(router)
 app.include_router(ai_router)
 app.include_router(analytics_router)
 app.include_router(internal_router)
+app.include_router(auth_router)
+app.include_router(account_router)
+app.include_router(public_router)
+
+
+@app.middleware("http")
+async def request_context(request: Request, call_next: Any) -> Any:
+    candidate = request.headers.get("x-request-id", "")
+    request_id = (
+        candidate
+        if candidate.isascii() and candidate.replace("-", "").isalnum() and len(candidate) <= 64
+        else str(uuid4())
+    )
+    request.state.request_id = request_id
+    response = await call_next(request)
+    response.headers["x-request-id"] = request_id
+    return response
 
 
 @app.middleware("http")
 async def limit_ai_request_size(request: Request, call_next: Any) -> Any:
-    if request.url.path.startswith("/api/v1/ai/") and request.method == "POST":
+    limited_path = request.url.path.startswith(("/api/v1/ai/", "/api/v1/auth/", "/api/v1/account/"))
+    if limited_path and request.method == "POST":
         content_length = request.headers.get("content-length")
         limit = 8 * 1024 * 1024 + 65_536 if request.url.path.endswith("analyze-image") else 32_768
-        if content_length is not None and int(content_length) > limit:
+        try:
+            too_large = content_length is not None and int(content_length) > limit
+        except ValueError:
+            too_large = True
+        if too_large:
             return JSONResponse(
                 status_code=413,
                 content={

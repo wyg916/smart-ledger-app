@@ -23,6 +23,7 @@ from app.analytics.service import (
     register_installation,
     start_session,
 )
+from app.auth.dependencies import OptionalCurrentUser
 from app.config import Settings, get_settings
 from app.database import get_session
 
@@ -63,13 +64,21 @@ async def create_installation(
     payload: InstallationRequest,
     session: SessionDependency,
     settings: SettingsDependency,
+    current: OptionalCurrentUser,
 ) -> InstallationResponse:
     if not settings.telemetry_enabled:
         raise HTTPException(
             status_code=503,
             detail={"code": "TELEMETRY_DISABLED", "message": "Telemetry is disabled"},
         )
-    _, token = await register_installation(session, payload)
+    if settings.environment == "production" and current is None:
+        raise HTTPException(
+            status_code=401,
+            detail={"code": "AUTH_UNAUTHORIZED", "message": "Authentication required"},
+        )
+    _, token = await register_installation(
+        session, payload, user_id=current.user.id if current is not None else None
+    )
     return InstallationResponse(installation_token=token)
 
 

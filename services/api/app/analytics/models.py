@@ -17,6 +17,7 @@ class AnalyticsInstallation(Base):
 
     installation_id: Mapped[str] = mapped_column(String(36), primary_key=True)
     anonymous_actor_id: Mapped[str] = mapped_column(String(36), index=True)
+    user_id: Mapped[str | None] = mapped_column(String(36), index=True, nullable=True)
     token_hash: Mapped[str] = mapped_column(String(64), unique=True)
     platform: Mapped[str] = mapped_column(String(16))
     app_version: Mapped[str] = mapped_column(String(32))
@@ -32,6 +33,7 @@ class AnalyticsSession(Base):
         ForeignKey("analytics_installations.installation_id", ondelete="CASCADE"), index=True
     )
     anonymous_actor_id: Mapped[str] = mapped_column(String(36), index=True)
+    user_id: Mapped[str | None] = mapped_column(String(36), index=True, nullable=True)
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
@@ -44,6 +46,7 @@ class AnalyticsEvent(Base):
         ForeignKey("analytics_installations.installation_id", ondelete="CASCADE"), index=True
     )
     anonymous_actor_id: Mapped[str] = mapped_column(String(36), index=True)
+    user_id: Mapped[str | None] = mapped_column(String(36), index=True, nullable=True)
     session_id: Mapped[str] = mapped_column(String(36), index=True)
     event_name: Mapped[str] = mapped_column(String(64), index=True)
     occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)

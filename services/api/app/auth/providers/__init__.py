@@ -1,0 +1,1 @@
+"""External identity provider adapters."""
