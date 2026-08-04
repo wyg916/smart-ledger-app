@@ -59,3 +59,48 @@ final class AiFailure implements Exception {
   final AiFailureKind kind;
   final String message;
 }
+
+enum ChatRole { user, assistant }
+
+final class ChatMessage {
+  const ChatMessage({required this.role, required this.content});
+
+  final ChatRole role;
+  final String content;
+
+  Map<String, String> toJson() => {'role': role.name, 'content': content};
+}
+
+final class ChatResult {
+  const ChatResult({
+    required this.title,
+    required this.answer,
+    required this.insights,
+    required this.actions,
+    required this.warnings,
+    required this.disclaimer,
+  });
+
+  final String title;
+  final String answer;
+  final List<String> insights;
+  final List<String> actions;
+  final List<String> warnings;
+  final String disclaimer;
+}
+
+final class ImageAnalysisResult {
+  const ImageAnalysisResult({
+    required this.summary,
+    required this.importantInformation,
+    required this.riskFlags,
+    required this.transactionDrafts,
+    required this.disclaimer,
+  });
+
+  final String summary;
+  final List<String> importantInformation;
+  final List<String> riskFlags;
+  final List<Map<String, Object?>> transactionDrafts;
+  final String disclaimer;
+}

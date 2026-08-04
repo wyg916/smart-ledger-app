@@ -27,7 +27,7 @@ void main() {
   tearDown(() => harness.close());
 
   test(
-    'creates schema version 3 with foreign keys and required tables',
+    'creates schema version 4 with foreign keys and required tables',
     () async {
       expect(harness.database.schemaVersion, AppDatabase.currentSchemaVersion);
       expect(await harness.database.ping(), 1);
@@ -45,6 +45,7 @@ void main() {
           'transactions',
           'app_settings',
           'budgets',
+          'analytics_event_queue',
         ]),
       );
     },
@@ -60,6 +61,33 @@ void main() {
     expect(ids.toSet(), hasLength(ids.length));
     expect(ids, everyElement(matches(uuidV4)));
   });
+
+  test(
+    'quick categories rank recent usage first and return at most six',
+    () async {
+      const foodId = '00000000-0000-4000-8000-000000000301';
+      await harness.transactions.create(
+        type: LedgerTransactionType.expense,
+        accountId: defaultAccountId,
+        categoryId: foodId,
+        amountMinor: 2500,
+        occurredAtUtc: harness.clock.nowUtc(),
+        timeZoneId: 'Asia/Shanghai',
+      );
+
+      final categories = await harness.categories
+          .watchQuick(
+            type: CategoryType.expense,
+            windowStartUtc: harness.clock.nowUtc().subtract(
+              const Duration(days: 90),
+            ),
+          )
+          .first;
+
+      expect(categories, hasLength(6));
+      expect(categories.first.id, foodId);
+    },
+  );
 
   test('bootstrap provides rich categories and remains idempotent', () async {
     var rows = await harness.database.select(harness.database.categories).get();

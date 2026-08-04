@@ -89,6 +89,30 @@ void main() {
     },
   );
 
+  testWidgets('bottom-tab quick category saves once and returns home', (
+    tester,
+  ) async {
+    final harness = await pumpLedger(tester);
+    await tester.tap(find.byKey(const Key('bottom-entry')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('transaction-amount')), '1.23');
+    await tester.tap(
+      find.byKey(
+        const Key('form-quick-category-00000000-0000-4000-8000-000000000301'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('add-transaction')), findsOneWidget);
+    expect(find.text('-1.23'), findsNWidgets(2));
+    final saved = await harness.database
+        .select(harness.database.ledgerTransactions)
+        .get();
+    expect(saved.where((row) => row.deletedAtMs == null), hasLength(1));
+    expect(saved.single.amountMinor, 123);
+    await disposeLedger(tester, harness);
+  });
+
   testWidgets('rejects invalid amount in the transaction form', (tester) async {
     final harness = await pumpLedger(tester);
     await tester.tap(find.byKey(const Key('add-transaction')));

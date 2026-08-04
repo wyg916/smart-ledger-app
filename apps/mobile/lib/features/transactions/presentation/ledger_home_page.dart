@@ -5,17 +5,32 @@ import 'package:smart_ledger/app/ledger_theme.dart';
 import 'package:smart_ledger/app/ledger_visuals.dart';
 import 'package:smart_ledger/core/database/database_providers.dart';
 import 'package:smart_ledger/core/money/money.dart';
+import 'package:smart_ledger/features/budgets/domain/ledger_budget.dart';
+import 'package:smart_ledger/features/categories/domain/ledger_category.dart';
+import 'package:smart_ledger/features/home/presentation/home_providers.dart';
+import 'package:smart_ledger/features/quick_entry/presentation/natural_language_entry_panel.dart';
+import 'package:smart_ledger/features/telemetry/presentation/telemetry_providers.dart';
 import 'package:smart_ledger/features/transactions/domain/ledger_transaction.dart';
-import 'package:smart_ledger/features/transactions/presentation/ledger_providers.dart';
 
 class LedgerHomePage extends ConsumerWidget {
   const LedgerHomePage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(telemetryPageEventProvider('home_viewed'));
     final bootstrap = ref.watch(localLedgerBootstrapProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('我的小账本')),
+      appBar: AppBar(
+        title: const Text('我的小账本'),
+        actions: [
+          IconButton(
+            key: const Key('profile-action'),
+            tooltip: '访客与安全',
+            onPressed: () => context.push('/guest-security'),
+            icon: const Icon(Icons.account_circle_outlined),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         key: const Key('add-transaction'),
         onPressed: bootstrap.hasValue
@@ -40,172 +55,200 @@ class _LedgerBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final transactions = ref.watch(ledgerTransactionsProvider);
-    final accounts = ref.watch(allAccountsProvider).valueOrNull ?? const [];
-    final categories = ref.watch(allCategoriesProvider).valueOrNull ?? const [];
-    final filter = ref.watch(ledgerFilterProvider);
+    final period = ref.watch(homePeriodProvider);
+    final source = period == HomePeriod.today
+        ? ref.watch(todayTransactionsProvider)
+        : ref.watch(homeMonthTransactionsProvider);
+    final quick = ref.watch(quickCategoriesProvider(CategoryType.expense));
+    final budgets = ref.watch(homeBudgetsProvider);
 
-    return transactions.when(
+    return source.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => _ErrorState(message: error.toString()),
       data: (items) {
         final summary = summarizeTransactions(items);
         return RefreshIndicator(
-          onRefresh: () async => ref.invalidate(ledgerTransactionsProvider),
-          child: ListView(
+          onRefresh: () async {
+            ref.invalidate(todayTransactionsProvider);
+            ref.invalidate(homeMonthTransactionsProvider);
+            ref.invalidate(homeBudgetsProvider);
+          },
+          child: SingleChildScrollView(
             key: const Key('ledger-list'),
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
-            children: [
-              const _WelcomeCard(),
-              const SizedBox(height: 10),
-              const _QuickActions(),
-              const SizedBox(height: 18),
-              Row(
-                children: [
-                  IconButton(
-                    key: const Key('previous-month'),
-                    onPressed: () =>
-                        ref.read(ledgerFilterProvider.notifier).state = filter
-                            .copyWith(
-                              month: DateTime(
-                                filter.month.year,
-                                filter.month.month - 1,
-                              ),
-                            ),
-                    icon: const Icon(Icons.chevron_left),
-                  ),
-                  Expanded(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 112),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const _WelcomeCard(),
+                const SizedBox(height: 6),
+                const _QuickActions(),
+                if (items.isNotEmpty) ...[
+                  const _SectionTitle('最近账单'),
+                  ...items.take(8).map((item) => _TransactionTile(item: item)),
+                ],
+                const NaturalLanguageEntryPanel(compact: true),
+                const SizedBox(height: 8),
+                SegmentedButton<HomePeriod>(
+                  key: const Key('home-period'),
+                  segments: const [
+                    ButtonSegment(value: HomePeriod.today, label: Text('今天')),
+                    ButtonSegment(value: HomePeriod.month, label: Text('本月')),
+                  ],
+                  selected: {period},
+                  onSelectionChanged: (selection) =>
+                      ref.read(homePeriodProvider.notifier).state =
+                          selection.single,
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _SummaryCard(
+                        label: '收入',
+                        value: summary.incomeMinor,
+                        keyName: 'income-summary',
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _SummaryCard(
+                        label: '支出',
+                        value: summary.expenseMinor,
+                        keyName: 'expense-summary',
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _SummaryCard(
+                        label: '净额',
+                        value: summary.netMinor,
+                        keyName: 'net-summary',
+                      ),
+                    ),
+                  ],
+                ),
+                if (items.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
                     child: Text(
-                      '${filter.month.year}年${filter.month.month}月',
+                      period == HomePeriod.today ? '今天暂无记录' : '本月暂无记录',
+                      key: const Key('empty-ledger'),
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ),
-                  IconButton(
-                    key: const Key('next-month'),
-                    onPressed: () =>
-                        ref.read(ledgerFilterProvider.notifier).state = filter
-                            .copyWith(
-                              month: DateTime(
-                                filter.month.year,
-                                filter.month.month + 1,
-                              ),
-                            ),
-                    icon: const Icon(Icons.chevron_right),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _SummaryCard(
-                      label: '收入',
-                      value: summary.incomeMinor,
-                      keyName: 'income-summary',
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _SummaryCard(
-                      label: '支出',
-                      value: summary.expenseMinor,
-                      keyName: 'expense-summary',
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _SummaryCard(
-                      label: '净额',
-                      value: summary.netMinor,
-                      keyName: 'net-summary',
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: DropdownButtonFormField<String?>(
-                      key: const Key('account-filter'),
-                      initialValue: filter.accountId,
-                      decoration: const InputDecoration(
-                        labelText: '账户',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: [
-                        const DropdownMenuItem(
-                          value: null,
-                          child: Text('全部账户'),
+                if (items.isEmpty) const _SectionTitle('最近账单'),
+                if (items.isEmpty) const Text('从第一笔开始，慢慢把生活理清楚吧'),
+                const _SectionTitle('常用分类', hint: '近 90 天智能排序'),
+                quick.when(
+                  loading: () => const LinearProgressIndicator(),
+                  error: (_, _) => const Text('常用分类暂不可用'),
+                  data: (categories) => categories.isEmpty
+                      ? const Text('完成几笔记账后，这里会显示常用分类')
+                      : Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: categories
+                              .take(6)
+                              .map((item) => _QuickCategory(category: item))
+                              .toList(growable: false),
                         ),
-                        ...accounts.map(
-                          (item) => DropdownMenuItem(
-                            value: item.id,
-                            child: Text(item.name),
-                          ),
+                ),
+                const _SectionTitle('本月预算'),
+                budgets.when(
+                  loading: () => const LinearProgressIndicator(),
+                  error: (_, _) => const Text('预算暂不可用'),
+                  data: (values) => values.isEmpty
+                      ? OutlinedButton.icon(
+                          onPressed: () => context.push('/budgets/new'),
+                          icon: const Icon(Icons.add),
+                          label: const Text('设置第一项预算'),
+                        )
+                      : Column(
+                          children: values
+                              .take(3)
+                              .map((item) => _BudgetProgress(budget: item))
+                              .toList(growable: false),
                         ),
-                      ],
-                      onChanged: (value) =>
-                          ref
-                              .read(ledgerFilterProvider.notifier)
-                              .state = value == null
-                          ? filter.copyWith(clearAccount: true)
-                          : filter.copyWith(accountId: value),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: DropdownButtonFormField<String?>(
-                      key: const Key('category-filter'),
-                      initialValue: filter.categoryId,
-                      decoration: const InputDecoration(
-                        labelText: '分类',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: [
-                        const DropdownMenuItem(
-                          value: null,
-                          child: Text('全部分类'),
-                        ),
-                        ...categories.map(
-                          (item) => DropdownMenuItem(
-                            value: item.id,
-                            child: Text(item.name),
-                          ),
-                        ),
-                      ],
-                      onChanged: (value) =>
-                          ref
-                              .read(ledgerFilterProvider.notifier)
-                              .state = value == null
-                          ? filter.copyWith(clearCategory: true)
-                          : filter.copyWith(categoryId: value),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              if (items.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.only(top: 52),
-                  child: Column(
-                    children: [
-                      LedgerBuddy(size: 68),
-                      SizedBox(height: 12),
-                      Text('本月暂无记录', key: Key('empty-ledger')),
-                      Text('从第一笔开始，慢慢把生活理清楚吧'),
-                    ],
-                  ),
-                )
-              else
-                ...items.map((item) => _TransactionTile(item: item)),
-            ],
+                ),
+              ],
+            ),
           ),
         );
       },
     );
   }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle(this.title, {this.hint});
+
+  final String title;
+  final String? hint;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: 20, bottom: 8),
+    child: Row(
+      children: [
+        Text(title, style: Theme.of(context).textTheme.titleMedium),
+        if (hint != null) ...[
+          const Spacer(),
+          Text(hint!, style: Theme.of(context).textTheme.bodySmall),
+        ],
+      ],
+    ),
+  );
+}
+
+class _QuickCategory extends StatelessWidget {
+  const _QuickCategory({required this.category});
+
+  final LedgerCategory category;
+
+  @override
+  Widget build(BuildContext context) => ActionChip(
+    key: Key('quick-category-${category.id}'),
+    avatar: Icon(categoryIcon(category.name), size: 18),
+    label: Text(category.name),
+    onPressed: () => context.push('/transactions/new?category=${category.id}'),
+  );
+}
+
+class _BudgetProgress extends StatelessWidget {
+  const _BudgetProgress({required this.budget});
+
+  final LedgerBudget budget;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    child: Padding(
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: Text(budget.name)),
+              Text(
+                '${Money.fromMinor(budget.usedMinor).format()} / '
+                '${Money.fromMinor(budget.amountMinor).format()}',
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          LinearProgressIndicator(
+            value: budget.displayUsageRate,
+            color: budget.isOverrun
+                ? Theme.of(context).colorScheme.error
+                : budget.isNearLimit
+                ? LedgerPalette.honey
+                : LedgerPalette.mint,
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 class _SummaryCard extends StatelessWidget {
@@ -229,15 +272,17 @@ class _SummaryCard extends StatelessWidget {
     return Card(
       color: color,
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
         child: Column(
           children: [
             Text(label),
             const SizedBox(height: 4),
-            Text(
-              Money.fromMinor(value).format(),
-              key: Key(keyName),
-              style: Theme.of(context).textTheme.titleMedium,
+            FittedBox(
+              child: Text(
+                Money.fromMinor(value).format(),
+                key: Key(keyName),
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
             ),
           ],
         ),
@@ -269,19 +314,23 @@ class _TransactionTile extends StatelessWidget {
       child: ListTile(
         key: Key('transaction-${item.id}'),
         onTap: () => context.push('/transactions/${item.id}'),
-        leading: Icon(
-          item.type == LedgerTransactionType.transfer
-              ? Icons.swap_horiz
-              : categoryIcon(title),
-          color: item.type == LedgerTransactionType.income
-              ? LedgerPalette.mint
-              : LedgerPalette.coral,
+        leading: CircleAvatar(
+          backgroundColor: item.type == LedgerTransactionType.income
+              ? LedgerPalette.mintSoft
+              : LedgerPalette.coralSoft,
+          child: Icon(
+            item.type == LedgerTransactionType.transfer
+                ? Icons.swap_horiz
+                : categoryIcon(title),
+          ),
         ),
         title: Text(title),
         subtitle: Text(
           item.note == null
               ? '${item.accountName} · $date'
               : '${item.accountName} · $date · ${item.note}',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         trailing: Text('$sign${Money.fromMinor(item.amountMinor).format()}'),
       ),
@@ -296,11 +345,11 @@ class _WelcomeCard extends StatelessWidget {
   Widget build(BuildContext context) => Card(
     color: LedgerPalette.honeySoft,
     child: const Padding(
-      padding: EdgeInsets.all(18),
+      padding: EdgeInsets.all(16),
       child: Row(
         children: [
-          LedgerBuddy(size: 64),
-          SizedBox(width: 14),
+          LedgerBuddy(size: 58),
+          SizedBox(width: 13),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -309,7 +358,7 @@ class _WelcomeCard extends StatelessWidget {
                   '今天也一起好好记账吧',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                 ),
-                SizedBox(height: 5),
+                SizedBox(height: 4),
                 Text('每一笔都算数，也不必一次做到完美。'),
               ],
             ),
@@ -333,14 +382,14 @@ class _QuickActions extends StatelessWidget {
           label: 'AI 陪伴',
           icon: Icons.auto_awesome_rounded,
           color: LedgerPalette.coralSoft,
-          onTap: () => context.push('/ai'),
+          onTap: () => context.go('/ai'),
         ),
         _QuickAction(
           key: const Key('analytics-action'),
           label: '统计',
           icon: Icons.insights_rounded,
           color: LedgerPalette.mintSoft,
-          onTap: () => context.push('/analytics'),
+          onTap: () => context.go('/analytics'),
         ),
         _QuickAction(
           key: const Key('budgets-action'),

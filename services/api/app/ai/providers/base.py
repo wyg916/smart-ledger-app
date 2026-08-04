@@ -9,6 +9,9 @@ class AiScenario(StrEnum):
     monthly_summary = "monthly_summary"
     budget_review = "budget_review"
     financial_plan = "financial_plan"
+    chat = "chat"
+    parse_transaction = "parse_transaction"
+    image_analysis = "image_analysis"
 
 
 @dataclass(frozen=True, slots=True)

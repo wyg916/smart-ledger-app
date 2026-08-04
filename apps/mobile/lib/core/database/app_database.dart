@@ -170,6 +170,21 @@ class Budgets extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+class AnalyticsEventQueue extends Table {
+  TextColumn get eventId => text()();
+  TextColumn get eventName => text()();
+  TextColumn get sessionId => text()();
+  IntColumn get occurredAtMs => integer()();
+  IntColumn get schemaVersion => integer().withDefault(const Constant(1))();
+  TextColumn get propertiesJson => text().withDefault(const Constant('{}'))();
+  IntColumn get attemptCount => integer().withDefault(const Constant(0))();
+  IntColumn get nextRetryAtMs => integer().nullable()();
+  IntColumn get createdAtMs => integer()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {eventId};
+}
+
 @DriftDatabase(
   tables: [
     Ledgers,
@@ -178,6 +193,7 @@ class Budgets extends Table {
     LedgerTransactions,
     AppSettings,
     Budgets,
+    AnalyticsEventQueue,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -185,7 +201,7 @@ class AppDatabase extends _$AppDatabase {
 
   AppDatabase.defaults() : super(_openConnection());
 
-  static const int currentSchemaVersion = 3;
+  static const int currentSchemaVersion = 4;
 
   @override
   int get schemaVersion => currentSchemaVersion;
@@ -202,9 +218,13 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from == 2 && to >= 3) {
         await migrator.createTable(budgets);
-        return;
       }
-      throw StateError('Unsupported database migration $from -> $to');
+      if (from <= 3 && to >= 4) {
+        await migrator.createTable(analyticsEventQueue);
+      }
+      if (from < 1 || from > 4 || to != 4) {
+        throw StateError('Unsupported database migration $from -> $to');
+      }
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
@@ -242,6 +262,8 @@ class AppDatabase extends _$AppDatabase {
           "ON budgets (ledger_id, year_month) WHERE deleted_at_ms IS NULL AND scope_type = 'total'",
       'CREATE UNIQUE INDEX IF NOT EXISTS uq_budgets_category_month '
           "ON budgets (ledger_id, year_month, category_id) WHERE deleted_at_ms IS NULL AND scope_type = 'category'",
+      'CREATE INDEX IF NOT EXISTS idx_analytics_queue_retry '
+          'ON analytics_event_queue (next_retry_at_ms, created_at_ms)',
       '''CREATE TRIGGER IF NOT EXISTS validate_transaction_insert
          BEFORE INSERT ON transactions
          WHEN NEW.amount_minor <= 0

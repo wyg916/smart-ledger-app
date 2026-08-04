@@ -8,6 +8,8 @@ from fastapi.responses import JSONResponse
 
 from app.ai.errors import AiError
 from app.ai.routes import router as ai_router
+from app.analytics.routes import internal_router
+from app.analytics.routes import router as analytics_router
 from app.config import get_settings
 from app.database import dispose_engine
 from app.routes import router
@@ -23,13 +25,16 @@ settings = get_settings()
 app = FastAPI(title=settings.app_name, version=settings.app_version, lifespan=lifespan)
 app.include_router(router)
 app.include_router(ai_router)
+app.include_router(analytics_router)
+app.include_router(internal_router)
 
 
 @app.middleware("http")
 async def limit_ai_request_size(request: Request, call_next: Any) -> Any:
     if request.url.path.startswith("/api/v1/ai/") and request.method == "POST":
         content_length = request.headers.get("content-length")
-        if content_length is not None and int(content_length) > 32_768:
+        limit = 8 * 1024 * 1024 + 65_536 if request.url.path.endswith("analyze-image") else 32_768
+        if content_length is not None and int(content_length) > limit:
             return JSONResponse(
                 status_code=413,
                 content={
@@ -64,11 +69,19 @@ async def http_exception_handler(_: Request, exc: HTTPException) -> JSONResponse
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(_: Request, exc: RequestValidationError) -> JSONResponse:
+    details = [
+        {
+            "type": error.get("type", "value_error"),
+            "loc": list(error.get("loc", ())),
+            "msg": error.get("msg", "Invalid value"),
+        }
+        for error in exc.errors()
+    ]
     payload: dict[str, Any] = {
         "error": {
             "code": "validation_error",
             "message": "Request validation failed",
         },
-        "details": exc.errors(),
+        "details": details,
     }
     return JSONResponse(status_code=422, content=payload)

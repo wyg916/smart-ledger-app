@@ -11,14 +11,44 @@ import 'package:smart_ledger/features/ai/presentation/ai_budget_review_page.dart
 import 'package:smart_ledger/features/ai/presentation/ai_financial_plan_page.dart';
 import 'package:smart_ledger/features/ai/presentation/ai_monthly_summary_page.dart';
 import 'package:smart_ledger/features/transactions/presentation/ledger_home_page.dart';
+import 'package:smart_ledger/features/transactions/presentation/details_page.dart';
 import 'package:smart_ledger/features/transactions/presentation/transaction_detail_page.dart';
 import 'package:smart_ledger/features/transactions/presentation/transaction_form_page.dart';
+import 'package:smart_ledger/app/ledger_shell.dart';
+import 'package:smart_ledger/features/identity/presentation/guest_security_page.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
     initialLocation: '/',
     routes: [
-      GoRoute(path: '/', builder: (context, state) => const LedgerHomePage()),
+      ShellRoute(
+        builder: (context, state, child) =>
+            LedgerShell(location: state.uri.path, child: child),
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (context, state) => const LedgerHomePage(),
+          ),
+          GoRoute(
+            path: '/details',
+            builder: (context, state) => const DetailsPage(),
+          ),
+          GoRoute(
+            path: '/transactions/new',
+            builder: (context, state) => TransactionFormPage(
+              initialCategoryId: state.uri.queryParameters['category'],
+            ),
+          ),
+          GoRoute(
+            path: '/analytics',
+            builder: (context, state) => const AnalyticsPage(),
+          ),
+          GoRoute(
+            path: '/ai',
+            builder: (context, state) => const AiAssistantPage(),
+          ),
+        ],
+      ),
       GoRoute(
         path: '/accounts',
         builder: (context, state) => const AccountsPage(),
@@ -26,10 +56,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/categories',
         builder: (context, state) => const CategoriesPage(),
-      ),
-      GoRoute(
-        path: '/analytics',
-        builder: (context, state) => const AnalyticsPage(),
       ),
       GoRoute(
         path: '/budgets',
@@ -54,26 +80,20 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
       GoRoute(
-        path: '/ai',
-        builder: (context, state) => const AiAssistantPage(),
-        routes: [
-          GoRoute(
-            path: 'monthly-summary',
-            builder: (context, state) => const AiMonthlySummaryPage(),
-          ),
-          GoRoute(
-            path: 'budget-review',
-            builder: (context, state) => const AiBudgetReviewPage(),
-          ),
-          GoRoute(
-            path: 'financial-plan',
-            builder: (context, state) => const AiFinancialPlanPage(),
-          ),
-        ],
+        path: '/ai/monthly-summary',
+        builder: (context, state) => const AiMonthlySummaryPage(),
       ),
       GoRoute(
-        path: '/transactions/new',
-        builder: (context, state) => const TransactionFormPage(),
+        path: '/ai/budget-review',
+        builder: (context, state) => const AiBudgetReviewPage(),
+      ),
+      GoRoute(
+        path: '/ai/financial-plan',
+        builder: (context, state) => const AiFinancialPlanPage(),
+      ),
+      GoRoute(
+        path: '/guest-security',
+        builder: (context, state) => const GuestSecurityPage(),
       ),
       GoRoute(
         path: '/transactions/:id',

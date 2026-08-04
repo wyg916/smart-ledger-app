@@ -17,7 +17,7 @@ import '../../support/ledger_test_harness.dart';
 
 void main() {
   test(
-    'schema 2 to 3 preserves all P1B facts and creates empty budgets',
+    'schema 2 to 4 preserves all P1B facts and creates new tables empty',
     () async {
       final directory = await Directory.systemTemp.createTemp('schema-2-to-3-');
       final file = File('${directory.path}/ledger.sqlite');
@@ -101,13 +101,75 @@ void main() {
       expect(deletedAfter.deletedAtMs, deletedBefore.deletedAtMs);
       expect(await upgraded.select(upgraded.budgets).get(), isEmpty);
       expect(
+        await upgraded.select(upgraded.analyticsEventQueue).get(),
+        isEmpty,
+      );
+      expect(
         await upgraded.customSelect('PRAGMA foreign_key_check').get(),
         isEmpty,
       );
       final version = await upgraded
           .customSelect('PRAGMA user_version')
           .getSingle();
-      expect(version.read<int>('user_version'), 3);
+      expect(version.read<int>('user_version'), 4);
+      await upgraded.close();
+      await directory.delete(recursive: true);
+    },
+  );
+
+  test(
+    'schema 3 to 4 preserves ledger facts and creates an empty analytics queue',
+    () async {
+      final directory = await Directory.systemTemp.createTemp('schema-3-to-4-');
+      final file = File('${directory.path}/ledger.sqlite');
+      final clock = MutableTestClock(DateTime.utc(2026, 8, 3, 8));
+      final ids = CountingUuidGenerator();
+      final source = AppDatabase(NativeDatabase(file));
+      await LocalLedgerBootstrapper(
+        source,
+        clock,
+        const FixedLedgerTimeZone('Asia/Shanghai'),
+      ).initialize();
+      final categories = DriftCategoryRepository(source, clock, ids);
+      final transactions = DriftTransactionRepository(source, clock, ids);
+      final categoryId = await categories.create(
+        name: 'P1D 迁移分类',
+        type: CategoryType.expense,
+      );
+      final transactionId = await transactions.create(
+        type: LedgerTransactionType.expense,
+        accountId: defaultAccountId,
+        categoryId: categoryId,
+        amountMinor: 1234,
+        occurredAtUtc: DateTime.utc(2026, 8, 3),
+        timeZoneId: 'Asia/Shanghai',
+      );
+      await source.close();
+
+      final raw = sqlite.sqlite3.open(file.path);
+      raw.execute('DROP TABLE analytics_event_queue');
+      raw.execute('PRAGMA user_version = 3');
+      raw.close();
+
+      final upgraded = AppDatabase(NativeDatabase(file));
+      expect(
+        (await upgraded.select(upgraded.ledgerTransactions).get()).map(
+          (row) => row.id,
+        ),
+        contains(transactionId),
+      );
+      expect(
+        await upgraded.select(upgraded.analyticsEventQueue).get(),
+        isEmpty,
+      );
+      final version = await upgraded
+          .customSelect('PRAGMA user_version')
+          .getSingle();
+      expect(version.read<int>('user_version'), 4);
+      expect(
+        await upgraded.customSelect('PRAGMA foreign_key_check').get(),
+        isEmpty,
+      );
       await upgraded.close();
       await directory.delete(recursive: true);
     },

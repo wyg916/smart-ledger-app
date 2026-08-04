@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,6 +18,8 @@ import 'package:smart_ledger/features/ai/domain/ai_requests.dart';
 import 'package:smart_ledger/features/ai/presentation/ai_financial_plan_page.dart';
 import 'package:smart_ledger/features/ai/presentation/ai_providers.dart';
 import 'package:smart_ledger/features/analytics/domain/ledger_analytics.dart';
+import 'package:smart_ledger/features/categories/domain/ledger_category.dart';
+import 'package:smart_ledger/features/quick_entry/domain/transaction_draft.dart';
 
 import '../../support/ledger_test_harness.dart';
 
@@ -258,6 +261,26 @@ class _FakeAiClient implements AiApiClient {
     planCalls++;
     return _next();
   }
+
+  @override
+  Future<ChatResult> chat({
+    required List<ChatMessage> messages,
+    Map<String, String> context = const {},
+  }) => throw UnimplementedError();
+
+  @override
+  Future<TransactionDraft> parseTransaction({
+    required String text,
+    required String timeZoneId,
+    required List<LedgerCategory> categories,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<ImageAnalysisResult> analyzeImage({
+    required Uint8List bytes,
+    required String filename,
+    required String mimeType,
+  }) => throw UnimplementedError();
 }
 
 class _CompletingAiClient implements AiApiClient {
@@ -271,6 +294,26 @@ class _CompletingAiClient implements AiApiClient {
   Future<AiResult> budgetReview(BudgetAiRequest request) => completer.future;
   @override
   Future<AiResult> monthlySummary(MonthlyAiRequest request) => completer.future;
+
+  @override
+  Future<ChatResult> chat({
+    required List<ChatMessage> messages,
+    Map<String, String> context = const {},
+  }) => throw UnimplementedError();
+
+  @override
+  Future<TransactionDraft> parseTransaction({
+    required String text,
+    required String timeZoneId,
+    required List<LedgerCategory> categories,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<ImageAnalysisResult> analyzeImage({
+    required Uint8List bytes,
+    required String filename,
+    required String mimeType,
+  }) => throw UnimplementedError();
 }
 
 Future<LedgerTestHarness> _pumpApp(

@@ -5472,6 +5472,603 @@ class BudgetsCompanion extends UpdateCompanion<Budget> {
   }
 }
 
+class $AnalyticsEventQueueTable extends AnalyticsEventQueue
+    with TableInfo<$AnalyticsEventQueueTable, AnalyticsEventQueueData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AnalyticsEventQueueTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _eventIdMeta = const VerificationMeta(
+    'eventId',
+  );
+  @override
+  late final GeneratedColumn<String> eventId = GeneratedColumn<String>(
+    'event_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _eventNameMeta = const VerificationMeta(
+    'eventName',
+  );
+  @override
+  late final GeneratedColumn<String> eventName = GeneratedColumn<String>(
+    'event_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sessionIdMeta = const VerificationMeta(
+    'sessionId',
+  );
+  @override
+  late final GeneratedColumn<String> sessionId = GeneratedColumn<String>(
+    'session_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _occurredAtMsMeta = const VerificationMeta(
+    'occurredAtMs',
+  );
+  @override
+  late final GeneratedColumn<int> occurredAtMs = GeneratedColumn<int>(
+    'occurred_at_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _schemaVersionMeta = const VerificationMeta(
+    'schemaVersion',
+  );
+  @override
+  late final GeneratedColumn<int> schemaVersion = GeneratedColumn<int>(
+    'schema_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _propertiesJsonMeta = const VerificationMeta(
+    'propertiesJson',
+  );
+  @override
+  late final GeneratedColumn<String> propertiesJson = GeneratedColumn<String>(
+    'properties_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('{}'),
+  );
+  static const VerificationMeta _attemptCountMeta = const VerificationMeta(
+    'attemptCount',
+  );
+  @override
+  late final GeneratedColumn<int> attemptCount = GeneratedColumn<int>(
+    'attempt_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _nextRetryAtMsMeta = const VerificationMeta(
+    'nextRetryAtMs',
+  );
+  @override
+  late final GeneratedColumn<int> nextRetryAtMs = GeneratedColumn<int>(
+    'next_retry_at_ms',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMsMeta = const VerificationMeta(
+    'createdAtMs',
+  );
+  @override
+  late final GeneratedColumn<int> createdAtMs = GeneratedColumn<int>(
+    'created_at_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    eventId,
+    eventName,
+    sessionId,
+    occurredAtMs,
+    schemaVersion,
+    propertiesJson,
+    attemptCount,
+    nextRetryAtMs,
+    createdAtMs,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'analytics_event_queue';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AnalyticsEventQueueData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('event_id')) {
+      context.handle(
+        _eventIdMeta,
+        eventId.isAcceptableOrUnknown(data['event_id']!, _eventIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_eventIdMeta);
+    }
+    if (data.containsKey('event_name')) {
+      context.handle(
+        _eventNameMeta,
+        eventName.isAcceptableOrUnknown(data['event_name']!, _eventNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_eventNameMeta);
+    }
+    if (data.containsKey('session_id')) {
+      context.handle(
+        _sessionIdMeta,
+        sessionId.isAcceptableOrUnknown(data['session_id']!, _sessionIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sessionIdMeta);
+    }
+    if (data.containsKey('occurred_at_ms')) {
+      context.handle(
+        _occurredAtMsMeta,
+        occurredAtMs.isAcceptableOrUnknown(
+          data['occurred_at_ms']!,
+          _occurredAtMsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_occurredAtMsMeta);
+    }
+    if (data.containsKey('schema_version')) {
+      context.handle(
+        _schemaVersionMeta,
+        schemaVersion.isAcceptableOrUnknown(
+          data['schema_version']!,
+          _schemaVersionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('properties_json')) {
+      context.handle(
+        _propertiesJsonMeta,
+        propertiesJson.isAcceptableOrUnknown(
+          data['properties_json']!,
+          _propertiesJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('attempt_count')) {
+      context.handle(
+        _attemptCountMeta,
+        attemptCount.isAcceptableOrUnknown(
+          data['attempt_count']!,
+          _attemptCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('next_retry_at_ms')) {
+      context.handle(
+        _nextRetryAtMsMeta,
+        nextRetryAtMs.isAcceptableOrUnknown(
+          data['next_retry_at_ms']!,
+          _nextRetryAtMsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at_ms')) {
+      context.handle(
+        _createdAtMsMeta,
+        createdAtMs.isAcceptableOrUnknown(
+          data['created_at_ms']!,
+          _createdAtMsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMsMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {eventId};
+  @override
+  AnalyticsEventQueueData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AnalyticsEventQueueData(
+      eventId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}event_id'],
+      )!,
+      eventName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}event_name'],
+      )!,
+      sessionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}session_id'],
+      )!,
+      occurredAtMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}occurred_at_ms'],
+      )!,
+      schemaVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}schema_version'],
+      )!,
+      propertiesJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}properties_json'],
+      )!,
+      attemptCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}attempt_count'],
+      )!,
+      nextRetryAtMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}next_retry_at_ms'],
+      ),
+      createdAtMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at_ms'],
+      )!,
+    );
+  }
+
+  @override
+  $AnalyticsEventQueueTable createAlias(String alias) {
+    return $AnalyticsEventQueueTable(attachedDatabase, alias);
+  }
+}
+
+class AnalyticsEventQueueData extends DataClass
+    implements Insertable<AnalyticsEventQueueData> {
+  final String eventId;
+  final String eventName;
+  final String sessionId;
+  final int occurredAtMs;
+  final int schemaVersion;
+  final String propertiesJson;
+  final int attemptCount;
+  final int? nextRetryAtMs;
+  final int createdAtMs;
+  const AnalyticsEventQueueData({
+    required this.eventId,
+    required this.eventName,
+    required this.sessionId,
+    required this.occurredAtMs,
+    required this.schemaVersion,
+    required this.propertiesJson,
+    required this.attemptCount,
+    this.nextRetryAtMs,
+    required this.createdAtMs,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['event_id'] = Variable<String>(eventId);
+    map['event_name'] = Variable<String>(eventName);
+    map['session_id'] = Variable<String>(sessionId);
+    map['occurred_at_ms'] = Variable<int>(occurredAtMs);
+    map['schema_version'] = Variable<int>(schemaVersion);
+    map['properties_json'] = Variable<String>(propertiesJson);
+    map['attempt_count'] = Variable<int>(attemptCount);
+    if (!nullToAbsent || nextRetryAtMs != null) {
+      map['next_retry_at_ms'] = Variable<int>(nextRetryAtMs);
+    }
+    map['created_at_ms'] = Variable<int>(createdAtMs);
+    return map;
+  }
+
+  AnalyticsEventQueueCompanion toCompanion(bool nullToAbsent) {
+    return AnalyticsEventQueueCompanion(
+      eventId: Value(eventId),
+      eventName: Value(eventName),
+      sessionId: Value(sessionId),
+      occurredAtMs: Value(occurredAtMs),
+      schemaVersion: Value(schemaVersion),
+      propertiesJson: Value(propertiesJson),
+      attemptCount: Value(attemptCount),
+      nextRetryAtMs: nextRetryAtMs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nextRetryAtMs),
+      createdAtMs: Value(createdAtMs),
+    );
+  }
+
+  factory AnalyticsEventQueueData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AnalyticsEventQueueData(
+      eventId: serializer.fromJson<String>(json['eventId']),
+      eventName: serializer.fromJson<String>(json['eventName']),
+      sessionId: serializer.fromJson<String>(json['sessionId']),
+      occurredAtMs: serializer.fromJson<int>(json['occurredAtMs']),
+      schemaVersion: serializer.fromJson<int>(json['schemaVersion']),
+      propertiesJson: serializer.fromJson<String>(json['propertiesJson']),
+      attemptCount: serializer.fromJson<int>(json['attemptCount']),
+      nextRetryAtMs: serializer.fromJson<int?>(json['nextRetryAtMs']),
+      createdAtMs: serializer.fromJson<int>(json['createdAtMs']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'eventId': serializer.toJson<String>(eventId),
+      'eventName': serializer.toJson<String>(eventName),
+      'sessionId': serializer.toJson<String>(sessionId),
+      'occurredAtMs': serializer.toJson<int>(occurredAtMs),
+      'schemaVersion': serializer.toJson<int>(schemaVersion),
+      'propertiesJson': serializer.toJson<String>(propertiesJson),
+      'attemptCount': serializer.toJson<int>(attemptCount),
+      'nextRetryAtMs': serializer.toJson<int?>(nextRetryAtMs),
+      'createdAtMs': serializer.toJson<int>(createdAtMs),
+    };
+  }
+
+  AnalyticsEventQueueData copyWith({
+    String? eventId,
+    String? eventName,
+    String? sessionId,
+    int? occurredAtMs,
+    int? schemaVersion,
+    String? propertiesJson,
+    int? attemptCount,
+    Value<int?> nextRetryAtMs = const Value.absent(),
+    int? createdAtMs,
+  }) => AnalyticsEventQueueData(
+    eventId: eventId ?? this.eventId,
+    eventName: eventName ?? this.eventName,
+    sessionId: sessionId ?? this.sessionId,
+    occurredAtMs: occurredAtMs ?? this.occurredAtMs,
+    schemaVersion: schemaVersion ?? this.schemaVersion,
+    propertiesJson: propertiesJson ?? this.propertiesJson,
+    attemptCount: attemptCount ?? this.attemptCount,
+    nextRetryAtMs: nextRetryAtMs.present
+        ? nextRetryAtMs.value
+        : this.nextRetryAtMs,
+    createdAtMs: createdAtMs ?? this.createdAtMs,
+  );
+  AnalyticsEventQueueData copyWithCompanion(AnalyticsEventQueueCompanion data) {
+    return AnalyticsEventQueueData(
+      eventId: data.eventId.present ? data.eventId.value : this.eventId,
+      eventName: data.eventName.present ? data.eventName.value : this.eventName,
+      sessionId: data.sessionId.present ? data.sessionId.value : this.sessionId,
+      occurredAtMs: data.occurredAtMs.present
+          ? data.occurredAtMs.value
+          : this.occurredAtMs,
+      schemaVersion: data.schemaVersion.present
+          ? data.schemaVersion.value
+          : this.schemaVersion,
+      propertiesJson: data.propertiesJson.present
+          ? data.propertiesJson.value
+          : this.propertiesJson,
+      attemptCount: data.attemptCount.present
+          ? data.attemptCount.value
+          : this.attemptCount,
+      nextRetryAtMs: data.nextRetryAtMs.present
+          ? data.nextRetryAtMs.value
+          : this.nextRetryAtMs,
+      createdAtMs: data.createdAtMs.present
+          ? data.createdAtMs.value
+          : this.createdAtMs,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AnalyticsEventQueueData(')
+          ..write('eventId: $eventId, ')
+          ..write('eventName: $eventName, ')
+          ..write('sessionId: $sessionId, ')
+          ..write('occurredAtMs: $occurredAtMs, ')
+          ..write('schemaVersion: $schemaVersion, ')
+          ..write('propertiesJson: $propertiesJson, ')
+          ..write('attemptCount: $attemptCount, ')
+          ..write('nextRetryAtMs: $nextRetryAtMs, ')
+          ..write('createdAtMs: $createdAtMs')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    eventId,
+    eventName,
+    sessionId,
+    occurredAtMs,
+    schemaVersion,
+    propertiesJson,
+    attemptCount,
+    nextRetryAtMs,
+    createdAtMs,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AnalyticsEventQueueData &&
+          other.eventId == this.eventId &&
+          other.eventName == this.eventName &&
+          other.sessionId == this.sessionId &&
+          other.occurredAtMs == this.occurredAtMs &&
+          other.schemaVersion == this.schemaVersion &&
+          other.propertiesJson == this.propertiesJson &&
+          other.attemptCount == this.attemptCount &&
+          other.nextRetryAtMs == this.nextRetryAtMs &&
+          other.createdAtMs == this.createdAtMs);
+}
+
+class AnalyticsEventQueueCompanion
+    extends UpdateCompanion<AnalyticsEventQueueData> {
+  final Value<String> eventId;
+  final Value<String> eventName;
+  final Value<String> sessionId;
+  final Value<int> occurredAtMs;
+  final Value<int> schemaVersion;
+  final Value<String> propertiesJson;
+  final Value<int> attemptCount;
+  final Value<int?> nextRetryAtMs;
+  final Value<int> createdAtMs;
+  final Value<int> rowid;
+  const AnalyticsEventQueueCompanion({
+    this.eventId = const Value.absent(),
+    this.eventName = const Value.absent(),
+    this.sessionId = const Value.absent(),
+    this.occurredAtMs = const Value.absent(),
+    this.schemaVersion = const Value.absent(),
+    this.propertiesJson = const Value.absent(),
+    this.attemptCount = const Value.absent(),
+    this.nextRetryAtMs = const Value.absent(),
+    this.createdAtMs = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AnalyticsEventQueueCompanion.insert({
+    required String eventId,
+    required String eventName,
+    required String sessionId,
+    required int occurredAtMs,
+    this.schemaVersion = const Value.absent(),
+    this.propertiesJson = const Value.absent(),
+    this.attemptCount = const Value.absent(),
+    this.nextRetryAtMs = const Value.absent(),
+    required int createdAtMs,
+    this.rowid = const Value.absent(),
+  }) : eventId = Value(eventId),
+       eventName = Value(eventName),
+       sessionId = Value(sessionId),
+       occurredAtMs = Value(occurredAtMs),
+       createdAtMs = Value(createdAtMs);
+  static Insertable<AnalyticsEventQueueData> custom({
+    Expression<String>? eventId,
+    Expression<String>? eventName,
+    Expression<String>? sessionId,
+    Expression<int>? occurredAtMs,
+    Expression<int>? schemaVersion,
+    Expression<String>? propertiesJson,
+    Expression<int>? attemptCount,
+    Expression<int>? nextRetryAtMs,
+    Expression<int>? createdAtMs,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (eventId != null) 'event_id': eventId,
+      if (eventName != null) 'event_name': eventName,
+      if (sessionId != null) 'session_id': sessionId,
+      if (occurredAtMs != null) 'occurred_at_ms': occurredAtMs,
+      if (schemaVersion != null) 'schema_version': schemaVersion,
+      if (propertiesJson != null) 'properties_json': propertiesJson,
+      if (attemptCount != null) 'attempt_count': attemptCount,
+      if (nextRetryAtMs != null) 'next_retry_at_ms': nextRetryAtMs,
+      if (createdAtMs != null) 'created_at_ms': createdAtMs,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AnalyticsEventQueueCompanion copyWith({
+    Value<String>? eventId,
+    Value<String>? eventName,
+    Value<String>? sessionId,
+    Value<int>? occurredAtMs,
+    Value<int>? schemaVersion,
+    Value<String>? propertiesJson,
+    Value<int>? attemptCount,
+    Value<int?>? nextRetryAtMs,
+    Value<int>? createdAtMs,
+    Value<int>? rowid,
+  }) {
+    return AnalyticsEventQueueCompanion(
+      eventId: eventId ?? this.eventId,
+      eventName: eventName ?? this.eventName,
+      sessionId: sessionId ?? this.sessionId,
+      occurredAtMs: occurredAtMs ?? this.occurredAtMs,
+      schemaVersion: schemaVersion ?? this.schemaVersion,
+      propertiesJson: propertiesJson ?? this.propertiesJson,
+      attemptCount: attemptCount ?? this.attemptCount,
+      nextRetryAtMs: nextRetryAtMs ?? this.nextRetryAtMs,
+      createdAtMs: createdAtMs ?? this.createdAtMs,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (eventId.present) {
+      map['event_id'] = Variable<String>(eventId.value);
+    }
+    if (eventName.present) {
+      map['event_name'] = Variable<String>(eventName.value);
+    }
+    if (sessionId.present) {
+      map['session_id'] = Variable<String>(sessionId.value);
+    }
+    if (occurredAtMs.present) {
+      map['occurred_at_ms'] = Variable<int>(occurredAtMs.value);
+    }
+    if (schemaVersion.present) {
+      map['schema_version'] = Variable<int>(schemaVersion.value);
+    }
+    if (propertiesJson.present) {
+      map['properties_json'] = Variable<String>(propertiesJson.value);
+    }
+    if (attemptCount.present) {
+      map['attempt_count'] = Variable<int>(attemptCount.value);
+    }
+    if (nextRetryAtMs.present) {
+      map['next_retry_at_ms'] = Variable<int>(nextRetryAtMs.value);
+    }
+    if (createdAtMs.present) {
+      map['created_at_ms'] = Variable<int>(createdAtMs.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AnalyticsEventQueueCompanion(')
+          ..write('eventId: $eventId, ')
+          ..write('eventName: $eventName, ')
+          ..write('sessionId: $sessionId, ')
+          ..write('occurredAtMs: $occurredAtMs, ')
+          ..write('schemaVersion: $schemaVersion, ')
+          ..write('propertiesJson: $propertiesJson, ')
+          ..write('attemptCount: $attemptCount, ')
+          ..write('nextRetryAtMs: $nextRetryAtMs, ')
+          ..write('createdAtMs: $createdAtMs, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -5482,6 +6079,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $LedgerTransactionsTable(this);
   late final $AppSettingsTable appSettings = $AppSettingsTable(this);
   late final $BudgetsTable budgets = $BudgetsTable(this);
+  late final $AnalyticsEventQueueTable analyticsEventQueue =
+      $AnalyticsEventQueueTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5493,6 +6092,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     ledgerTransactions,
     appSettings,
     budgets,
+    analyticsEventQueue,
   ];
 }
 
@@ -9615,6 +10215,310 @@ typedef $$BudgetsTableProcessedTableManager =
       Budget,
       PrefetchHooks Function({bool ledgerId, bool categoryId})
     >;
+typedef $$AnalyticsEventQueueTableCreateCompanionBuilder =
+    AnalyticsEventQueueCompanion Function({
+      required String eventId,
+      required String eventName,
+      required String sessionId,
+      required int occurredAtMs,
+      Value<int> schemaVersion,
+      Value<String> propertiesJson,
+      Value<int> attemptCount,
+      Value<int?> nextRetryAtMs,
+      required int createdAtMs,
+      Value<int> rowid,
+    });
+typedef $$AnalyticsEventQueueTableUpdateCompanionBuilder =
+    AnalyticsEventQueueCompanion Function({
+      Value<String> eventId,
+      Value<String> eventName,
+      Value<String> sessionId,
+      Value<int> occurredAtMs,
+      Value<int> schemaVersion,
+      Value<String> propertiesJson,
+      Value<int> attemptCount,
+      Value<int?> nextRetryAtMs,
+      Value<int> createdAtMs,
+      Value<int> rowid,
+    });
+
+class $$AnalyticsEventQueueTableFilterComposer
+    extends Composer<_$AppDatabase, $AnalyticsEventQueueTable> {
+  $$AnalyticsEventQueueTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get eventId => $composableBuilder(
+    column: $table.eventId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get eventName => $composableBuilder(
+    column: $table.eventName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sessionId => $composableBuilder(
+    column: $table.sessionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get occurredAtMs => $composableBuilder(
+    column: $table.occurredAtMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get schemaVersion => $composableBuilder(
+    column: $table.schemaVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get propertiesJson => $composableBuilder(
+    column: $table.propertiesJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get attemptCount => $composableBuilder(
+    column: $table.attemptCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get nextRetryAtMs => $composableBuilder(
+    column: $table.nextRetryAtMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAtMs => $composableBuilder(
+    column: $table.createdAtMs,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$AnalyticsEventQueueTableOrderingComposer
+    extends Composer<_$AppDatabase, $AnalyticsEventQueueTable> {
+  $$AnalyticsEventQueueTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get eventId => $composableBuilder(
+    column: $table.eventId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get eventName => $composableBuilder(
+    column: $table.eventName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sessionId => $composableBuilder(
+    column: $table.sessionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get occurredAtMs => $composableBuilder(
+    column: $table.occurredAtMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get schemaVersion => $composableBuilder(
+    column: $table.schemaVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get propertiesJson => $composableBuilder(
+    column: $table.propertiesJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get attemptCount => $composableBuilder(
+    column: $table.attemptCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get nextRetryAtMs => $composableBuilder(
+    column: $table.nextRetryAtMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAtMs => $composableBuilder(
+    column: $table.createdAtMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AnalyticsEventQueueTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AnalyticsEventQueueTable> {
+  $$AnalyticsEventQueueTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get eventId =>
+      $composableBuilder(column: $table.eventId, builder: (column) => column);
+
+  GeneratedColumn<String> get eventName =>
+      $composableBuilder(column: $table.eventName, builder: (column) => column);
+
+  GeneratedColumn<String> get sessionId =>
+      $composableBuilder(column: $table.sessionId, builder: (column) => column);
+
+  GeneratedColumn<int> get occurredAtMs => $composableBuilder(
+    column: $table.occurredAtMs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get schemaVersion => $composableBuilder(
+    column: $table.schemaVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get propertiesJson => $composableBuilder(
+    column: $table.propertiesJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get attemptCount => $composableBuilder(
+    column: $table.attemptCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get nextRetryAtMs => $composableBuilder(
+    column: $table.nextRetryAtMs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get createdAtMs => $composableBuilder(
+    column: $table.createdAtMs,
+    builder: (column) => column,
+  );
+}
+
+class $$AnalyticsEventQueueTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AnalyticsEventQueueTable,
+          AnalyticsEventQueueData,
+          $$AnalyticsEventQueueTableFilterComposer,
+          $$AnalyticsEventQueueTableOrderingComposer,
+          $$AnalyticsEventQueueTableAnnotationComposer,
+          $$AnalyticsEventQueueTableCreateCompanionBuilder,
+          $$AnalyticsEventQueueTableUpdateCompanionBuilder,
+          (
+            AnalyticsEventQueueData,
+            BaseReferences<
+              _$AppDatabase,
+              $AnalyticsEventQueueTable,
+              AnalyticsEventQueueData
+            >,
+          ),
+          AnalyticsEventQueueData,
+          PrefetchHooks Function()
+        > {
+  $$AnalyticsEventQueueTableTableManager(
+    _$AppDatabase db,
+    $AnalyticsEventQueueTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AnalyticsEventQueueTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AnalyticsEventQueueTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$AnalyticsEventQueueTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> eventId = const Value.absent(),
+                Value<String> eventName = const Value.absent(),
+                Value<String> sessionId = const Value.absent(),
+                Value<int> occurredAtMs = const Value.absent(),
+                Value<int> schemaVersion = const Value.absent(),
+                Value<String> propertiesJson = const Value.absent(),
+                Value<int> attemptCount = const Value.absent(),
+                Value<int?> nextRetryAtMs = const Value.absent(),
+                Value<int> createdAtMs = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AnalyticsEventQueueCompanion(
+                eventId: eventId,
+                eventName: eventName,
+                sessionId: sessionId,
+                occurredAtMs: occurredAtMs,
+                schemaVersion: schemaVersion,
+                propertiesJson: propertiesJson,
+                attemptCount: attemptCount,
+                nextRetryAtMs: nextRetryAtMs,
+                createdAtMs: createdAtMs,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String eventId,
+                required String eventName,
+                required String sessionId,
+                required int occurredAtMs,
+                Value<int> schemaVersion = const Value.absent(),
+                Value<String> propertiesJson = const Value.absent(),
+                Value<int> attemptCount = const Value.absent(),
+                Value<int?> nextRetryAtMs = const Value.absent(),
+                required int createdAtMs,
+                Value<int> rowid = const Value.absent(),
+              }) => AnalyticsEventQueueCompanion.insert(
+                eventId: eventId,
+                eventName: eventName,
+                sessionId: sessionId,
+                occurredAtMs: occurredAtMs,
+                schemaVersion: schemaVersion,
+                propertiesJson: propertiesJson,
+                attemptCount: attemptCount,
+                nextRetryAtMs: nextRetryAtMs,
+                createdAtMs: createdAtMs,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$AnalyticsEventQueueTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AnalyticsEventQueueTable,
+      AnalyticsEventQueueData,
+      $$AnalyticsEventQueueTableFilterComposer,
+      $$AnalyticsEventQueueTableOrderingComposer,
+      $$AnalyticsEventQueueTableAnnotationComposer,
+      $$AnalyticsEventQueueTableCreateCompanionBuilder,
+      $$AnalyticsEventQueueTableUpdateCompanionBuilder,
+      (
+        AnalyticsEventQueueData,
+        BaseReferences<
+          _$AppDatabase,
+          $AnalyticsEventQueueTable,
+          AnalyticsEventQueueData
+        >,
+      ),
+      AnalyticsEventQueueData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -9631,4 +10535,6 @@ class $AppDatabaseManager {
       $$AppSettingsTableTableManager(_db, _db.appSettings);
   $$BudgetsTableTableManager get budgets =>
       $$BudgetsTableTableManager(_db, _db.budgets);
+  $$AnalyticsEventQueueTableTableManager get analyticsEventQueue =>
+      $$AnalyticsEventQueueTableTableManager(_db, _db.analyticsEventQueue);
 }

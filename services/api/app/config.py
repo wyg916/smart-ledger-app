@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     kimi_ai_enabled: bool = Field(default=False, validation_alias="KIMI_AI_ENABLED")
     kimi_provider: str = Field(default="kimi", validation_alias="KIMI_PROVIDER")
     kimi_live_test: bool = Field(default=False, validation_alias="KIMI_LIVE_TEST")
+    kimi_chat_model: str = Field(default="kimi-k2.6", validation_alias="KIMI_CHAT_MODEL")
+    kimi_vision_model: str = Field(default="kimi-k2.6", validation_alias="KIMI_VISION_MODEL")
+    telemetry_enabled: bool = Field(default=True, validation_alias="TELEMETRY_ENABLED")
+    internal_metrics_token: str = Field(default="", validation_alias="INTERNAL_METRICS_TOKEN")
 
 
 @lru_cache

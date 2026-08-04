@@ -57,6 +57,11 @@ final class DriftTransactionRepository implements TransactionRepository {
           predicate &
           _database.ledgerTransactions.categoryId.equals(categoryId);
     }
+    if (filter.type case final type?) {
+      predicate =
+          predicate &
+          _database.ledgerTransactions.transactionType.equals(type.name);
+    }
     query
       ..where(predicate)
       ..orderBy([
@@ -119,6 +124,7 @@ final class DriftTransactionRepository implements TransactionRepository {
     required DateTime occurredAtUtc,
     required String timeZoneId,
     String? note,
+    String sourceType = 'manual',
   }) async {
     Money.fromMinor(amountMinor);
     if (amountMinor <= 0) {
@@ -146,6 +152,9 @@ final class DriftTransactionRepository implements TransactionRepository {
               occurredAtUtcMs: occurredAtUtc.toUtc().millisecondsSinceEpoch,
               timeZoneId: requireTimeZoneId(timeZoneId),
               note: Value(normalizedOptionalText(note, maxLength: 500)),
+              sourceType: Value(
+                sourceType == 'ai_assisted' ? 'ai_assisted' : 'manual',
+              ),
               createdAtMs: now,
               updatedAtMs: now,
             ),

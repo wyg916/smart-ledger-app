@@ -101,6 +101,18 @@ final class UtcMonthRange {
   final DateTime endExclusive;
 }
 
+final class UtcDayRange {
+  const UtcDayRange({
+    required this.start,
+    required this.endExclusive,
+    required this.localDate,
+  });
+
+  final DateTime start;
+  final DateTime endExclusive;
+  final DateTime localDate;
+}
+
 bool _timeZonesInitialized = false;
 
 UtcMonthRange monthRangeInTimeZone(LedgerMonth month, String timeZoneId) {
@@ -123,4 +135,38 @@ String localDayForUtc(DateTime utc, String timeZoneId) {
   return '${local.year.toString().padLeft(4, '0')}-'
       '${local.month.toString().padLeft(2, '0')}-'
       '${local.day.toString().padLeft(2, '0')}';
+}
+
+DateTime localDateForUtc(DateTime utc, String timeZoneId) {
+  if (!_timeZonesInitialized) {
+    tz_data.initializeTimeZones();
+    _timeZonesInitialized = true;
+  }
+  final local = tz.TZDateTime.from(utc.toUtc(), tz.getLocation(timeZoneId));
+  return DateTime(local.year, local.month, local.day);
+}
+
+UtcDayRange dayRangeInTimeZone(DateTime localDate, String timeZoneId) {
+  if (!_timeZonesInitialized) {
+    tz_data.initializeTimeZones();
+    _timeZonesInitialized = true;
+  }
+  final location = tz.getLocation(timeZoneId);
+  final start = tz.TZDateTime(
+    location,
+    localDate.year,
+    localDate.month,
+    localDate.day,
+  );
+  final end = tz.TZDateTime(
+    location,
+    localDate.year,
+    localDate.month,
+    localDate.day + 1,
+  );
+  return UtcDayRange(
+    start: start.toUtc(),
+    endExclusive: end.toUtc(),
+    localDate: DateTime(start.year, start.month, start.day),
+  );
 }

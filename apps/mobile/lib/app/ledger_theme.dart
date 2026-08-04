@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 abstract final class LedgerPalette {
   static const cream = Color(0xFFFFF8E8);
@@ -46,6 +47,7 @@ ThemeData buildLedgerTheme() {
       backgroundColor: Colors.transparent,
       foregroundColor: LedgerPalette.ink,
       surfaceTintColor: Colors.transparent,
+      systemOverlayStyle: SystemUiOverlayStyle.dark,
       centerTitle: false,
       titleTextStyle: TextStyle(
         color: LedgerPalette.ink,

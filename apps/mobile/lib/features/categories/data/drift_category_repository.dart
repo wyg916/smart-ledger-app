@@ -36,6 +36,42 @@ final class DriftCategoryRepository implements CategoryRepository {
   }
 
   @override
+  Stream<List<LedgerCategory>> watchQuick({
+    required CategoryType type,
+    required DateTime windowStartUtc,
+    int limit = 6,
+  }) {
+    return _database
+        .customSelect(
+          '''
+          SELECT c.*, COUNT(t.id) AS use_count,
+            COALESCE(MAX(t.occurred_at_utc_ms), 0) AS last_used_at_ms
+          FROM categories c
+          LEFT JOIN transactions t
+            ON t.category_id = c.id
+            AND t.deleted_at_ms IS NULL
+            AND t.transaction_type = c.category_type
+            AND t.occurred_at_utc_ms >= ?
+          WHERE c.ledger_id = ? AND c.category_type = ?
+            AND c.enabled = 1 AND c.deleted_at_ms IS NULL
+          GROUP BY c.id
+          ORDER BY use_count DESC, last_used_at_ms DESC,
+            c.sort_order ASC, c.id ASC
+          LIMIT ?
+          ''',
+          variables: [
+            Variable.withInt(windowStartUtc.toUtc().millisecondsSinceEpoch),
+            Variable.withString(defaultLedgerId),
+            Variable.withString(type.name),
+            Variable.withInt(limit),
+          ],
+          readsFrom: {_database.categories, _database.ledgerTransactions},
+        )
+        .watch()
+        .map((rows) => rows.map(_mapQueryRow).toList(growable: false));
+  }
+
+  @override
   Future<LedgerCategory?> getById(String id) async {
     final row =
         await (_database.select(_database.categories)
@@ -155,4 +191,15 @@ final class DriftCategoryRepository implements CategoryRepository {
       systemKey: row.systemKey,
     );
   }
+
+  LedgerCategory _mapQueryRow(QueryRow row) => LedgerCategory(
+    id: row.read<String>('id'),
+    ledgerId: row.read<String>('ledger_id'),
+    name: row.read<String>('name'),
+    type: CategoryType.fromDatabase(row.read<String>('category_type')),
+    enabled: row.read<int>('enabled') == 1,
+    version: row.read<int>('version'),
+    iconCode: row.readNullable<String>('icon_code'),
+    systemKey: row.readNullable<String>('system_key'),
+  );
 }

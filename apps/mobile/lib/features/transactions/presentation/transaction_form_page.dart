@@ -1,16 +1,26 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:smart_ledger/core/database/database_providers.dart';
 import 'package:smart_ledger/core/money/money.dart';
 import 'package:smart_ledger/features/categories/domain/ledger_category.dart';
+import 'package:smart_ledger/features/home/presentation/home_providers.dart';
+import 'package:smart_ledger/features/quick_entry/presentation/natural_language_entry_panel.dart';
+import 'package:smart_ledger/features/telemetry/presentation/telemetry_providers.dart';
 import 'package:smart_ledger/features/transactions/domain/ledger_transaction.dart';
 import 'package:smart_ledger/features/transactions/presentation/ledger_providers.dart';
 
 class TransactionFormPage extends ConsumerStatefulWidget {
-  const TransactionFormPage({super.key, this.transactionId});
+  const TransactionFormPage({
+    super.key,
+    this.transactionId,
+    this.initialCategoryId,
+  });
 
   final String? transactionId;
+  final String? initialCategoryId;
 
   @override
   ConsumerState<TransactionFormPage> createState() =>
@@ -20,6 +30,7 @@ class TransactionFormPage extends ConsumerStatefulWidget {
 class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
   final amountController = TextEditingController();
   final noteController = TextEditingController();
+  final amountFocusNode = FocusNode();
   LedgerTransactionType type = LedgerTransactionType.expense;
   String? accountId;
   String? toAccountId;
@@ -33,6 +44,7 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
   void initState() {
     super.initState();
     occurredAt = ref.read(ledgerClockProvider).nowUtc().toLocal();
+    categoryId = widget.initialCategoryId;
     if (editing) Future<void>.microtask(_load);
   }
 
@@ -66,6 +78,7 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
   void dispose() {
     amountController.dispose();
     noteController.dispose();
+    amountFocusNode.dispose();
     super.dispose();
   }
 
@@ -78,6 +91,10 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
     final categories =
         ref.watch(enabledCategoriesProvider(categoryType)).valueOrNull ??
         const [];
+    final quickCategories = type == LedgerTransactionType.transfer
+        ? const <LedgerCategory>[]
+        : ref.watch(quickCategoriesProvider(categoryType)).valueOrNull ??
+              const [];
 
     if (!editing && accountId == null && accounts.isNotEmpty) {
       accountId = accounts.first.id;
@@ -102,7 +119,7 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(editing ? '编辑交易' : '新增交易'),
+        title: Text(editing ? '编辑交易' : '记一笔'),
         actions: [
           if (editing)
             IconButton(
@@ -117,6 +134,12 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
+                if (!editing) ...[
+                  const NaturalLanguageEntryPanel(),
+                  const SizedBox(height: 10),
+                  Text('手动记账', style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 10),
+                ],
                 SegmentedButton<LedgerTransactionType>(
                   key: const Key('transaction-type'),
                   segments: const [
@@ -146,6 +169,7 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
                 TextField(
                   key: const Key('transaction-amount'),
                   controller: amountController,
+                  focusNode: amountFocusNode,
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
@@ -156,6 +180,32 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
                   ),
                 ),
                 const SizedBox(height: 12),
+                if (type != LedgerTransactionType.transfer &&
+                    quickCategories.isNotEmpty) ...[
+                  Text(
+                    '常用分类（填好金额后点一下即可保存）',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 7),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 7,
+                    children: quickCategories
+                        .take(6)
+                        .map(
+                          (item) => ChoiceChip(
+                            key: Key('form-quick-category-${item.id}'),
+                            label: Text(item.name),
+                            selected: categoryId == item.id,
+                            onSelected: loading
+                                ? null
+                                : (_) => _useQuickCategory(item.id),
+                          ),
+                        )
+                        .toList(growable: false),
+                  ),
+                  const SizedBox(height: 12),
+                ],
                 DropdownButtonFormField<String>(
                   key: const Key('transaction-account'),
                   initialValue: accountId,
@@ -231,15 +281,21 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
                     border: OutlineInputBorder(),
                   ),
                 ),
-                const SizedBox(height: 20),
-                FilledButton.icon(
-                  key: const Key('save-transaction'),
-                  onPressed: loading ? null : _save,
-                  icon: const Icon(Icons.save_outlined),
-                  label: Text(editing ? '保存修改' : '保存交易'),
-                ),
+                const SizedBox(height: 80),
               ],
             ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
+          child: FilledButton.icon(
+            key: const Key('save-transaction'),
+            onPressed: loading ? null : _save,
+            icon: const Icon(Icons.save_outlined),
+            label: Text(editing ? '保存修改' : '保存交易'),
+          ),
+        ),
+      ),
     );
   }
 
@@ -263,7 +319,22 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
     });
   }
 
-  Future<void> _save() async {
+  Future<void> _useQuickCategory(String selectedCategoryId) async {
+    setState(() => categoryId = selectedCategoryId);
+    try {
+      Money.parsePositive(amountController.text);
+    } catch (_) {
+      amountFocusNode.requestFocus();
+      return;
+    }
+    _record(
+      'quick_category_used',
+      properties: const {'entry_method': 'quick_category'},
+    );
+    await _save(quickCategoryId: selectedCategoryId);
+  }
+
+  Future<void> _save({String? quickCategoryId}) async {
     setState(() => loading = true);
     try {
       final selectedAccount = accountId;
@@ -277,26 +348,41 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
           type: type,
           accountId: selectedAccount,
           toAccountId: toAccountId,
-          categoryId: categoryId,
+          categoryId: quickCategoryId ?? categoryId,
           amountMinor: amount,
           occurredAtUtc: occurredAt.toUtc(),
           timeZoneId: timeZoneId,
           note: noteController.text,
         );
         ref.invalidate(transactionDetailProvider(widget.transactionId!));
+        _record('transaction_edited');
       } else {
         await useCase.create(
           type: type,
           accountId: selectedAccount,
           toAccountId: toAccountId,
-          categoryId: categoryId,
+          categoryId: quickCategoryId ?? categoryId,
           amountMinor: amount,
           occurredAtUtc: occurredAt.toUtc(),
           timeZoneId: timeZoneId,
           note: noteController.text,
         );
+        _record(
+          'transaction_created',
+          properties: {
+            'entry_method': quickCategoryId == null
+                ? 'manual'
+                : 'quick_category',
+          },
+        );
       }
-      if (mounted) context.pop();
+      if (mounted) {
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go('/');
+        }
+      }
     } catch (error) {
       if (mounted) _showError(error);
     } finally {
@@ -329,6 +415,7 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
       await ref
           .read(saveTransactionUseCaseProvider)
           .delete(widget.transactionId!);
+      _record('transaction_deleted');
       if (mounted) context.go('/');
     } catch (error) {
       if (mounted) _showError(error);
@@ -341,5 +428,15 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(error.toString())));
+  }
+
+  void _record(String name, {Map<String, Object> properties = const {}}) {
+    unawaited(
+      ref
+          .read(telemetryCoordinatorProvider.future)
+          .then(
+            (coordinator) => coordinator.record(name, properties: properties),
+          ),
+    );
   }
 }

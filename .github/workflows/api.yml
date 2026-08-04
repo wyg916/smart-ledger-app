@@ -43,3 +43,10 @@ jobs:
       - name: Test
         working-directory: services/api
         run: uv run pytest
+      - name: Verify Alembic upgrade and downgrade
+        working-directory: services/api
+        env:
+          SMART_LEDGER_DATABASE_URL: sqlite+aiosqlite:////tmp/smart-ledger-ci.db
+        run: |
+          uv run alembic upgrade head
+          uv run alembic downgrade base

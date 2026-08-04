@@ -159,6 +159,77 @@ void main() {
     },
   );
 
+  testWidgets('details groups transactions by ledger timezone local day', (
+    tester,
+  ) async {
+    final harness = await pumpApp(tester);
+    final category = await harness.categories.create(
+      name: '跨日明细',
+      type: CategoryType.expense,
+    );
+    await harness.transactions.create(
+      type: LedgerTransactionType.expense,
+      accountId: defaultAccountId,
+      categoryId: category,
+      amountMinor: 100,
+      occurredAtUtc: DateTime.utc(2026, 8, 3, 15, 30),
+      timeZoneId: 'Asia/Shanghai',
+    );
+    await harness.transactions.create(
+      type: LedgerTransactionType.expense,
+      accountId: defaultAccountId,
+      categoryId: category,
+      amountMinor: 200,
+      occurredAtUtc: DateTime.utc(2026, 8, 3, 16, 30),
+      timeZoneId: 'Asia/Shanghai',
+    );
+
+    await tester.tap(find.byKey(const Key('bottom-details')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('details-day-2026-08-03')), findsOneWidget);
+    expect(find.byKey(const Key('details-day-2026-08-04')), findsOneWidget);
+    expect(find.textContaining('收 0.00  支 1.00'), findsOneWidget);
+    expect(find.textContaining('收 0.00  支 2.00'), findsOneWidget);
+    await disposeApp(tester, harness);
+  });
+
+  testWidgets('daily analytics uses a half-open ledger timezone day', (
+    tester,
+  ) async {
+    final harness = await pumpApp(tester);
+    harness.clock.value = DateTime.utc(2026, 8, 2, 17);
+    final category = await harness.categories.create(
+      name: '日视图分类',
+      type: CategoryType.expense,
+    );
+    await harness.transactions.create(
+      type: LedgerTransactionType.expense,
+      accountId: defaultAccountId,
+      categoryId: category,
+      amountMinor: 1234,
+      occurredAtUtc: DateTime.utc(2026, 8, 3, 10),
+      timeZoneId: 'Asia/Shanghai',
+    );
+    await harness.transactions.create(
+      type: LedgerTransactionType.expense,
+      accountId: defaultAccountId,
+      categoryId: category,
+      amountMinor: 9999,
+      occurredAtUtc: DateTime.utc(2026, 8, 3, 17),
+      timeZoneId: 'Asia/Shanghai',
+    );
+
+    await tester.tap(find.byKey(const Key('bottom-analytics')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('按日'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('analytics-day-list')), findsOneWidget);
+    expect(find.text('12.34'), findsOneWidget);
+    expect(find.text('-12.34'), findsNWidgets(2));
+    expect(find.text('99.99'), findsNothing);
+    await disposeApp(tester, harness);
+  });
+
   testWidgets('analytics error state is explicit', (tester) async {
     final harness = await pumpApp(tester, analytics: _FailingAnalytics());
     await tester.tap(find.byKey(const Key('analytics-action')));

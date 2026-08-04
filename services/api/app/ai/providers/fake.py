@@ -19,6 +19,49 @@ class FakeProvider:
         self.calls += 1
         if self.always_invalid or (self.invalid_once and self.calls == 1):
             content: dict[str, Any] = {"invalid": True}
+        elif scenario is AiScenario.chat:
+            content = {
+                "title": "一起看看",
+                "answer": "我可以依据你明确附带的聚合摘要解释收支，也可以回答一般财务问题。",
+                "insights": ["当前回答没有读取原始账单或备注。"],
+                "actions": ["可以先选择是否附带今日、本月或预算摘要。"],
+                "warnings": [],
+                "disclaimer": "AI 内容仅供一般性财务信息参考。",
+            }
+        elif scenario is AiScenario.parse_transaction:
+            categories = payload.get("categories", [])
+            first = categories[0] if categories else None
+            content = {
+                "transaction_type": first["transaction_type"] if first else "expense",
+                "amount_minor": 2500,
+                "currency_code": payload.get("currency_code", "CNY"),
+                "category_candidate": first["name"] if first else None,
+                "occurred_at": "2026-08-04T08:00:00+08:00",
+                "timezone": payload.get("timezone", "Asia/Shanghai"),
+                "note": "AI 解析草稿",
+                "confidence": 0.86,
+                "needs_confirmation": True,
+                "warnings": [],
+            }
+        elif scenario is AiScenario.image_analysis:
+            content = {
+                "summary": "这是一张合成财务截图。",
+                "important_information": ["识别到一笔待核对的消费记录。"],
+                "risk_flags": [],
+                "transaction_drafts": [
+                    {
+                        "transaction_type": "expense",
+                        "amount_minor": 2500,
+                        "currency_code": "CNY",
+                        "category_candidate": "餐饮",
+                        "occurred_at": "2026-08-04T08:00:00+08:00",
+                        "note": "截图识别草稿",
+                        "confidence": 0.82,
+                        "needs_confirmation": True,
+                    }
+                ],
+                "disclaimer": "截图识别可能有误，确认后才能记账。",
+            }
         else:
             label = {
                 AiScenario.monthly_summary: "月度消费总结",

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:smart_ledger/core/money/money.dart';
 import 'package:smart_ledger/features/budgets/domain/ledger_budget.dart';
 import 'package:smart_ledger/features/budgets/presentation/budget_providers.dart';
+import 'package:smart_ledger/features/telemetry/presentation/telemetry_providers.dart';
 import 'package:smart_ledger/features/transactions/presentation/ledger_providers.dart';
 
 class BudgetsPage extends ConsumerWidget {
@@ -11,6 +12,7 @@ class BudgetsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(telemetryPageEventProvider('budget_viewed'));
     final result = ref.watch(monthlyBudgetsProvider);
     final filter = ref.watch(ledgerFilterProvider);
     return Scaffold(

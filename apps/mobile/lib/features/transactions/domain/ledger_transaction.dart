@@ -47,12 +47,14 @@ final class TransactionFilter {
     required this.endUtcExclusive,
     this.accountId,
     this.categoryId,
+    this.type,
   });
 
   final DateTime startUtc;
   final DateTime endUtcExclusive;
   final String? accountId;
   final String? categoryId;
+  final LedgerTransactionType? type;
 }
 
 final class LedgerSummary {
@@ -77,6 +79,7 @@ abstract interface class TransactionRepository {
     required DateTime occurredAtUtc,
     required String timeZoneId,
     String? note,
+    String sourceType = 'manual',
   });
 
   Future<void> update({

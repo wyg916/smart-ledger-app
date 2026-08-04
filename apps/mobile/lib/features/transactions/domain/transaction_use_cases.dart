@@ -14,6 +14,7 @@ final class SaveTransactionUseCase {
     required DateTime occurredAtUtc,
     required String timeZoneId,
     String? note,
+    String sourceType = 'manual',
   }) {
     return _repository.create(
       type: type,
@@ -24,6 +25,7 @@ final class SaveTransactionUseCase {
       occurredAtUtc: occurredAtUtc,
       timeZoneId: timeZoneId,
       note: note,
+      sourceType: sourceType,
     );
   }
 

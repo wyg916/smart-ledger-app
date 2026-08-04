@@ -36,6 +36,12 @@ abstract interface class CategoryRepository {
 
   Future<List<LedgerCategory>> listEnabled(CategoryType type);
 
+  Stream<List<LedgerCategory>> watchQuick({
+    required CategoryType type,
+    required DateTime windowStartUtc,
+    int limit = 6,
+  });
+
   Future<LedgerCategory?> getById(String id);
 
   Future<String> create({required String name, required CategoryType type});

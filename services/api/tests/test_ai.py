@@ -1,9 +1,11 @@
 import logging
 from collections.abc import AsyncIterator
+from io import BytesIO
 from typing import Any
 
 import httpx
 import pytest
+from PIL import Image
 
 from app.ai.errors import AiError, map_upstream_status
 from app.ai.prompts.v1.system import SYSTEM_PROMPT
@@ -147,6 +149,65 @@ async def test_three_scenarios_use_fake_provider(
     assert "reasoning_content" not in body
     assert "amount_minor" not in body["result"]
     assert "整理好啦" in body["result"]["summary"]
+
+
+async def test_free_chat_accepts_only_explicit_aggregate_context(
+    client: httpx.AsyncClient,
+) -> None:
+    override(FakeProvider(), kimi_chat_model="fake-chat")
+    response = await client.post(
+        "/api/v1/ai/chat",
+        json={
+            "messages": [{"role": "user", "content": "帮我解释一下"}],
+            "context": {"today_summary": "今天收入0分，支出2500分。"},
+        },
+    )
+    assert response.status_code == 200
+    assert response.json()["model"] == "fake-chat"
+    assert "原始账单" in response.json()["result"]["insights"][0]
+
+
+async def test_parse_transaction_returns_confirmation_only_draft(
+    client: httpx.AsyncClient,
+) -> None:
+    override(FakeProvider())
+    response = await client.post(
+        "/api/v1/ai/parse-transaction",
+        json={
+            "text": "今天早餐25元",
+            "timezone": "Asia/Shanghai",
+            "currency_code": "CNY",
+            "categories": [{"name": "餐饮", "transaction_type": "expense"}],
+        },
+    )
+    assert response.status_code == 200
+    result = response.json()["result"]
+    assert result["amount_minor"] == 2500
+    assert result["category_candidate"] == "餐饮"
+    assert result["needs_confirmation"] is True
+
+
+async def test_image_analysis_validates_and_reencodes_image(
+    client: httpx.AsyncClient,
+) -> None:
+    override(FakeProvider(), kimi_vision_model="fake-vision")
+    buffer = BytesIO()
+    Image.new("RGB", (20, 20), (255, 240, 220)).save(buffer, format="PNG")
+    response = await client.post(
+        "/api/v1/ai/analyze-image",
+        files={"image": ("receipt.png", buffer.getvalue(), "image/png")},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["model"] == "fake-vision"
+    assert body["result"]["transaction_drafts"][0]["needs_confirmation"] is True
+
+    invalid = await client.post(
+        "/api/v1/ai/analyze-image",
+        files={"image": ("receipt.png", b"not-an-image", "image/png")},
+    )
+    assert invalid.status_code == 422
+    assert invalid.json()["error"]["code"] == "AI_IMAGE_INVALID"
 
 
 async def test_disabled_and_production_fail_closed(client: httpx.AsyncClient) -> None:

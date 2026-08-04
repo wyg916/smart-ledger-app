@@ -1,6 +1,11 @@
+import base64
+from datetime import datetime
+from io import BytesIO
 from typing import Annotated, Any, NoReturn
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from PIL import Image, ImageOps, UnidentifiedImageError
 
 from app.ai.errors import AiError
 from app.ai.providers.base import AiProvider, AiScenario
@@ -10,8 +15,17 @@ from app.ai.schemas import (
     AiResponse,
     AiStatus,
     BudgetReviewRequest,
+    ChatRequest,
+    ChatResponse,
+    ChatResult,
     FinancialPlanRequest,
+    ImageAnalysisResponse,
+    ImageAnalysisResult,
     MonthlySummaryRequest,
+    ParseTransactionRequest,
+    ParseTransactionResponse,
+    StrictModel,
+    TransactionDraftResult,
 )
 from app.ai.services import AiService
 from app.config import Settings, get_settings
@@ -63,6 +77,21 @@ async def _generate(
         _raise_http(exc)
 
 
+async def _generate_typed[ResultT: StrictModel](
+    scenario: AiScenario,
+    payload: dict[str, Any],
+    settings: Settings,
+    provider: AiProvider,
+    result_type: type[ResultT],
+    model: str,
+) -> tuple[ResultT, str, Any]:
+    try:
+        _ensure_available(settings)
+        return await AiService(provider).generate_typed(scenario, model, payload, result_type)
+    except AiError as exc:
+        _raise_http(exc)
+
+
 @router.get("/status", response_model=AiStatus)
 async def ai_status(settings: Annotated[Settings, Depends(get_settings)]) -> AiStatus:
     ready = settings.kimi_provider == "fake" or bool(settings.moonshot_api_key)
@@ -99,3 +128,126 @@ async def financial_plan(
     payload: FinancialPlanRequest, settings: SettingsDependency, provider: ProviderDependency
 ) -> AiResponse:
     return await _generate(AiScenario.financial_plan, payload, settings, provider)
+
+
+@router.post("/chat", response_model=ChatResponse)
+async def chat(
+    payload: ChatRequest,
+    settings: SettingsDependency,
+    provider: ProviderDependency,
+) -> ChatResponse:
+    result, model, usage = await _generate_typed(
+        AiScenario.chat,
+        payload.model_dump(mode="json"),
+        settings,
+        provider,
+        ChatResult,
+        settings.kimi_chat_model,
+    )
+    return ChatResponse(result=result, model=model, usage=usage)
+
+
+@router.post("/parse-transaction", response_model=ParseTransactionResponse)
+async def parse_transaction(
+    payload: ParseTransactionRequest,
+    settings: SettingsDependency,
+    provider: ProviderDependency,
+) -> ParseTransactionResponse:
+    try:
+        ZoneInfo(payload.timezone)
+    except ZoneInfoNotFoundError as exc:
+        raise HTTPException(
+            status_code=422,
+            detail={"code": "AI_TIMEZONE_INVALID", "message": "Timezone is invalid"},
+        ) from exc
+    provider_payload = payload.model_dump(mode="json")
+    provider_payload["reference_time"] = datetime.now(ZoneInfo(payload.timezone)).isoformat()
+    result, model, usage = await _generate_typed(
+        AiScenario.parse_transaction,
+        provider_payload,
+        settings,
+        provider,
+        TransactionDraftResult,
+        settings.kimi_fast_model,
+    )
+    allowed = {(category.name, category.transaction_type) for category in payload.categories}
+    if (
+        result.category_candidate is not None
+        and (
+            result.category_candidate,
+            result.transaction_type,
+        )
+        not in allowed
+    ):
+        raise HTTPException(
+            status_code=502,
+            detail={
+                "code": "AI_INVALID_RESPONSE",
+                "message": "AI category candidate is invalid",
+            },
+        )
+    if result.currency_code != payload.currency_code or result.timezone != payload.timezone:
+        raise HTTPException(
+            status_code=502,
+            detail={"code": "AI_INVALID_RESPONSE", "message": "AI draft context is invalid"},
+        )
+    return ParseTransactionResponse(result=result, model=model, usage=usage)
+
+
+def _validated_image(raw: bytes, content_type: str | None) -> tuple[bytes, str]:
+    allowed = {"image/png", "image/jpeg", "image/webp"}
+    if content_type not in allowed:
+        raise HTTPException(
+            status_code=415,
+            detail={"code": "AI_IMAGE_TYPE_INVALID", "message": "Unsupported image type"},
+        )
+    try:
+        source: Image.Image = Image.open(BytesIO(raw))
+        source.verify()
+        source = Image.open(BytesIO(raw))
+        source = ImageOps.exif_transpose(source)
+    except (UnidentifiedImageError, OSError) as exc:
+        raise HTTPException(
+            status_code=422,
+            detail={"code": "AI_IMAGE_INVALID", "message": "Image content is invalid"},
+        ) from exc
+    if source.width * source.height > 16_000_000:
+        raise HTTPException(
+            status_code=413,
+            detail={"code": "AI_IMAGE_DIMENSIONS_INVALID", "message": "Image is too large"},
+        )
+    source.thumbnail((4096, 4096), Image.Resampling.LANCZOS)
+    converted = source.convert("RGB")
+    output = BytesIO()
+    converted.save(output, format="JPEG", quality=84, optimize=True)
+    return output.getvalue(), "image/jpeg"
+
+
+@router.post("/analyze-image", response_model=ImageAnalysisResponse)
+async def analyze_image(
+    settings: SettingsDependency,
+    provider: ProviderDependency,
+    image: Annotated[UploadFile, File()],
+) -> ImageAnalysisResponse:
+    raw = b""
+    try:
+        raw = await image.read(8 * 1024 * 1024 + 1)
+        if len(raw) > 8 * 1024 * 1024:
+            raise HTTPException(
+                status_code=413,
+                detail={"code": "AI_IMAGE_TOO_LARGE", "message": "Image exceeds 8 MiB"},
+            )
+        encoded, mime_type = _validated_image(raw, image.content_type)
+        data_url = f"data:{mime_type};base64,{base64.b64encode(encoded).decode('ascii')}"
+        result, model, usage = await _generate_typed(
+            AiScenario.image_analysis,
+            {"_image_data_url": data_url, "instruction": "分析这张财务相关截图"},
+            settings,
+            provider,
+            ImageAnalysisResult,
+            settings.kimi_vision_model,
+        )
+        return ImageAnalysisResponse(result=result, model=model, usage=usage)
+    finally:
+        raw = b""
+        await image.close()
