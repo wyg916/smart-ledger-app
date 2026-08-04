@@ -8,6 +8,9 @@ import 'package:smart_ledger/features/accounts/domain/account_use_cases.dart';
 import 'package:smart_ledger/features/accounts/domain/ledger_account.dart';
 import 'package:smart_ledger/features/analytics/data/drift_analytics_repository.dart';
 import 'package:smart_ledger/features/analytics/domain/ledger_analytics.dart';
+import 'package:smart_ledger/features/auth/domain/auth_session.dart';
+import 'package:smart_ledger/features/auth/data/review_sample_data_seeder.dart';
+import 'package:smart_ledger/features/auth/presentation/auth_providers.dart';
 import 'package:smart_ledger/features/budgets/data/drift_budget_repository.dart';
 import 'package:smart_ledger/features/budgets/domain/budget_use_cases.dart';
 import 'package:smart_ledger/features/budgets/domain/ledger_budget.dart';
@@ -19,7 +22,12 @@ import 'package:smart_ledger/features/transactions/domain/ledger_transaction.dar
 import 'package:smart_ledger/features/transactions/domain/transaction_use_cases.dart';
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
-  final database = AppDatabase.defaults();
+  final auth = ref.watch(authControllerProvider);
+  final userId = auth.session?.userId;
+  if (auth.phase != AuthPhase.authenticated || userId == null) {
+    throw StateError('Authenticated user required before opening the ledger');
+  }
+  final database = AppDatabase.forUser(userId);
   ref.onDispose(database.close);
   return database;
 });
@@ -84,10 +92,13 @@ final saveBudgetUseCaseProvider = Provider<SaveBudgetUseCase>(
 );
 
 final localLedgerBootstrapProvider = FutureProvider<void>((ref) async {
-  final bootstrapper = LocalLedgerBootstrapper(
-    ref.watch(appDatabaseProvider),
-    ref.watch(ledgerClockProvider),
-    ref.watch(ledgerTimeZoneProvider),
-  );
+  final auth = ref.watch(authControllerProvider);
+  final database = ref.watch(appDatabaseProvider);
+  final clock = ref.watch(ledgerClockProvider);
+  final timeZone = ref.watch(ledgerTimeZoneProvider);
+  final bootstrapper = LocalLedgerBootstrapper(database, clock, timeZone);
   await bootstrapper.initialize();
+  if (auth.session?.providers.contains('play_review') ?? false) {
+    await ReviewSampleDataSeeder(database, clock, timeZone).initialize();
+  }
 });

@@ -18,12 +18,14 @@ final class TelemetryCoordinator implements TelemetryRecorder {
     this._client,
     this._identityService,
     this._identity,
+    this._userAccessToken,
   );
 
   final AnalyticsQueueRepository _queue;
   final TelemetryApiClient _client;
   final AnonymousIdentityService _identityService;
   AnonymousIdentity _identity;
+  final String _userAccessToken;
   bool _flushing = false;
   bool _sessionStarted = false;
 
@@ -86,7 +88,10 @@ final class TelemetryCoordinator implements TelemetryRecorder {
   Future<String> _ensureSession() async {
     var token = _identity.installationToken;
     if (token == null) {
-      token = await _client.registerInstallation(_identity);
+      token = await _client.registerInstallation(
+        _identity,
+        userAccessToken: _userAccessToken,
+      );
       await _identityService.saveInstallationToken(token);
       _identity = _identity.copyWith(installationToken: token);
     }

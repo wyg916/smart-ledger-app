@@ -7,7 +7,10 @@ import 'package:smart_ledger/features/identity/domain/anonymous_identity.dart';
 import 'package:smart_ledger/features/telemetry/domain/telemetry_event.dart';
 
 abstract interface class TelemetryApiClient {
-  Future<String> registerInstallation(AnonymousIdentity identity);
+  Future<String> registerInstallation(
+    AnonymousIdentity identity, {
+    required String userAccessToken,
+  });
   Future<void> startSession(AnonymousIdentity identity, String token);
   Future<void> endSession(AnonymousIdentity identity, String token);
   Future<void> uploadBatch(List<QueuedTelemetryEvent> events, String token);
@@ -20,13 +23,16 @@ final class HttpTelemetryApiClient implements TelemetryApiClient {
   final String _baseUrl;
 
   @override
-  Future<String> registerInstallation(AnonymousIdentity identity) async {
+  Future<String> registerInstallation(
+    AnonymousIdentity identity, {
+    required String userAccessToken,
+  }) async {
     final response = await _post('/api/v1/telemetry/installations', {
       'installation_id': identity.installationId,
       'anonymous_actor_id': identity.actorId,
       'platform': Platform.isAndroid ? 'android' : 'ios',
-      'app_version': '0.1.0',
-    });
+      'app_version': '1.0.0',
+    }, token: userAccessToken);
     return (jsonDecode(response.body)
             as Map<String, Object?>)['installation_token']!
         as String;

@@ -32,10 +32,11 @@ abstract interface class AiApiClient {
 }
 
 final class HttpAiApiClient implements AiApiClient {
-  const HttpAiApiClient(this._client, this._baseUrl);
+  const HttpAiApiClient(this._client, this._baseUrl, [this._accessToken]);
 
   final http.Client _client;
   final String _baseUrl;
+  final String? Function()? _accessToken;
 
   @override
   Future<AiResult> monthlySummary(MonthlyAiRequest request) =>
@@ -119,11 +120,15 @@ final class HttpAiApiClient implements AiApiClient {
       throw const AiFailure(AiFailureKind.disabled, 'AI 服务地址未配置');
     }
     try {
+      final token = _accessToken?.call();
       final request =
           http.MultipartRequest(
               'POST',
               Uri.parse('$_baseUrl/api/v1/ai/analyze-image'),
             )
+            ..headers.addAll({
+              if (token != null) 'authorization': 'Bearer $token',
+            })
             ..files.add(
               http.MultipartFile.fromBytes(
                 'image',
@@ -173,10 +178,14 @@ final class HttpAiApiClient implements AiApiClient {
       throw const AiFailure(AiFailureKind.disabled, 'AI 服务地址未配置');
     }
     try {
+      final token = _accessToken?.call();
       final response = await _client
           .post(
             Uri.parse('$_baseUrl/api/v1/ai/$path'),
-            headers: const {'content-type': 'application/json'},
+            headers: {
+              'content-type': 'application/json',
+              if (token != null) 'authorization': 'Bearer $token',
+            },
             body: jsonEncode(payload),
           )
           .timeout(const Duration(seconds: 40));

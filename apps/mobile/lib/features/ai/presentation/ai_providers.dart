@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:smart_ledger/core/config/app_environment.dart';
 import 'package:smart_ledger/features/ai/data/ai_api_client.dart';
 import 'package:smart_ledger/features/ai/data/image_processing_service.dart';
+import 'package:smart_ledger/features/auth/presentation/auth_providers.dart';
 
 final httpClientProvider = Provider<http.Client>((ref) {
   final client = http.Client();
@@ -12,7 +13,11 @@ final httpClientProvider = Provider<http.Client>((ref) {
 });
 
 final aiApiClientProvider = Provider<AiApiClient>((ref) {
-  return HttpAiApiClient(ref.watch(httpClientProvider), apiBaseUrl);
+  return HttpAiApiClient(
+    ref.watch(httpClientProvider),
+    apiBaseUrl,
+    () => ref.read(authenticatedAccessTokenProvider),
+  );
 });
 
 final imageProcessingServiceProvider = Provider<ImageProcessingService>(

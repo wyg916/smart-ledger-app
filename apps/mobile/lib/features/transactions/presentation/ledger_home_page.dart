@@ -25,8 +25,8 @@ class LedgerHomePage extends ConsumerWidget {
         actions: [
           IconButton(
             key: const Key('profile-action'),
-            tooltip: '访客与安全',
-            onPressed: () => context.push('/guest-security'),
+            tooltip: '账号与安全',
+            onPressed: () => context.push('/account-security'),
             icon: const Icon(Icons.account_circle_outlined),
           ),
         ],

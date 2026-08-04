@@ -22,4 +22,17 @@ final appEnvironmentProvider = Provider<AppEnvironment>(
   (ref) => AppEnvironment.fromName(_configuredEnvironment),
 );
 
-const apiBaseUrl = String.fromEnvironment('API_BASE_URL', defaultValue: '');
+const apiBaseUrl = String.fromEnvironment(
+  'API_BASE_URL',
+  defaultValue: 'https://www.znjz.site',
+);
+const appVersion = '1.0.0';
+
+void validateAppConfiguration() {
+  final environment = AppEnvironment.fromName(_configuredEnvironment);
+  final uri = Uri.tryParse(apiBaseUrl);
+  if (environment == AppEnvironment.production &&
+      (uri == null || uri.scheme != 'https' || uri.host.isEmpty)) {
+    throw StateError('Production API_BASE_URL must be HTTPS');
+  }
+}

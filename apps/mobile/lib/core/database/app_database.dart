@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import 'package:smart_ledger/features/auth/data/local_data_isolation_service.dart';
 
 part 'app_database.g.dart';
 
@@ -201,6 +202,8 @@ class AppDatabase extends _$AppDatabase {
 
   AppDatabase.defaults() : super(_openConnection());
 
+  AppDatabase.forUser(String userId) : super(_openConnectionForUser(userId));
+
   static const int currentSchemaVersion = 4;
 
   @override
@@ -330,6 +333,17 @@ LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final directory = await getApplicationDocumentsDirectory();
     final file = File(path.join(directory.path, 'smart_ledger.sqlite'));
+    return NativeDatabase.createInBackground(file);
+  });
+}
+
+LazyDatabase _openConnectionForUser(String userId) {
+  final fileKey = LocalDataIsolationService.userFileKey(userId);
+  return LazyDatabase(() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File(
+      path.join(directory.path, 'smart_ledger_$fileKey.sqlite'),
+    );
     return NativeDatabase.createInBackground(file);
   });
 }

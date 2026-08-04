@@ -25,7 +25,7 @@ import '../../support/ledger_test_harness.dart';
 
 void main() {
   test(
-    'Android release networking is declared and cleartext stays scoped',
+    'Android release networking denies cleartext and debug stays scoped',
     () async {
       final manifest = await File(
         'android/app/src/main/AndroidManifest.xml',
@@ -33,13 +33,21 @@ void main() {
       final networkSecurity = await File(
         'android/app/src/main/res/xml/network_security_config.xml',
       ).readAsString();
+      final debugNetworkSecurity = await File(
+        'android/app/src/debug/res/xml/network_security_config_debug.xml',
+      ).readAsString();
       expect(manifest, contains('android.permission.INTERNET'));
+      expect(manifest, contains('android:usesCleartextTraffic="false"'));
       expect(manifest, contains('@xml/network_security_config'));
       expect(networkSecurity, contains('cleartextTrafficPermitted="false"'));
-      expect(networkSecurity, contains('>10.0.2.2</domain>'));
       expect(
         networkSecurity,
-        isNot(contains('cleartextTrafficPermitted="true" />')),
+        isNot(contains('cleartextTrafficPermitted="true"')),
+      );
+      expect(debugNetworkSecurity, contains('>10.0.2.2</domain>'));
+      expect(
+        debugNetworkSecurity,
+        contains('cleartextTrafficPermitted="true"'),
       );
     },
   );

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_ledger/app/ledger_theme.dart';
 import 'package:smart_ledger/app/router.dart';
+import 'package:smart_ledger/features/auth/domain/auth_session.dart';
+import 'package:smart_ledger/features/auth/presentation/auth_providers.dart';
 import 'package:smart_ledger/features/security/presentation/app_lock_gate.dart';
 import 'package:smart_ledger/features/security/presentation/security_providers.dart';
 import 'package:smart_ledger/features/telemetry/presentation/telemetry_providers.dart';
@@ -35,7 +37,8 @@ class _SmartLedgerAppState extends ConsumerState<SmartLedgerApp>
         state == AppLifecycleState.inactive) {
       ref.read(appLockControllerProvider.notifier).lockForBackground();
     }
-    if (state == AppLifecycleState.detached) {
+    if (state == AppLifecycleState.detached &&
+        ref.read(authControllerProvider).phase == AuthPhase.authenticated) {
       unawaited(
         ref
             .read(telemetryCoordinatorProvider.future)
@@ -46,13 +49,18 @@ class _SmartLedgerAppState extends ConsumerState<SmartLedgerApp>
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(telemetryCoordinatorProvider);
+    final auth = ref.watch(authControllerProvider);
+    if (auth.phase == AuthPhase.authenticated) {
+      ref.watch(telemetryCoordinatorProvider);
+    }
     return MaterialApp.router(
       title: '智能记账',
       debugShowCheckedModeBanner: false,
       theme: buildLedgerTheme(),
       routerConfig: ref.watch(routerProvider),
-      builder: (context, child) => AppLockGate(child: child),
+      builder: (context, child) => auth.phase == AuthPhase.authenticated
+          ? AppLockGate(child: child)
+          : child ?? const SizedBox.shrink(),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_ledger/core/config/app_environment.dart';
 import 'package:smart_ledger/core/database/database_providers.dart';
 import 'package:smart_ledger/features/ai/presentation/ai_providers.dart';
+import 'package:smart_ledger/features/auth/presentation/auth_providers.dart';
 import 'package:smart_ledger/features/identity/presentation/identity_providers.dart';
 import 'package:smart_ledger/features/telemetry/data/analytics_queue_repository.dart';
 import 'package:smart_ledger/features/telemetry/data/telemetry_api_client.dart';
@@ -22,12 +23,17 @@ final telemetryApiClientProvider = Provider<TelemetryApiClient>(
 final telemetryCoordinatorProvider = FutureProvider<TelemetryRecorder>((
   ref,
 ) async {
+  final accessToken = ref.watch(authenticatedAccessTokenProvider);
+  if (accessToken == null) {
+    throw StateError('Authenticated user required for telemetry');
+  }
   final identity = await ref.watch(anonymousIdentityProvider.future);
   final coordinator = TelemetryCoordinator(
     ref.watch(analyticsQueueRepositoryProvider),
     ref.watch(telemetryApiClientProvider),
     ref.watch(anonymousIdentityServiceProvider),
     identity,
+    accessToken,
   );
   await coordinator.start();
   return coordinator;

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:smart_ledger/features/accounts/presentation/accounts_page.dart';
@@ -10,17 +11,36 @@ import 'package:smart_ledger/features/ai/presentation/ai_assistant_page.dart';
 import 'package:smart_ledger/features/ai/presentation/ai_budget_review_page.dart';
 import 'package:smart_ledger/features/ai/presentation/ai_financial_plan_page.dart';
 import 'package:smart_ledger/features/ai/presentation/ai_monthly_summary_page.dart';
+import 'package:smart_ledger/features/auth/domain/auth_session.dart';
+import 'package:smart_ledger/features/auth/presentation/account_security_page.dart';
+import 'package:smart_ledger/features/auth/presentation/auth_providers.dart';
+import 'package:smart_ledger/features/auth/presentation/auth_splash_page.dart';
+import 'package:smart_ledger/features/auth/presentation/local_data_binding_page.dart';
+import 'package:smart_ledger/features/auth/presentation/login_page.dart';
 import 'package:smart_ledger/features/transactions/presentation/ledger_home_page.dart';
 import 'package:smart_ledger/features/transactions/presentation/details_page.dart';
 import 'package:smart_ledger/features/transactions/presentation/transaction_detail_page.dart';
 import 'package:smart_ledger/features/transactions/presentation/transaction_form_page.dart';
 import 'package:smart_ledger/app/ledger_shell.dart';
-import 'package:smart_ledger/features/identity/presentation/guest_security_page.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
+  final refresh = _RouterRefreshNotifier();
+  ref.listen<AuthState>(authControllerProvider, (_, _) => refresh.notify());
   final router = GoRouter(
     initialLocation: '/',
+    refreshListenable: refresh,
+    redirect: (context, state) =>
+        authRedirect(ref.read(authControllerProvider), state.matchedLocation),
     routes: [
+      GoRoute(
+        path: '/splash',
+        builder: (context, state) => const AuthSplashPage(),
+      ),
+      GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
+      GoRoute(
+        path: '/bind-local-data',
+        builder: (context, state) => const LocalDataBindingPage(),
+      ),
       ShellRoute(
         builder: (context, state, child) =>
             LedgerShell(location: state.uri.path, child: child),
@@ -92,8 +112,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const AiFinancialPlanPage(),
       ),
       GoRoute(
-        path: '/guest-security',
-        builder: (context, state) => const GuestSecurityPage(),
+        path: '/account-security',
+        builder: (context, state) => const AccountSecurityPage(),
       ),
       GoRoute(
         path: '/transactions/:id',
@@ -110,5 +130,24 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
   ref.onDispose(router.dispose);
+  ref.onDispose(refresh.dispose);
   return router;
 });
+
+final class _RouterRefreshNotifier extends ChangeNotifier {
+  void notify() => notifyListeners();
+}
+
+String? authRedirect(AuthState auth, String location) {
+  final isAuthRoute =
+      location == '/splash' ||
+      location == '/login' ||
+      location == '/bind-local-data';
+  return switch (auth.phase) {
+    AuthPhase.initializing => location == '/splash' ? null : '/splash',
+    AuthPhase.unauthenticated => location == '/login' ? null : '/login',
+    AuthPhase.bindingRequired =>
+      location == '/bind-local-data' ? null : '/bind-local-data',
+    AuthPhase.authenticated => isAuthRoute ? '/' : null,
+  };
+}
