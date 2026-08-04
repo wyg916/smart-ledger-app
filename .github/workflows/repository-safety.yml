@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - "p1d/**"
+      - "p1e/**"
 
 permissions:
   contents: read

@@ -6,7 +6,7 @@ on:
       - "services/api/**"
       - ".github/workflows/api.yml"
   push:
-    branches: [main, "p1/**", "p1d/**"]
+    branches: [main, "p1/**", "p1d/**", "p1e/**"]
     paths:
       - "services/api/**"
       - ".github/workflows/api.yml"
@@ -18,6 +18,20 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: smart_ledger_ci
+          POSTGRES_USER: ledger_ci
+          POSTGRES_PASSWORD: ledger_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ledger_ci -d smart_ledger_ci"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
     env:
       KIMI_PROVIDER: fake
       KIMI_AI_ENABLED: "true"
@@ -49,4 +63,12 @@ jobs:
           SMART_LEDGER_DATABASE_URL: sqlite+aiosqlite:////tmp/smart-ledger-ci.db
         run: |
           uv run alembic upgrade head
+          uv run alembic downgrade base
+      - name: Verify PostgreSQL migration
+        working-directory: services/api
+        env:
+          SMART_LEDGER_DATABASE_URL: postgresql+asyncpg://ledger_ci:ledger_ci@127.0.0.1:5432/smart_ledger_ci
+        run: |
+          uv run alembic upgrade head
+          uv run alembic current
           uv run alembic downgrade base

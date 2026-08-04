@@ -1,0 +1,50 @@
+name: Android release candidate compile check
+
+on:
+  pull_request:
+    paths:
+      - "apps/mobile/**"
+      - ".github/workflows/android-release-candidate.yml"
+  push:
+    branches: [main, "p1e/**"]
+    paths:
+      - "apps/mobile/**"
+      - ".github/workflows/android-release-candidate.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  unsigned-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.44.8"
+          channel: stable
+          cache: true
+      - name: Verify signing material is absent from CI
+        run: |
+          test ! -e apps/mobile/android/key.properties
+          ! find apps/mobile -type f \( -name '*.jks' -o -name '*.keystore' \) -print -quit | grep .
+      - name: Resolve and generate
+        working-directory: apps/mobile
+        run: |
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+      - name: Compile unsigned production Release APK and AAB
+        working-directory: apps/mobile
+        run: |
+          flutter build apk --release --dart-define=APP_ENV=production --dart-define=API_BASE_URL=https://www.znjz.site
+          flutter build appbundle --release --dart-define=APP_ENV=production --dart-define=API_BASE_URL=https://www.znjz.site
+      - name: Prohibit publishing unsigned CI artifacts
+        run: |
+          test -f apps/mobile/build/app/outputs/flutter-apk/app-release.apk
+          test -f apps/mobile/build/app/outputs/bundle/release/app-release.aab
+          echo "Compile-only artifacts intentionally remain inside the ephemeral runner."

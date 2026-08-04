@@ -6,7 +6,7 @@ on:
       - "apps/mobile/**"
       - ".github/workflows/flutter.yml"
   push:
-    branches: [main, "p1/**", "p1b/**", "p1c/**", "p1d/**"]
+    branches: [main, "p1/**", "p1b/**", "p1c/**", "p1d/**", "p1e/**"]
     paths:
       - "apps/mobile/**"
       - ".github/workflows/flutter.yml"
@@ -46,4 +46,4 @@ jobs:
         run: flutter test
       - name: Build unsigned debug APK
         working-directory: apps/mobile
-        run: flutter build apk --debug --dart-define=API_BASE_URL=http://10.0.2.2:8001
+        run: flutter build apk --debug --dart-define=APP_ENV=production --dart-define=API_BASE_URL=https://www.znjz.site
