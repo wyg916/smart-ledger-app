@@ -75,7 +75,7 @@ final class AuthSession {
       accessExpiresAt: now.add(const Duration(days: 1)),
       refreshExpiresAt: now.add(const Duration(days: 30)),
       lastVerifiedAt: now,
-      providers: const ['play_review'],
+      providers: const ['phone_one_click'],
     );
   }
 }
