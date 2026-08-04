@@ -1,6 +1,6 @@
 # P1D 匿名身份与运营分析实现报告
 
-状态：本地与 Android 门禁通过，远端门禁待完成
+状态：PASS（本地、Android、功能分支 CI、fast-forward 与 main CI 全部通过）
 日期：2026-08-04
 
 ## 实现结果
@@ -27,6 +27,9 @@
 - Flutter 身份持久化、session 更新、事件清洗、离线队列上限/重试和游客/应用锁测试通过。
 - Schema 3→4 升级保留既有账本事实；Android `install -r` 后旧收入、支出和统计仍在。
 - `scripts/product_metrics_report.py` 可用环境 Token 拉取 7/30 天脱敏摘要且不打印凭据。
+- 工程提交 `1936d5123d64ca64d27e74155075dfe22606b6d3` 的功能分支 Flutter/FastAPI/Safety Run
+  `30908130415`、`30908129729`、`30908128026` 与 main Run `30908806675`、`30908807065`、
+  `30908806639` 全部成功。
 
 ## 边界
 

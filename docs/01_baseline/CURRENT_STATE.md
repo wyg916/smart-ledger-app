@@ -1,6 +1,6 @@
 # 当前事实基线
 
-更新日期：2026-08-03
+更新日期：2026-08-04
 
 ## 仓库
 - GitHub：`wyg916/smart-ledger-app`
@@ -103,8 +103,12 @@
   `kimi-k2.6` 与
   `kimi-k2.7-code`，六个合成场景均通过 Structured Output 和 Pydantic。
 - Android 34 `adb install -r` 保留既有收入 100.00 和确认后支出 25.00；日/月统计、对话、
-  图片待确认、匿名指标、冷启动、游客/安全页和空白最近任务预览通过。分支/主线 CI 与最终
-  fast-forward 状态以本轮关闭提交为准，在完成前不提前标记 PASS。
+  图片待确认、匿名指标、冷启动、游客/安全页和空白最近任务预览通过。
+- `P1D-RAPID-UPGRADE` 工程提交为 `1936d5123d64ca64d27e74155075dfe22606b6d3`。
+  功能分支 Flutter Run `30908130415`、FastAPI Run `30908129729`、Repository Safety Run
+  `30908128026` 全部成功；确认远端 main 仍为授权基线 `ad46a0ca723bff41a2a5114cd32efc5506687e75`
+  后，以 `git merge --ff-only` 合入并普通推送。main Flutter Run `30908806675`、FastAPI Run
+  `30908807065`、Repository Safety Run `30908806639` 全部成功，阶段正式关闭为 PASS。
 
 ## 待审计
 - [x] macOS 旧 Android 可复现构建（JDK 17、Android SDK 34、官方 HTTPS Wrapper、clean/test/assembleDebug）
@@ -125,8 +129,9 @@ P0-CLOSEOUT、P1A、P1B、P1C 与 P1D 已同步到 `origin/main` 并正式关闭
 `P1D = PASS`。P1D 不代表真实旧库迁移、登录、同步、后端业务表、备份、
 应用锁、通用聊天、Agent、RAG 或发布能力完成；不得自动进入下一阶段。
 
-`P1D-RAPID-UPGRADE` 的本地、真实 Kimi 与 Android 门禁已通过，当前仍需以分支远端 CI、
-fast-forward 合入和 main CI 作为最终关闭条件；这些远端事实完成前状态为 `REMOTE_PENDING`。
+`P1D-RAPID-UPGRADE` 的本地、真实 Kimi、Android、功能分支 CI、fast-forward 合入和 main
+CI 均已通过，阶段结论为 `P1D-RAPID-UPGRADE = PASS`。这不代表注册、云端账单、多设备同步、
+长期记忆、Agent、RAG、生产部署、正式签名或 iOS 发布能力已经完成。
 
 `IOS_TOOLCHAIN = BLOCKED`：需安装完整 Xcode、执行首次初始化并安装 CocoaPods，
 在此之前不允许进入正式 iOS 构建或发布阶段。真实用户、正式签名、最终标识和商店

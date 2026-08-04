@@ -1,6 +1,6 @@
 # P1D 对话、智能记账与图片实现报告
 
-状态：本地、真实 Kimi 与 Android 门禁通过，远端门禁待完成
+状态：PASS（本地、真实 Kimi、Android、功能分支 CI 与 main CI 全部通过）
 日期：2026-08-04
 
 ## 交付
@@ -38,6 +38,10 @@ FakeProvider 联网验收完成自由对话与图片结构化解读；图片候�
 
 FastAPI 31/31 测试、Ruff format/lint、Mypy 与 Alembic SQLite/PostgreSQL 迁移通过；CI 使用
 FakeProvider，不配置或调用真实 Kimi。
+
+工程提交 `1936d5123d64ca64d27e74155075dfe22606b6d3` 的功能分支 Flutter/FastAPI/Safety Run
+分别为 `30908130415`、`30908129729`、`30908128026`；fast-forward 合入后的 main Run 分别为
+`30908806675`、`30908807065`、`30908806639`，六条均成功。
 
 ## 非目标
 

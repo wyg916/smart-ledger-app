@@ -1,6 +1,6 @@
 # P1D UI 产品化验收报告
 
-状态：Android 本地验收通过，远端门禁待完成
+状态：PASS（Android 本地验收、功能分支 CI、fast-forward 与 main CI 全部通过）
 日期：2026-08-04
 
 ## 参考图与视觉语言
@@ -42,6 +42,11 @@ Android 34 ARM64、1080×2400 上生成了以下九类截图；均为合成账�
 213,673,146 字节，SHA-256 `4cfccff347d70960ea4602c57f57fde2dfb40fec7cd8aac5bba5855d1bd8311d`；
 联网 Release APK 67,375,371 字节，SHA-256
 `23d109cabb753ac4b51179fd06feeff66b90c8246ed9810100e14e393addb13e`。
+
+工程提交 `1936d5123d64ca64d27e74155075dfe22606b6d3` 的功能分支 Flutter Run
+`30908130415`、FastAPI Run `30908129729`、Repository Safety Run `30908128026` 全部成功；
+fast-forward 合入后，main Flutter Run `30908806675`、FastAPI Run `30908807065`、
+Repository Safety Run `30908806639` 全部成功。
 
 ## 平台状态
 

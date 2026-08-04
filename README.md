@@ -22,11 +22,11 @@ tests/fixtures/             匿名化测试数据
 
 ## 当前阶段
 
-P1D Kimi AI Lite 已在 `main` 关闭。`p1d/rapid-product-upgrade` 正在完成其产品化升级：默认
-今日首页、按日/按月统计、日期分组明细、六个常用分类、本地优先的一句话记账、Kimi 自由
-对话与单图理解、匿名安全身份、离线运营事件和 DAU/WAU/MAU 查询。完整实现与门禁证据见
-`docs/06_ui/`、`docs/07_ai/` 和 `docs/08_identity_analytics/`；只有分支与 main CI 均成功后，
-关闭报告才会把阶段标记为 PASS。
+`P1D-RAPID-UPGRADE` 已在 `main` 关闭并标记为 PASS：默认今日首页、按日/按月统计、日期
+分组明细、六个常用分类、本地优先的一句话记账、Kimi 自由对话与单图理解、匿名安全身份、
+离线运营事件和 DAU/WAU/MAU 查询均已交付。工程提交 `1936d5123d64ca64d27e74155075dfe22606b6d3`
+的功能分支与 main Flutter、FastAPI、Repository Safety CI 全部成功；完整实现与门禁证据见
+`docs/06_ui/`、`docs/07_ai/` 和 `docs/08_identity_analytics/`。
 
 本阶段不包含注册、云端账单、业务同步、长期记忆、Agent、RAG、任意 SQL、生产部署或正式
 签名发布。语音输入保持 `VOICE_INPUT = DEFERRED`；`IOS_TOOLCHAIN = BLOCKED`，Android 已
