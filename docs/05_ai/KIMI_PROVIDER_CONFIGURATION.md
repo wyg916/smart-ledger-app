@@ -1,7 +1,7 @@
 # Kimi Provider 配置
 
-状态：P1D 本地开发配置
-更新日期：2026-08-03
+状态：P1D Rapid Upgrade 本地开发配置
+更新日期：2026-08-04
 
 ## 安全原则
 
@@ -19,13 +19,15 @@
 | `KIMI_BASE_URL` | `https://api.moonshot.cn/v1` | 国内 OpenAI 兼容 API |
 | `KIMI_FAST_MODEL` | `kimi-k2.6` | 月度总结、预算解释 |
 | `KIMI_REASONING_MODEL` | `kimi-k2.6` | 财务规划；可在模型可用性复核后覆盖 |
+| `KIMI_CHAT_MODEL` | `kimi-k2.6` | 自由对话 |
+| `KIMI_VISION_MODEL` | `kimi-k2.6` | 单张财务截图理解 |
 | `KIMI_AI_ENABLED` | `true`/`false` | 总开关，默认关闭 |
 | `KIMI_PROVIDER` | `kimi`/`fake` | 本地真实调用或 CI 合成 Provider |
 | `KIMI_LIVE_TEST` | `false` | 真实 smoke 显式开关，默认关闭 |
 
-2026-08-03 受控 `/v1/models` 仅返回 `kimi-k2.6`、`kimi-k2.7-code`，未返回 K3；因此
-当前快速和规划场景均使用 `kimi-k2.6`，并关闭 thinking。不得把 coding 模型自动当作财务
-规划模型。将来如模型清单变化，先受控查询再显式修改环境变量。
+2026-08-04 受控 `/v1/models` 仍只返回 `kimi-k2.6`、`kimi-k2.7-code`，未返回 K3；因此
+快速、规划、对话和图片场景均使用 `kimi-k2.6`，并关闭 thinking。不得把 coding 模型自动
+当作财务模型。将来如模型清单变化，先受控查询再显式修改环境变量。
 
 ## 本地启动
 
@@ -52,8 +54,9 @@ Android release 已声明 `INTERNET` 权限。网络安全配置默认禁止明�
 cd services/api
 KIMI_LIVE_TEST=true uv run python -m scripts.kimi_smoke
 
-# 仅复核一个场景：monthly_summary / budget_review / financial_plan
-KIMI_LIVE_TEST=true KIMI_SMOKE_SCENARIO=financial_plan \
+# 可单独复核 monthly_summary / budget_review / financial_plan / chat /
+# parse_transaction / image_analysis
+KIMI_LIVE_TEST=true KIMI_SMOKE_SCENARIO=image_analysis \
   uv run python -m scripts.kimi_smoke
 ```
 

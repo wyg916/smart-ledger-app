@@ -1,6 +1,6 @@
 # P1D AI 对话、智能记账与截图契约
 
-状态：冻结用于 `P1D-RAPID-UPGRADE`  
+状态：冻结用于 `P1D-RAPID-UPGRADE`
 日期：2026-08-04
 
 ## 能力与边界

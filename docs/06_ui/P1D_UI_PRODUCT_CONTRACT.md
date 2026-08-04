@@ -1,6 +1,6 @@
 # P1D Rapid UI 产品契约
 
-状态：冻结用于 `P1D-RAPID-UPGRADE`  
+状态：冻结用于 `P1D-RAPID-UPGRADE`
 日期：2026-08-04
 
 ## 范围与事实源

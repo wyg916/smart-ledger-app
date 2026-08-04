@@ -1,6 +1,6 @@
 # P1D Kimi AI Lite 冻结契约
 
-状态：冻结用于 P1D-AI-LITE 实现  
+状态：冻结用于 P1D-AI-LITE 实现
 日期：2026-08-03
 
 ## 范围

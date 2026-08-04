@@ -93,6 +93,18 @@
   `git merge --ff-only` 合入 P1D 工程 SHA `db8a1f78c417bbfa3f8346d0464052fa3d8b2b50` 并
   普通推送；main FastAPI Run `30834204550`、Flutter Run `30834203471`、Repository
   Safety Run `30834202262` 全部通过。P1D 已正式关闭。
+- 用户于 2026-08-04 授权 `P1D-RAPID-UPGRADE`；分支 `p1d/rapid-product-upgrade` 从用户确认的
+  `main` 基线 `ad46a0ca723bff41a2a5114cd32efc5506687e75` 创建。三份范围契约已先行冻结。
+- 本轮已实现产品化五项底栏、默认今日首页、日期分组明细、统计日/月视图、90 天六分类、
+  本地优先自然语言草稿、Kimi 自由对话/单图、匿名安全身份、Drift Schema 4 离线事件队列、
+  analytics 四表与指标接口、游客/应用锁及 Android 后台预览保护。
+- 当前本地门禁为 Flutter 68/68、行覆盖率 47.17%、FastAPI 31/31、Flutter analyze、Ruff、
+  Mypy、Alembic SQLite/PostgreSQL 和 Android Debug/Release 构建通过。真实 Kimi 现场模型为
+  `kimi-k2.6` 与
+  `kimi-k2.7-code`，六个合成场景均通过 Structured Output 和 Pydantic。
+- Android 34 `adb install -r` 保留既有收入 100.00 和确认后支出 25.00；日/月统计、对话、
+  图片待确认、匿名指标、冷启动、游客/安全页和空白最近任务预览通过。分支/主线 CI 与最终
+  fast-forward 状态以本轮关闭提交为准，在完成前不提前标记 PASS。
 
 ## 待审计
 - [x] macOS 旧 Android 可复现构建（JDK 17、Android SDK 34、官方 HTTPS Wrapper、clean/test/assembleDebug）
@@ -112,6 +124,9 @@ P0-CLOSEOUT、P1A、P1B、P1C 与 P1D 已同步到 `origin/main` 并正式关闭
 真实 Kimi、Android release、分支 CI、fast-forward 合入和 main CI 均已通过，阶段结论为
 `P1D = PASS`。P1D 不代表真实旧库迁移、登录、同步、后端业务表、备份、
 应用锁、通用聊天、Agent、RAG 或发布能力完成；不得自动进入下一阶段。
+
+`P1D-RAPID-UPGRADE` 的本地、真实 Kimi 与 Android 门禁已通过，当前仍需以分支远端 CI、
+fast-forward 合入和 main CI 作为最终关闭条件；这些远端事实完成前状态为 `REMOTE_PENDING`。
 
 `IOS_TOOLCHAIN = BLOCKED`：需安装完整 Xcode、执行首次初始化并安装 CocoaPods，
 在此之前不允许进入正式 iOS 构建或发布阶段。真实用户、正式签名、最终标识和商店
