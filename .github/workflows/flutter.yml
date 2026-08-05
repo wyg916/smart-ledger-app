@@ -43,7 +43,7 @@ jobs:
         run: flutter analyze
       - name: Test
         working-directory: apps/mobile
-        run: flutter test
+        run: flutter test --coverage
       - name: Build unsigned debug APK
         working-directory: apps/mobile
         run: flutter build apk --debug --dart-define=APP_ENV=production --dart-define=API_BASE_URL=https://www.znjz.site

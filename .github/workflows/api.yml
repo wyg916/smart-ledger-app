@@ -4,11 +4,13 @@ on:
   pull_request:
     paths:
       - "services/api/**"
+      - "scripts/product_metrics_report.py"
       - ".github/workflows/api.yml"
   push:
     branches: [main, "p1/**", "p1d/**", "p1e/**"]
     paths:
       - "services/api/**"
+      - "scripts/product_metrics_report.py"
       - ".github/workflows/api.yml"
 
 permissions:
@@ -36,6 +38,8 @@ jobs:
       KIMI_PROVIDER: fake
       KIMI_AI_ENABLED: "true"
       KIMI_LIVE_TEST: "false"
+      PHONE_AUTH_PROVIDER: fake
+      WECHAT_AUTH_PROVIDER: fake
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v7
@@ -47,10 +51,10 @@ jobs:
         run: uv sync --frozen
       - name: Ruff format
         working-directory: services/api
-        run: uv run ruff format --check .
+        run: uv run ruff format --check . ../../scripts/product_metrics_report.py
       - name: Ruff lint
         working-directory: services/api
-        run: uv run ruff check .
+        run: uv run ruff check . ../../scripts/product_metrics_report.py
       - name: Type check
         working-directory: services/api
         run: uv run mypy .
@@ -64,6 +68,8 @@ jobs:
         run: |
           uv run alembic upgrade head
           uv run alembic downgrade base
+          uv run alembic upgrade head
+          uv run python -c "import sqlite3; c=sqlite3.connect('/tmp/smart-ledger-ci.db'); assert c.execute('PRAGMA foreign_key_check').fetchall()==[]"
       - name: Verify PostgreSQL migration
         working-directory: services/api
         env:
@@ -72,3 +78,5 @@ jobs:
           uv run alembic upgrade head
           uv run alembic current
           uv run alembic downgrade base
+          uv run alembic upgrade head
+          uv run alembic current

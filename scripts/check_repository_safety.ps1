@@ -27,6 +27,7 @@ try {
 
     $forbiddenNamePattern = '(?i)(^\.env($|\.)|local\.properties$|\.(jks|keystore|p12|pfx|pem|key|mobileprovision|db|sqlite|sqlite3|apk|aab|apks|ipa|zip|log)$)'
     $forbidden = @($files | Where-Object { $_.Name -match $forbiddenNamePattern -and $_.Name -ne ".env.example" })
+    $snapshotFiles = @($files | Where-Object { $_.Name -match '(?i)ai.*(question|answer|conversation).*snapshot' })
     $large = @($files | Where-Object { $_.Length -gt $MaxFileBytes })
 
     $textExtensions = @(
@@ -40,6 +41,10 @@ try {
         'sk-[0-9A-Za-z_-]{20,}',
         'Authorization\s*:\s*Bearer\s+[0-9A-Za-z_-]{20,}',
         'MOONSHOT_API_KEY\s*=\s*[0-9A-Za-z_-]{20,}',
+        'JWT_SECRET\s*=\s*[0-9A-Za-z_-]{20,}',
+        'REFRESH_TOKEN\s*=\s*[0-9A-Za-z_-]{20,}',
+        '(?i)(?:openid|unionid)\s*[:=]\s*["''][0-9A-Za-z_-]{12,}',
+        '(?<![0-9])1[3-9][0-9]{9}(?![0-9])',
         '-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----'
     )
     $secretFindings = New-Object System.Collections.Generic.List[string]
@@ -62,11 +67,14 @@ try {
     if ($large.Count -gt 0) {
         Write-Error ("Files larger than $MaxFileBytes bytes found:`n" + (($large | ForEach-Object { "{0} ({1} bytes)" -f (Get-RepoRelativePath $_.FullName), $_.Length }) -join "`n"))
     }
+    if ($snapshotFiles.Count -gt 0) {
+        Write-Error ("AI question or answer snapshots found:`n" + (($snapshotFiles.FullName | ForEach-Object { Get-RepoRelativePath $_ }) -join "`n"))
+    }
     if ($secretFindings.Count -gt 0) {
         Write-Error ("High-confidence secret patterns found:`n" + ($secretFindings -join "`n"))
     }
 
-    if ($forbidden.Count -gt 0 -or $large.Count -gt 0 -or $secretFindings.Count -gt 0) {
+    if ($forbidden.Count -gt 0 -or $large.Count -gt 0 -or $snapshotFiles.Count -gt 0 -or $secretFindings.Count -gt 0) {
         exit 1
     }
     Write-Host "Repository safety check passed: $($files.Count) candidate files scanned."

@@ -28,6 +28,29 @@ services:
     environment:
       SMART_LEDGER_ENVIRONMENT: development
       SMART_LEDGER_DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-ledger_dev}:${POSTGRES_PASSWORD:-ledger_dev}@postgres:5432/${POSTGRES_DB:-smart_ledger_dev}
+      AUTH_JWT_SECRET: local-development-jwt-secret-at-least-32-characters
+      AUTH_IDENTITY_PEPPER: local-development-identity-pepper-at-least-32-characters
+      INTERNAL_METRICS_TOKEN: ${INTERNAL_METRICS_TOKEN:-synthetic-local-metrics-token}
+      KIMI_PROVIDER: fake
+      KIMI_AI_ENABLED: "true"
+      PHONE_AUTH_PROVIDER: fake
+      WECHAT_AUTH_PROVIDER: fake
+      TELEMETRY_ENABLED: "true"
+      ANALYTICS_RAW_RETENTION_DAYS: ${ANALYTICS_RAW_RETENTION_DAYS:-90}
+      ANALYTICS_AGGREGATE_RETENTION_DAYS: ${ANALYTICS_AGGREGATE_RETENTION_DAYS:-400}
+      AI_FREE_DAILY_LIMIT: ${AI_FREE_DAILY_LIMIT:-2}
+      AI_FREE_WEEKLY_LIMIT: ${AI_FREE_WEEKLY_LIMIT:-10}
+      AI_REVIEW_DAILY_LIMIT: ${AI_REVIEW_DAILY_LIMIT:-50}
+      AI_REVIEW_WEEKLY_LIMIT: ${AI_REVIEW_WEEKLY_LIMIT:-250}
+      AI_INTERNAL_TEST_DAILY_LIMIT: ${AI_INTERNAL_TEST_DAILY_LIMIT:-100}
+      AI_INTERNAL_TEST_WEEKLY_LIMIT: ${AI_INTERNAL_TEST_WEEKLY_LIMIT:-500}
+      AI_RESERVATION_TTL_SECONDS: ${AI_RESERVATION_TTL_SECONDS:-600}
+      AI_MODEL_PRICING_JSON: ${AI_MODEL_PRICING_JSON:-{}}
+      USER_TIMEZONE_CHANGE_COOLDOWN_HOURS: ${USER_TIMEZONE_CHANGE_COOLDOWN_HOURS:-24}
+    command:
+      - /bin/sh
+      - -ec
+      - uv run alembic upgrade head && exec uv run uvicorn app.main:app --host 0.0.0.0 --port 8000
     ports:
       - "127.0.0.1:${API_PORT:-8000}:8000"
     depends_on:
