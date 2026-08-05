@@ -127,6 +127,12 @@
 - API 36 现场运营读数为 DAU 1、同用户 session 2、AI 成功 2、配额拦截 2；PostgreSQL 现场
   验证同周第 10 次成功/第 11 次拦截和三个并发只放行两个。App/API 日志未命中 FATAL、ANR、
   数据库错误、Token、Provider Secret、手机号或微信身份。
+- P1E2 功能分支 HEAD `4cc758f07c8b65954c278c72693095964c01b6fb` 的 Repository Safety
+  `31005929979`、FastAPI `31005930023`、Flutter `31005929996`、Android RC
+  `31005930029` 全部成功。复核远端 P1E 仍为 `0592012` 后以 `--ff-only` 合入并普通推送；
+  P1E 的 Repository Safety `31006458176`、FastAPI `31006458194`、Flutter `31006458282`、
+  Android RC `31006458180` 也全部成功。`P1E2-METRICS-AI-QUOTA = PASS`，但 P1E 总体仍为
+  PARTIAL，main 未修改。
 
 ## 待审计
 - [x] macOS 旧 Android 可复现构建（JDK 17、Android SDK 34、官方 HTTPS Wrapper、clean/test/assembleDebug）

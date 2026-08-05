@@ -1,6 +1,6 @@
 # P1E2 用户指标与 AI 配额实现报告
 
-状态：LOCAL PASS / REMOTE CI PENDING
+状态：PASS
 日期：2026-08-05  
 分支：`p1e/ai-quota-user-metrics`
 
@@ -77,8 +77,25 @@
 
 ## CI 与合并状态
 
-远端普通推送、功能分支 CI、条件式 `--ff-only` 合入 `p1e/android-auth-release` 与合入后 CI 尚待
-执行。只有这些门禁全部成功后才把本报告改为最终 PASS；任何失败都保持分支不合并。
+功能分支工程/本地证据 HEAD `4cc758f07c8b65954c278c72693095964c01b6fb` 已普通推送，四组 CI
+全部成功：
+
+- Repository Safety：`31005929979`
+- FastAPI foundation：`31005930023`
+- Flutter foundation：`31005929996`
+- Android release candidate compile check：`31005930029`
+
+合并前重新 fetch 并确认 `origin/p1e/android-auth-release` 仍为授权基线
+`059201207c36801413e61a520c128562e407c9ec`，功能分支与远端一致且工作树干净；随后只执行
+`git merge --ff-only p1e/ai-quota-user-metrics` 和普通推送。P1E 到 `4cc758f` 后本地/远端 0/0，
+合入后四组 CI 再次全部成功：
+
+- Repository Safety：`31006458176`
+- FastAPI foundation：`31006458194`
+- Flutter foundation：`31006458282`
+- Android release candidate compile check：`31006458180`
+
+因此 `P1E2-METRICS-AI-QUOTA = PASS`。全程未合入或推送 `main`。
 
 ## 不变的发布结论
 
