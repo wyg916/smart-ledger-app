@@ -18,7 +18,8 @@
 
 服务端使用 `users.timezone` 中经过 `zoneinfo` 验证的 IANA 时区。缺失为 UTC；首次登录可提交设备
 IANA 时区，之后只能调用受认证的时区更新接口。时区更新有最短间隔限制，不能由每次 AI 请求
-临时覆盖，且不重算或搬移已存在的 counter/usage。
+临时覆盖。历史 counter/usage 不重算也不搬移；为防止切换时区刷新额度，新时区当前日/周 counter
+至少继承旧时区当前 counter 的已用量。有未结算 reservation 时拒绝切换。
 
 - daily：用户当地 00:00（含）至次日 00:00（不含）。
 - weekly：用户当地周一 00:00（含）至下周一 00:00（不含）。
@@ -118,4 +119,3 @@ error type 和时间戳。成本只以模型、Token 数和服务端受控价格
 
 严禁保存或写入日志/Telemetry/测试快照：用户问题、回答、完整 Prompt、`reasoning_content`、
 图片/base64、原始交易、金额、账户/分类/备注、手机号、微信身份、Access/Refresh Token、Kimi Key。
-

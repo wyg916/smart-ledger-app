@@ -41,3 +41,21 @@
 - CI 已闭合，但仅证明仓库安全检查、自动化测试与无签名 Release 编译链通过，不替代真实 Provider、正式签名、生产部署、真机和商店审核门禁。
 
 因此本记录结论固定为 `P1E-ANDROID-AUTH-RC = PARTIAL`；不得合入 `main`，不得声称已上线或已通过商店审核。
+
+## P1E2 指标与配额增量证据
+
+P1E2 在 `p1e/ai-quota-user-metrics` 上增加认证用户指标和 AI 配额，不改变本文件的 PARTIAL 结论：
+
+- 正式 DAU 以 `user_id` 去重，anonymous legacy 仅单独展示；业务账单不上传，埋点不含财务内容
+  或 AI 问题/回答。
+- 普通用户 AI 服务端权威限制为 2 次/日、10 次/周；Flutter 仅展示/提前禁用，不能绕过服务端。
+- FastAPI 59/59、Flutter 94/94、47.46% 行覆盖率、SQLite/PostgreSQL 0004 迁移回环、开发空卷
+  Compose 自动迁移和 API 36 模拟器均通过。
+- 模拟器使用 FakePhone/FakeAi；两次 AI 成功后日额度归零，重启保持，本地记账、预算和统计仍
+  可用。PostgreSQL 同时验证周 10/10、第 11 次拦截、request id 幂等与并发不超额。
+- debug APK 为 191,000,972 bytes，SHA-256
+  `ea3887cb3802052bb1bcc815e5cc0bfc15e1e0f878cb1caaa2c414087730e9cf`；它未使用正式签名，
+  不是商店发布工件。
+
+真实 Provider、正式签名、生产环境、真机和商店门禁仍全部未关闭。本增量不得写成 Android 正式
+上线，也不得合入 `main`。

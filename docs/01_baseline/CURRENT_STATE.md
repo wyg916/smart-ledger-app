@@ -1,6 +1,6 @@
 # 当前事实基线
 
-更新日期：2026-08-04
+更新日期：2026-08-05
 
 ## 仓库
 - GitHub：`wyg916/smart-ledger-app`
@@ -109,6 +109,24 @@
   `30908128026` 全部成功；确认远端 main 仍为授权基线 `ad46a0ca723bff41a2a5114cd32efc5506687e75`
   后，以 `git merge --ff-only` 合入并普通推送。main Flutter Run `30908806675`、FastAPI Run
   `30908807065`、Repository Safety Run `30908806639` 全部成功，阶段正式关闭为 PASS。
+- P1E Android Auth RC 已在专用分支完成强制登录、认证用户隔离、账号安全、API 36 与无签名
+  Release 编译链，但真实号码/微信 Provider、正式签名、生产部署、真机和商店资料未关闭，结论
+  固定为 `P1E-ANDROID-AUTH-RC = PARTIAL`，不得合入 main 或声称上线。
+- P1E2 分支 `p1e/ai-quota-user-metrics` 从 P1E `059201207c36801413e61a520c128562e407c9ec`
+  创建，开始时本地/远端 P1E 0/0。契约提交 `3328a8d`，后端提交 `f73515c`，Flutter 提交
+  `2bdea0d`，CI/运维提交 `1d30029`。
+- P1E2 正式运营 DAU 以认证 `user_id` 去重；pre-auth 不伪造用户，P1D anonymous legacy 原样
+  保留并只允许显式单独查询。多维 API、30 天聚合页、1/7/30 天与自定义 JSON/CSV 导出、
+  D1/D7、登录/记账/AI 漏斗和 Token/成本元数据已实现。
+- 普通用户 AI 配额由 FastAPI/PostgreSQL 权威执行为 2 次/当地自然日、10 次/当地周一自然周；
+  六个 AI 路由统一使用 request id、daily/weekly 原子预占、消费/释放和 TTL 回收。Flutter 只展示
+  剩余量并提前禁用，普通用户不能切换 plan；本地记账、预算和统计不受额度影响。
+- P1E2 本地门禁为 FastAPI 59/59、Flutter 94/94、LCOV 4326/9115（47.46%）；SQLite 与
+  PostgreSQL 16 均完成 upgrade/downgrade/re-upgrade 到 0004。开发 Compose 可从空卷自动迁移并
+  健康启动，API 36 FakePhone 登录、两次 AI、额度耗尽、本地记账/预算/统计和重启保持通过。
+- API 36 现场运营读数为 DAU 1、同用户 session 2、AI 成功 2、配额拦截 2；PostgreSQL 现场
+  验证同周第 10 次成功/第 11 次拦截和三个并发只放行两个。App/API 日志未命中 FATAL、ANR、
+  数据库错误、Token、Provider Secret、手机号或微信身份。
 
 ## 待审计
 - [x] macOS 旧 Android 可复现构建（JDK 17、Android SDK 34、官方 HTTPS Wrapper、clean/test/assembleDebug）

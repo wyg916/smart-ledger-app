@@ -22,15 +22,17 @@ tests/fixtures/             匿名化测试数据
 
 ## 当前阶段
 
-`P1D-RAPID-UPGRADE` 已在 `main` 关闭并标记为 PASS：默认今日首页、按日/按月统计、日期
-分组明细、六个常用分类、本地优先的一句话记账、Kimi 自由对话与单图理解、匿名安全身份、
-离线运营事件和 DAU/WAU/MAU 查询均已交付。工程提交 `1936d5123d64ca64d27e74155075dfe22606b6d3`
-的功能分支与 main Flutter、FastAPI、Repository Safety CI 全部成功；完整实现与门禁证据见
-`docs/06_ui/`、`docs/07_ai/` 和 `docs/08_identity_analytics/`。
+`P1E-ANDROID-AUTH-RC` 已实现 Android 强制登录、认证用户隔离、账号安全和发布候选编译链，
+但真实号码/微信 Provider、正式签名、生产部署与真机仍未关闭，因此固定为 `PARTIAL`。
 
-本阶段不包含注册、云端账单、业务同步、长期记忆、Agent、RAG、任意 SQL、生产部署或正式
-签名发布。语音输入保持 `VOICE_INPUT = DEFERRED`；`IOS_TOOLCHAIN = BLOCKED`，Android 已
-实现的应用锁和后台预览保护不等于双端验收通过。
+当前 `p1e/ai-quota-user-metrics` 正在交付 P1E2：正式 DAU 以 `user_id` 去重，anonymous legacy
+只单独展示；运营 API/页面/导出提供多维指标、D1/D7、AI Token/成本与配额拦截。普通用户 AI
+由服务端权威限制为 2 次/日、10 次/周，Flutter 只展示且不能绕过。业务账单仍不上传，埋点不含
+财务内容或 AI 正文。实现与运维说明见 `docs/11_metrics_quota/`。
+
+本阶段不包含云端账单、业务同步、长期记忆、Agent、RAG、任意 SQL、生产上线或正式签名发布。
+语音输入保持 `VOICE_INPUT = DEFERRED`；`IOS_TOOLCHAIN = BLOCKED`，模拟器与 Fake Provider
+结果不等于 Android 已正式上线。
 
 ## 本地启动
 
