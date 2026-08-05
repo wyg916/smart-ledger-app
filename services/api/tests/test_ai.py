@@ -2,10 +2,12 @@ import logging
 from collections.abc import AsyncIterator
 from io import BytesIO
 from typing import Any
+from uuid import uuid4
 
 import httpx
 import pytest
 from PIL import Image
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.ai.errors import AiError, map_upstream_status
 from app.ai.prompts.v1.system import SYSTEM_PROMPT
@@ -13,16 +15,41 @@ from app.ai.providers.base import AiScenario, ProviderResult
 from app.ai.providers.fake import FakeProvider
 from app.ai.routes import get_ai_provider
 from app.ai.schemas import ai_result_json_schema
+from app.analytics.models import Base
 from app.config import Settings, get_settings
+from app.database import get_session
 from app.main import app
 
 
 @pytest.fixture
 async def client() -> AsyncIterator[httpx.AsyncClient]:
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+    async with engine.begin() as connection:
+        await connection.run_sync(Base.metadata.create_all)
+    factory = async_sessionmaker(engine, expire_on_commit=False)
+
+    async def session_override() -> AsyncIterator[AsyncSession]:
+        async with factory() as session:
+            yield session
+
+    app.dependency_overrides[get_session] = session_override
+    app.dependency_overrides[get_settings] = lambda: settings()
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as test_client:
+        login = await test_client.post(
+            "/api/v1/auth/phone/one-click",
+            json={
+                "token": "synthetic-phone-token",
+                "carrier": "mobile",
+                "installation_id": str(uuid4()),
+                "timezone": "Asia/Shanghai",
+            },
+        )
+        assert login.status_code == 200, login.text
+        test_client.headers["authorization"] = f"Bearer {login.json()['tokens']['access_token']}"
         yield test_client
     app.dependency_overrides.clear()
+    await engine.dispose()
 
 
 def settings(**updates: Any) -> Settings:
@@ -217,8 +244,7 @@ async def test_disabled_and_production_fail_closed(client: httpx.AsyncClient) ->
     assert disabled.json()["error"]["code"] == "AI_DISABLED"
     override(FakeProvider(), environment="production")
     production = await client.post("/api/v1/ai/monthly-summary", json=monthly_payload())
-    assert production.status_code == 403
-    assert production.json()["error"]["code"] == "AI_PRODUCTION_AUTH_REQUIRED"
+    assert production.status_code == 200
 
 
 async def test_missing_key_is_configuration_error(client: httpx.AsyncClient) -> None:

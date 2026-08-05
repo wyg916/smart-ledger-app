@@ -24,6 +24,8 @@ from app.auth.schemas import (
     RefreshRequest,
     ReviewLoginRequest,
     StatusResponse,
+    TimezoneResponse,
+    TimezoneUpdatePayload,
     UserView,
     WechatLoginRequest,
     WechatStateRequest,
@@ -49,6 +51,7 @@ from app.auth.service import (
     review_login,
     revoke_session,
     unbind_identity,
+    update_user_timezone,
     user_view,
     wechat_subject,
 )
@@ -198,11 +201,13 @@ async def phone_login(
             subject_hash=subject_hash,
             phone_hash=subject_hash,
             display_hint=hint,
+            timezone=payload.timezone,
         )
         response = await create_auth_session(
             session,
             user=user,
             installation_id=str(payload.installation_id),
+            auth_provider="phone_one_click",
             settings=settings,
         )
         await record_login_audit(
@@ -261,11 +266,13 @@ async def wechat_login(
             provider="wechat",
             subject_hash=wechat_subject(verified.subject, settings),
             display_hint="微信",
+            timezone=payload.timezone,
         )
         response = await create_auth_session(
             session,
             user=user,
             installation_id=str(payload.installation_id),
+            auth_provider="wechat",
             settings=settings,
         )
         await record_login_audit(
@@ -308,6 +315,7 @@ async def login_review_account(
             username=payload.username,
             password=payload.password,
             installation_id=str(payload.installation_id),
+            timezone=payload.timezone,
             settings=settings,
         )
         await record_login_audit(
@@ -351,6 +359,33 @@ async def logout(
 @router.get("/me", response_model=UserView)
 async def me(session: SessionDependency, current: CurrentUser) -> UserView:
     return await user_view(session, current.user)
+
+
+@account_router.put("/timezone", response_model=TimezoneResponse)
+async def change_timezone(
+    payload: TimezoneUpdatePayload,
+    session: SessionDependency,
+    settings: SettingsDependency,
+    current: CurrentUser,
+) -> TimezoneResponse:
+    try:
+        user = await update_user_timezone(
+            session, context=current, timezone=payload.timezone, settings=settings
+        )
+    except RateLimitError as exc:
+        raise HTTPException(
+            status_code=429,
+            detail={
+                "code": "TIMEZONE_UPDATE_RATE_LIMITED",
+                "message": "Timezone cannot be changed yet",
+            },
+        ) from exc
+    except AuthenticationError as exc:
+        raise HTTPException(
+            status_code=422,
+            detail={"code": "TIMEZONE_INVALID", "message": "Timezone is invalid"},
+        ) from exc
+    return TimezoneResponse(timezone=user.timezone, updated_at=user.timezone_updated_at)
 
 
 @router.post("/identities/bind-phone", response_model=IdentityResponse)

@@ -30,6 +30,37 @@ class Settings(BaseSettings):
     kimi_vision_model: str = Field(default="kimi-k2.6", validation_alias="KIMI_VISION_MODEL")
     telemetry_enabled: bool = Field(default=True, validation_alias="TELEMETRY_ENABLED")
     internal_metrics_token: str = Field(default="", validation_alias="INTERNAL_METRICS_TOKEN")
+    analytics_raw_retention_days: int = Field(
+        default=90, ge=30, le=730, validation_alias="ANALYTICS_RAW_RETENTION_DAYS"
+    )
+    analytics_aggregate_retention_days: int = Field(
+        default=400, ge=90, le=3650, validation_alias="ANALYTICS_AGGREGATE_RETENTION_DAYS"
+    )
+    ai_free_daily_limit: int = Field(
+        default=2, ge=1, le=100, validation_alias="AI_FREE_DAILY_LIMIT"
+    )
+    ai_free_weekly_limit: int = Field(
+        default=10, ge=1, le=500, validation_alias="AI_FREE_WEEKLY_LIMIT"
+    )
+    ai_review_daily_limit: int = Field(
+        default=50, ge=1, le=1000, validation_alias="AI_REVIEW_DAILY_LIMIT"
+    )
+    ai_review_weekly_limit: int = Field(
+        default=250, ge=1, le=5000, validation_alias="AI_REVIEW_WEEKLY_LIMIT"
+    )
+    ai_internal_test_daily_limit: int = Field(
+        default=100, ge=1, le=5000, validation_alias="AI_INTERNAL_TEST_DAILY_LIMIT"
+    )
+    ai_internal_test_weekly_limit: int = Field(
+        default=500, ge=1, le=20000, validation_alias="AI_INTERNAL_TEST_WEEKLY_LIMIT"
+    )
+    ai_reservation_ttl_seconds: int = Field(
+        default=600, ge=60, le=3600, validation_alias="AI_RESERVATION_TTL_SECONDS"
+    )
+    ai_model_pricing_json: str = Field(default="{}", validation_alias="AI_MODEL_PRICING_JSON")
+    user_timezone_change_cooldown_hours: int = Field(
+        default=24, ge=1, le=168, validation_alias="USER_TIMEZONE_CHANGE_COOLDOWN_HOURS"
+    )
     auth_jwt_secret: str = Field(default="development-only", validation_alias="AUTH_JWT_SECRET")
     auth_identity_pepper: str = Field(
         default="development-only", validation_alias="AUTH_IDENTITY_PEPPER"

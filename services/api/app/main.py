@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 
 from app.ai.errors import AiError
 from app.ai.routes import router as ai_router
-from app.analytics.routes import internal_router
+from app.analytics.routes import internal_router, page_router
 from app.analytics.routes import router as analytics_router
 from app.auth.routes import account_router
 from app.auth.routes import router as auth_router
@@ -34,6 +34,7 @@ app.include_router(router)
 app.include_router(ai_router)
 app.include_router(analytics_router)
 app.include_router(internal_router)
+app.include_router(page_router)
 app.include_router(auth_router)
 app.include_router(account_router)
 app.include_router(public_router)
@@ -78,20 +79,23 @@ async def limit_ai_request_size(request: Request, call_next: Any) -> Any:
 
 @app.exception_handler(AiError)
 async def ai_exception_handler(_: Request, exc: AiError) -> JSONResponse:
+    details = exc.details or {}
     return JSONResponse(
         status_code=exc.status_code,
-        content={"error": {"code": exc.code, "message": exc.message}},
+        content={"error": {"code": exc.code, "message": exc.message}, **details},
     )
 
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(_: Request, exc: HTTPException) -> JSONResponse:
     detail = exc.detail if isinstance(exc.detail, dict) else {"message": str(exc.detail)}
+    extras = {key: value for key, value in detail.items() if key not in {"code", "message"}}
     payload = {
         "error": {
             "code": detail.get("code", "http_error"),
             "message": detail.get("message", "Request failed"),
-        }
+        },
+        **extras,
     }
     return JSONResponse(status_code=exc.status_code, content=payload, headers=exc.headers)
 

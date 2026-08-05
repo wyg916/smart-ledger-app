@@ -1,18 +1,24 @@
 import base64
 from datetime import datetime
 from io import BytesIO
-from typing import Annotated, Any, NoReturn
+from time import monotonic
+from typing import Annotated, Any
+from uuid import UUID
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from PIL import Image, ImageOps, UnidentifiedImageError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ai.errors import AiError
 from app.ai.providers.base import AiProvider, AiScenario
 from app.ai.providers.fake import FakeProvider
 from app.ai.providers.kimi import KimiProvider
+from app.ai.quota import QuotaService, should_consume_error
 from app.ai.schemas import (
+    AiQuotaStatus,
     AiResponse,
+    AiResult,
     AiStatus,
     BudgetReviewRequest,
     ChatRequest,
@@ -28,8 +34,9 @@ from app.ai.schemas import (
     TransactionDraftResult,
 )
 from app.ai.services import AiService
-from app.auth.dependencies import OptionalCurrentUser
+from app.auth.dependencies import CurrentUser
 from app.config import Settings, get_settings
+from app.database import get_session
 
 router = APIRouter(prefix="/api/v1/ai", tags=["ai"])
 
@@ -42,41 +49,18 @@ def get_ai_provider(settings: Annotated[Settings, Depends(get_settings)]) -> AiP
     return KimiProvider(api_key=settings.moonshot_api_key, base_url=settings.kimi_base_url)
 
 
-def _ensure_available(settings: Settings, authenticated: bool) -> None:
-    if settings.environment == "production" and not authenticated:
-        raise AiError(
-            "AI_PRODUCTION_AUTH_REQUIRED",
-            "AI is unavailable in production without authentication",
-            403,
-        )
+def _ensure_available(settings: Settings) -> None:
     if not settings.kimi_ai_enabled:
         raise AiError("AI_DISABLED", "AI is disabled", 503)
 
 
-def _raise_http(error: AiError) -> NoReturn:
-    raise HTTPException(
-        status_code=error.status_code,
-        detail={"code": error.code, "message": error.message},
-    ) from error
-
-
-async def _generate(
-    scenario: AiScenario,
-    payload: Any,
-    settings: Settings,
-    provider: AiProvider,
-    authenticated: bool,
-) -> AiResponse:
+def _request_id(request: Request) -> str:
+    value = str(getattr(request.state, "request_id", ""))
     try:
-        _ensure_available(settings, authenticated)
-        model = (
-            settings.kimi_reasoning_model
-            if scenario is AiScenario.financial_plan
-            else settings.kimi_fast_model
-        )
-        return await AiService(provider).generate(scenario, model, payload.model_dump(mode="json"))
-    except AiError as exc:
-        _raise_http(exc)
+        UUID(value)
+    except ValueError as exc:
+        raise AiError("AI_REQUEST_ID_INVALID", "X-Request-Id must be a UUID", 422) from exc
+    return value
 
 
 async def _generate_typed[ResultT: StrictModel](
@@ -86,13 +70,56 @@ async def _generate_typed[ResultT: StrictModel](
     provider: AiProvider,
     result_type: type[ResultT],
     model: str,
-    authenticated: bool,
+    request: Request,
+    session: AsyncSession,
+    current: Any,
 ) -> tuple[ResultT, str, Any]:
+    _ensure_available(settings)
+    quota = QuotaService(session, settings)
+    reservation = await quota.reserve(
+        user=current.user,
+        installation_id=current.auth_session.installation_id,
+        feature=scenario.value,
+        request_id=_request_id(request),
+    )
+    started = monotonic()
     try:
-        _ensure_available(settings, authenticated)
-        return await AiService(provider).generate_typed(scenario, model, payload, result_type)
+        result, actual_model, usage = await AiService(provider).generate_typed(
+            scenario, model, payload, result_type
+        )
     except AiError as exc:
-        _raise_http(exc)
+        latency_ms = int((monotonic() - started) * 1000)
+        if should_consume_error(exc):
+            await quota.consume(
+                reservation,
+                model=model,
+                usage=None,
+                latency_ms=latency_ms,
+                error_type=exc.code,
+            )
+        else:
+            await quota.release(
+                reservation,
+                error_type=exc.code,
+                latency_ms=latency_ms,
+            )
+        raise
+    except Exception:
+        await quota.consume(
+            reservation,
+            model=model,
+            usage=None,
+            latency_ms=int((monotonic() - started) * 1000),
+            error_type="AI_INTERNAL_ERROR_AFTER_RESERVATION",
+        )
+        raise
+    await quota.consume(
+        reservation,
+        model=actual_model,
+        usage=usage,
+        latency_ms=int((monotonic() - started) * 1000),
+    )
+    return result, actual_model, usage
 
 
 @router.get("/status", response_model=AiStatus)
@@ -110,50 +137,95 @@ async def ai_status(settings: Annotated[Settings, Depends(get_settings)]) -> AiS
 
 ProviderDependency = Annotated[AiProvider, Depends(get_ai_provider)]
 SettingsDependency = Annotated[Settings, Depends(get_settings)]
+SessionDependency = Annotated[AsyncSession, Depends(get_session)]
+
+
+@router.get("/quota", response_model=AiQuotaStatus)
+async def ai_quota(
+    session: SessionDependency,
+    settings: SettingsDependency,
+    current: CurrentUser,
+) -> AiQuotaStatus:
+    return await QuotaService(session, settings).status(current.user)
 
 
 @router.post("/monthly-summary", response_model=AiResponse)
 async def monthly_summary(
     payload: MonthlySummaryRequest,
+    request: Request,
+    session: SessionDependency,
+    current: CurrentUser,
     settings: SettingsDependency,
     provider: ProviderDependency,
-    current: OptionalCurrentUser,
 ) -> AiResponse:
-    return await _generate(
-        AiScenario.monthly_summary, payload, settings, provider, current is not None
+    result, model, usage = await _generate_typed(
+        AiScenario.monthly_summary,
+        payload.model_dump(mode="json"),
+        settings,
+        provider,
+        AiResult,
+        settings.kimi_fast_model,
+        request,
+        session,
+        current,
     )
+    return AiResponse(result=result, model=model, usage=usage)
 
 
 @router.post("/budget-review", response_model=AiResponse)
 async def budget_review(
     payload: BudgetReviewRequest,
+    request: Request,
+    session: SessionDependency,
+    current: CurrentUser,
     settings: SettingsDependency,
     provider: ProviderDependency,
-    current: OptionalCurrentUser,
 ) -> AiResponse:
-    return await _generate(
-        AiScenario.budget_review, payload, settings, provider, current is not None
+    result, model, usage = await _generate_typed(
+        AiScenario.budget_review,
+        payload.model_dump(mode="json"),
+        settings,
+        provider,
+        AiResult,
+        settings.kimi_fast_model,
+        request,
+        session,
+        current,
     )
+    return AiResponse(result=result, model=model, usage=usage)
 
 
 @router.post("/financial-plan", response_model=AiResponse)
 async def financial_plan(
     payload: FinancialPlanRequest,
+    request: Request,
+    session: SessionDependency,
+    current: CurrentUser,
     settings: SettingsDependency,
     provider: ProviderDependency,
-    current: OptionalCurrentUser,
 ) -> AiResponse:
-    return await _generate(
-        AiScenario.financial_plan, payload, settings, provider, current is not None
+    result, model, usage = await _generate_typed(
+        AiScenario.financial_plan,
+        payload.model_dump(mode="json"),
+        settings,
+        provider,
+        AiResult,
+        settings.kimi_reasoning_model,
+        request,
+        session,
+        current,
     )
+    return AiResponse(result=result, model=model, usage=usage)
 
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat(
     payload: ChatRequest,
+    request: Request,
+    session: SessionDependency,
+    current: CurrentUser,
     settings: SettingsDependency,
     provider: ProviderDependency,
-    current: OptionalCurrentUser,
 ) -> ChatResponse:
     result, model, usage = await _generate_typed(
         AiScenario.chat,
@@ -162,7 +234,9 @@ async def chat(
         provider,
         ChatResult,
         settings.kimi_chat_model,
-        current is not None,
+        request,
+        session,
+        current,
     )
     return ChatResponse(result=result, model=model, usage=usage)
 
@@ -170,9 +244,11 @@ async def chat(
 @router.post("/parse-transaction", response_model=ParseTransactionResponse)
 async def parse_transaction(
     payload: ParseTransactionRequest,
+    request: Request,
+    session: SessionDependency,
+    current: CurrentUser,
     settings: SettingsDependency,
     provider: ProviderDependency,
-    current: OptionalCurrentUser,
 ) -> ParseTransactionResponse:
     try:
         ZoneInfo(payload.timezone)
@@ -190,7 +266,9 @@ async def parse_transaction(
         provider,
         TransactionDraftResult,
         settings.kimi_fast_model,
-        current is not None,
+        request,
+        session,
+        current,
     )
     allowed = {(category.name, category.transaction_type) for category in payload.categories}
     if (
@@ -247,9 +325,11 @@ def _validated_image(raw: bytes, content_type: str | None) -> tuple[bytes, str]:
 
 @router.post("/analyze-image", response_model=ImageAnalysisResponse)
 async def analyze_image(
+    request: Request,
+    session: SessionDependency,
+    current: CurrentUser,
     settings: SettingsDependency,
     provider: ProviderDependency,
-    current: OptionalCurrentUser,
     image: Annotated[UploadFile, File()],
 ) -> ImageAnalysisResponse:
     raw = b""
@@ -269,7 +349,9 @@ async def analyze_image(
             provider,
             ImageAnalysisResult,
             settings.kimi_vision_model,
-            current is not None,
+            request,
+            session,
+            current,
         )
         return ImageAnalysisResponse(result=result, model=model, usage=usage)
     finally:

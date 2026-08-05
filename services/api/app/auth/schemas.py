@@ -16,6 +16,7 @@ class PhoneLoginRequest(StrictModel):
     token: Annotated[str, Field(min_length=8, max_length=4096)]
     carrier: Literal["mobile", "unicom", "telecom"] | None = None
     installation_id: JsonUuid
+    timezone: Annotated[str, Field(min_length=1, max_length=64)] = "UTC"
 
 
 class WechatStateRequest(StrictModel):
@@ -31,12 +32,14 @@ class WechatLoginRequest(StrictModel):
     code: Annotated[str, Field(min_length=4, max_length=2048)]
     state: Annotated[str, Field(min_length=32, max_length=256)]
     installation_id: JsonUuid
+    timezone: Annotated[str, Field(min_length=1, max_length=64)] = "UTC"
 
 
 class ReviewLoginRequest(StrictModel):
     username: Annotated[str, Field(min_length=3, max_length=128)]
     password: Annotated[str, Field(min_length=8, max_length=256)]
     installation_id: JsonUuid
+    timezone: Annotated[str, Field(min_length=1, max_length=64)] = "UTC"
 
 
 class RefreshRequest(StrictModel):
@@ -59,6 +62,7 @@ class UserView(StrictModel):
     user_id: str
     status: str
     providers: list[str]
+    timezone: str
 
 
 class AuthResponse(StrictModel):
@@ -89,3 +93,12 @@ class DeletionResponse(StrictModel):
     request_id: str
     status: str
     local_data_action: str
+
+
+class TimezoneUpdatePayload(StrictModel):
+    timezone: Annotated[str, Field(min_length=1, max_length=64)]
+
+
+class TimezoneResponse(StrictModel):
+    timezone: str
+    updated_at: datetime | None

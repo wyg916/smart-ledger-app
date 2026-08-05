@@ -2,10 +2,12 @@ import hmac
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.ai.models import AiQuotaCounter, AiUsageEvent
 from app.analytics.models import AnalyticsEvent, AnalyticsInstallation, AnalyticsSession, utc_now
 from app.auth.models import (
     AccountDeletionRequest,
@@ -184,7 +186,9 @@ async def find_or_create_identity_user(
     display_hint: str | None,
     phone_hash: str | None = None,
     bind_user_id: str | None = None,
+    timezone: str = "UTC",
 ) -> User:
+    timezone = validate_timezone(timezone)
     identity = (
         await session.execute(
             select(AuthIdentity).where(
@@ -199,6 +203,10 @@ async def find_or_create_identity_user(
         user = await session.get(User, identity.user_id)
         if user is None or user.status != "active":
             raise AuthenticationError("user is unavailable")
+        if user.timezone_updated_at is None:
+            user.timezone = timezone
+            user.timezone_updated_at = utc_now()
+            await session.commit()
         return user
 
     if phone_hash is not None:
@@ -213,7 +221,15 @@ async def find_or_create_identity_user(
     if bind_user_id is not None and (user is None or user.status != "active"):
         raise AuthenticationError("user is unavailable")
     if user is None:
-        user = User(id=str(uuid4()), status="active", created_at=now, updated_at=now)
+        user = User(
+            id=str(uuid4()),
+            status="active",
+            timezone=timezone,
+            timezone_updated_at=now,
+            plan_code="free",
+            created_at=now,
+            updated_at=now,
+        )
         session.add(user)
         await session.flush()
     session.add(
@@ -246,7 +262,10 @@ async def _providers(session: AsyncSession, user_id: str) -> list[str]:
 
 async def user_view(session: AsyncSession, user: User) -> UserView:
     return UserView(
-        user_id=user.id, status=user.status, providers=await _providers(session, user.id)
+        user_id=user.id,
+        status=user.status,
+        providers=await _providers(session, user.id),
+        timezone=user.timezone,
     )
 
 
@@ -289,6 +308,7 @@ async def create_auth_session(
     *,
     user: User,
     installation_id: str,
+    auth_provider: str,
     settings: Settings,
 ) -> AuthResponse:
     now = utc_now()
@@ -296,6 +316,7 @@ async def create_auth_session(
         id=str(uuid4()),
         user_id=user.id,
         installation_id=installation_id,
+        auth_provider=auth_provider,
         created_at=now,
         last_seen_at=now,
         expires_at=now + timedelta(days=settings.auth_refresh_token_days),
@@ -415,6 +436,7 @@ async def review_login(
     username: str,
     password: str,
     installation_id: str,
+    timezone: str,
     settings: Settings,
 ) -> AuthResponse:
     username_digest = private_hash(f"review:{username.casefold()}", settings.auth_identity_pepper)
@@ -434,8 +456,16 @@ async def review_login(
     user = await session.get(User, account.user_id)
     if user is None or user.status != "active":
         raise AuthenticationError("review user unavailable")
+    if user.timezone_updated_at is None:
+        user.timezone = validate_timezone(timezone)
+        user.timezone_updated_at = utc_now()
+        await session.flush()
     return await create_auth_session(
-        session, user=user, installation_id=installation_id, settings=settings
+        session,
+        user=user,
+        installation_id=installation_id,
+        auth_provider="play_review",
+        settings=settings,
     )
 
 
@@ -450,14 +480,40 @@ async def provision_review_account(
     ).scalar_one_or_none()
     now = utc_now()
     salt, digest = new_password_hash(password)
+    from app.ai.models import AiQuotaPlan
+
+    plan = await session.get(AiQuotaPlan, "review")
+    if plan is None:
+        session.add(
+            AiQuotaPlan(
+                plan_code="review",
+                daily_limit=settings.ai_review_daily_limit,
+                weekly_limit=settings.ai_review_weekly_limit,
+                is_active=True,
+                effective_from=now,
+                effective_to=None,
+            )
+        )
     if existing is not None:
         existing.password_salt = salt
         existing.password_hash = digest
         existing.enabled = True
         existing.rotated_at = now
+        existing_user = await session.get(User, existing.user_id)
+        if existing_user is not None:
+            existing_user.plan_code = "review"
+            existing_user.updated_at = now
         await session.commit()
         return existing.user_id
-    user = User(id=str(uuid4()), status="active", created_at=now, updated_at=now)
+    user = User(
+        id=str(uuid4()),
+        status="active",
+        timezone="UTC",
+        timezone_updated_at=None,
+        plan_code="review",
+        created_at=now,
+        updated_at=now,
+    )
     session.add(user)
     await session.flush()
     session.add(
@@ -484,6 +540,43 @@ async def provision_review_account(
     )
     await session.commit()
     return user.id
+
+
+def validate_timezone(value: str) -> str:
+    try:
+        ZoneInfo(value)
+    except (ZoneInfoNotFoundError, ValueError) as exc:
+        raise AuthenticationError("timezone invalid") from exc
+    return value
+
+
+async def update_user_timezone(
+    session: AsyncSession,
+    *,
+    context: AuthContext,
+    timezone: str,
+    settings: Settings,
+) -> User:
+    timezone = validate_timezone(timezone)
+    user = context.user
+    if user.timezone == timezone:
+        return user
+    now = utc_now()
+    if user.timezone_updated_at is not None:
+        next_allowed = _aware(user.timezone_updated_at) + timedelta(
+            hours=settings.user_timezone_change_cooldown_hours
+        )
+        if now < next_allowed:
+            raise RateLimitError("timezone update rate limit exceeded")
+    from app.ai.quota import QuotaService
+
+    if not await QuotaService(session, settings).prepare_timezone_change(user, timezone):
+        raise RateLimitError("timezone update blocked while AI request is in progress")
+    user.timezone = timezone
+    user.timezone_updated_at = now
+    user.updated_at = now
+    await session.commit()
+    return user
 
 
 async def unbind_identity(session: AsyncSession, context: AuthContext, provider: str) -> list[str]:
@@ -573,16 +666,30 @@ async def confirm_deletion(
     await session.execute(
         update(AnalyticsInstallation)
         .where(AnalyticsInstallation.user_id == context.user.id)
-        .values(user_id=None)
+        .values(
+            user_id=None,
+            identity_scope="anonymous_deleted",
+            auth_provider="unknown",
+            user_timezone="UTC",
+        )
     )
     await session.execute(
         update(AnalyticsSession)
         .where(AnalyticsSession.user_id == context.user.id)
-        .values(user_id=None)
+        .values(
+            user_id=None,
+            identity_scope="anonymous_deleted",
+            auth_provider="unknown",
+            user_timezone="UTC",
+        )
     )
     await session.execute(
-        update(AnalyticsEvent).where(AnalyticsEvent.user_id == context.user.id).values(user_id=None)
+        update(AnalyticsEvent)
+        .where(AnalyticsEvent.user_id == context.user.id)
+        .values(user_id=None, identity_scope="anonymous_deleted", user_timezone="UTC")
     )
+    await session.execute(delete(AiUsageEvent).where(AiUsageEvent.user_id == context.user.id))
+    await session.execute(delete(AiQuotaCounter).where(AiQuotaCounter.user_id == context.user.id))
     context.user.status = "deleted"
     context.user.deleted_at = now
     context.user.updated_at = now

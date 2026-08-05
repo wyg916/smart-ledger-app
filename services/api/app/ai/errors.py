@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass(slots=True)
@@ -7,6 +8,7 @@ class AiError(Exception):
     message: str
     status_code: int
     retryable: bool = False
+    details: dict[str, Any] | None = None
 
 
 def map_upstream_status(status_code: int) -> AiError:

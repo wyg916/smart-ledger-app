@@ -124,6 +124,21 @@ class AiStatus(StrictModel):
     production_available: bool
 
 
+class AiQuotaStatus(StrictModel):
+    plan_code: str
+    daily_limit: int
+    daily_used: int
+    daily_reserved: int
+    daily_remaining: int
+    weekly_limit: int
+    weekly_used: int
+    weekly_reserved: int
+    weekly_remaining: int
+    next_daily_reset_at: datetime
+    next_weekly_reset_at: datetime
+    user_timezone: str
+
+
 class ChatMessageRequest(StrictModel):
     role: Literal["user", "assistant"]
     content: Annotated[str, Field(min_length=1, max_length=2000)]
