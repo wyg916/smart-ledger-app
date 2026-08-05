@@ -24,7 +24,8 @@ final telemetryCoordinatorProvider = FutureProvider<TelemetryRecorder>((
   ref,
 ) async {
   final accessToken = ref.watch(authenticatedAccessTokenProvider);
-  if (accessToken == null) {
+  final userId = ref.watch(authenticatedUserIdProvider);
+  if (accessToken == null || userId == null) {
     throw StateError('Authenticated user required for telemetry');
   }
   final identity = await ref.watch(anonymousIdentityProvider.future);
@@ -34,6 +35,7 @@ final telemetryCoordinatorProvider = FutureProvider<TelemetryRecorder>((
     ref.watch(anonymousIdentityServiceProvider),
     identity,
     accessToken,
+    userId,
   );
   await coordinator.start();
   return coordinator;

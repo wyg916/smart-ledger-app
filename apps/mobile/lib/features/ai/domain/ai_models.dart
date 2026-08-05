@@ -47,6 +47,7 @@ final class AiResult {
 enum AiFailureKind {
   offline,
   timeout,
+  quotaExceeded,
   rateLimited,
   invalidResponse,
   disabled,
@@ -54,10 +55,59 @@ enum AiFailureKind {
 }
 
 final class AiFailure implements Exception {
-  const AiFailure(this.kind, this.message);
+  const AiFailure(this.kind, this.message, {this.quota});
 
   final AiFailureKind kind;
   final String message;
+  final AiQuotaStatus? quota;
+}
+
+final class AiQuotaStatus {
+  const AiQuotaStatus({
+    required this.planCode,
+    required this.dailyLimit,
+    required this.dailyUsed,
+    required this.dailyRemaining,
+    required this.weeklyLimit,
+    required this.weeklyUsed,
+    required this.weeklyRemaining,
+    required this.nextDailyResetAt,
+    required this.nextWeeklyResetAt,
+    required this.userTimeZone,
+  });
+
+  factory AiQuotaStatus.fromJson(Map<String, Object?> json) => AiQuotaStatus(
+    planCode: json['plan_code']! as String,
+    dailyLimit: json['daily_limit']! as int,
+    dailyUsed: json['daily_used']! as int,
+    dailyRemaining: json['daily_remaining']! as int,
+    weeklyLimit: json['weekly_limit']! as int,
+    weeklyUsed: json['weekly_used']! as int,
+    weeklyRemaining: json['weekly_remaining']! as int,
+    nextDailyResetAt: DateTime.parse(
+      json['next_daily_reset_at']! as String,
+    ).toUtc(),
+    nextWeeklyResetAt: DateTime.parse(
+      json['next_weekly_reset_at']! as String,
+    ).toUtc(),
+    userTimeZone: json['user_timezone']! as String,
+  );
+
+  final String planCode;
+  final int dailyLimit;
+  final int dailyUsed;
+  final int dailyRemaining;
+  final int weeklyLimit;
+  final int weeklyUsed;
+  final int weeklyRemaining;
+  final DateTime nextDailyResetAt;
+  final DateTime nextWeeklyResetAt;
+  final String userTimeZone;
+
+  bool get isExhausted => dailyRemaining == 0 || weeklyRemaining == 0;
+
+  String get exhaustedMessage =>
+      dailyRemaining == 0 ? '今日AI次数已用完，明日恢复。' : '本周AI次数已用完，下周一恢复。';
 }
 
 enum ChatRole { user, assistant }

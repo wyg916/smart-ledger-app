@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_ledger/app/router.dart';
 import 'package:smart_ledger/core/database/entity_id.dart';
+import 'package:smart_ledger/core/time/ledger_time.dart';
 import 'package:smart_ledger/features/auth/data/auth_api_client.dart';
 import 'package:smart_ledger/features/auth/data/auth_platform_gateway.dart';
 import 'package:smart_ledger/features/auth/data/auth_session_store.dart';
@@ -99,6 +100,7 @@ void main() {
       expect(await controller.loginWithPhone(agreementsAccepted: true), isTrue);
       expect(controller.state.phase, AuthPhase.authenticated);
       expect(api.phoneCalls, 1);
+      expect(api.lastTimezone, 'Asia/Shanghai');
     });
 
     test('phone cancellation and provider failure stay logged out', () async {
@@ -231,6 +233,7 @@ AuthController _controller(
   platform,
   _identityService(),
   LocalDataIsolationService(() async => directory),
+  timeZone: const FixedLedgerTimeZone('Asia/Shanghai'),
   skipBindingCheck: true,
 );
 
@@ -298,14 +301,17 @@ final class _FakeAuthApi implements AuthApiClient {
   AuthApiException? phoneError;
   AuthApiException? refreshError;
   AuthApiException? meError;
+  String? lastTimezone;
 
   @override
   Future<AuthSession> phoneLogin({
     required String token,
     required String installationId,
+    required String timezone,
     String? carrier,
   }) async {
     phoneCalls++;
+    lastTimezone = timezone;
     if (phoneError case final error?) throw error;
     return _session();
   }
@@ -319,8 +325,10 @@ final class _FakeAuthApi implements AuthApiClient {
     required String code,
     required String state,
     required String installationId,
+    required String timezone,
   }) async {
     wechatCalls++;
+    lastTimezone = timezone;
     return _session(providers: const ['wechat']);
   }
 
@@ -329,8 +337,10 @@ final class _FakeAuthApi implements AuthApiClient {
     required String username,
     required String password,
     required String installationId,
+    required String timezone,
   }) async {
     reviewCalls++;
+    lastTimezone = timezone;
     return _session(providers: const ['play_review']);
   }
 

@@ -177,6 +177,9 @@ class AnalyticsEventQueue extends Table {
   TextColumn get sessionId => text()();
   IntColumn get occurredAtMs => integer()();
   IntColumn get schemaVersion => integer().withDefault(const Constant(1))();
+  TextColumn get userId => text().nullable()();
+  TextColumn get identityScope =>
+      text().withDefault(const Constant('anonymous_legacy'))();
   TextColumn get propertiesJson => text().withDefault(const Constant('{}'))();
   IntColumn get attemptCount => integer().withDefault(const Constant(0))();
   IntColumn get nextRetryAtMs => integer().nullable()();
@@ -204,7 +207,7 @@ class AppDatabase extends _$AppDatabase {
 
   AppDatabase.forUser(String userId) : super(_openConnectionForUser(userId));
 
-  static const int currentSchemaVersion = 4;
+  static const int currentSchemaVersion = 5;
 
   @override
   int get schemaVersion => currentSchemaVersion;
@@ -225,7 +228,17 @@ class AppDatabase extends _$AppDatabase {
       if (from <= 3 && to >= 4) {
         await migrator.createTable(analyticsEventQueue);
       }
-      if (from < 1 || from > 4 || to != 4) {
+      if (from == 4 && to >= 5) {
+        await migrator.addColumn(
+          analyticsEventQueue,
+          analyticsEventQueue.userId,
+        );
+        await migrator.addColumn(
+          analyticsEventQueue,
+          analyticsEventQueue.identityScope,
+        );
+      }
+      if (from < 1 || from > 5 || to != 5) {
         throw StateError('Unsupported database migration $from -> $to');
       }
     },

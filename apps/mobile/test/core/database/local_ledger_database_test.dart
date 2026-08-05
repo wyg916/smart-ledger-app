@@ -27,7 +27,7 @@ void main() {
   tearDown(() => harness.close());
 
   test(
-    'creates schema version 4 with foreign keys and required tables',
+    'creates current schema with foreign keys and required tables',
     () async {
       expect(harness.database.schemaVersion, AppDatabase.currentSchemaVersion);
       expect(await harness.database.ping(), 1);

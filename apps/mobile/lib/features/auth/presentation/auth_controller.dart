@@ -7,6 +7,7 @@ import 'package:smart_ledger/features/auth/data/auth_session_store.dart';
 import 'package:smart_ledger/features/auth/data/local_data_isolation_service.dart';
 import 'package:smart_ledger/features/auth/domain/auth_session.dart';
 import 'package:smart_ledger/features/identity/domain/anonymous_identity.dart';
+import 'package:smart_ledger/core/time/ledger_time.dart';
 import 'package:uuid/uuid.dart';
 
 final class AuthController extends StateNotifier<AuthState> {
@@ -16,15 +17,18 @@ final class AuthController extends StateNotifier<AuthState> {
     this._platform,
     this._identityService,
     this._isolation, {
+    LedgerTimeZone? timeZone,
     this.skipRemoteRestore = false,
     this.skipBindingCheck = false,
-  }) : super(const AuthState.initializing());
+  }) : _timeZone = timeZone ?? const DeviceLedgerTimeZone(),
+       super(const AuthState.initializing());
 
   final AuthSessionStore _store;
   final AuthApiClient _api;
   final AuthPlatformGateway _platform;
   final AnonymousIdentityService _identityService;
   final LocalDataIsolationService _isolation;
+  final LedgerTimeZone _timeZone;
   final bool skipRemoteRestore;
   final bool skipBindingCheck;
 
@@ -82,10 +86,12 @@ final class AuthController extends StateNotifier<AuthState> {
     return _performLogin(() async {
       final authorization = await _platform.authorizePhone();
       final installation = await _identityService.startSession();
+      final timezone = await _timeZone.currentIanaId();
       return _api.phoneLogin(
         token: authorization.token,
         carrier: authorization.carrier,
         installationId: installation.installationId,
+        timezone: timezone,
       );
     });
   }
@@ -100,6 +106,7 @@ final class AuthController extends StateNotifier<AuthState> {
         throw const AuthPlatformException('wechat_not_installed');
       }
       final installation = await _identityService.startSession();
+      final timezone = await _timeZone.currentIanaId();
       final serverState = await _api.createWechatState(
         installation.installationId,
       );
@@ -111,6 +118,7 @@ final class AuthController extends StateNotifier<AuthState> {
         code: authorization.code,
         state: authorization.state,
         installationId: installation.installationId,
+        timezone: timezone,
       );
     });
   }
@@ -118,10 +126,12 @@ final class AuthController extends StateNotifier<AuthState> {
   Future<bool> loginForReview(String username, String password) =>
       _performLogin(() async {
         final installation = await _identityService.startSession();
+        final timezone = await _timeZone.currentIanaId();
         return _api.reviewLogin(
           username: username,
           password: password,
           installationId: installation.installationId,
+          timezone: timezone,
         );
       });
 

@@ -17,7 +17,7 @@ import '../../support/ledger_test_harness.dart';
 
 void main() {
   test(
-    'schema 2 to 4 preserves all P1B facts and creates new tables empty',
+    'schema 2 to 5 preserves all P1B facts and creates new tables empty',
     () async {
       final directory = await Directory.systemTemp.createTemp('schema-2-to-3-');
       final file = File('${directory.path}/ledger.sqlite');
@@ -111,14 +111,65 @@ void main() {
       final version = await upgraded
           .customSelect('PRAGMA user_version')
           .getSingle();
-      expect(version.read<int>('user_version'), 4);
+      expect(version.read<int>('user_version'), 5);
       await upgraded.close();
       await directory.delete(recursive: true);
     },
   );
 
   test(
-    'schema 3 to 4 preserves ledger facts and creates an empty analytics queue',
+    'schema 4 to 5 preserves queued legacy telemetry identity scope',
+    () async {
+      final directory = await Directory.systemTemp.createTemp('schema-4-to-5-');
+      final file = File('${directory.path}/ledger.sqlite');
+      final source = AppDatabase(NativeDatabase(file));
+      await source.ping();
+      await source.customStatement(
+        'INSERT INTO analytics_event_queue '
+        '(event_id,event_name,session_id,occurred_at_ms,schema_version,'
+        'properties_json,attempt_count,next_retry_at_ms,created_at_ms) '
+        'VALUES (?,?,?,?,?,?,?,?,?)',
+        [
+          '10000000-0000-4000-8000-000000000401',
+          'transaction_created',
+          '10000000-0000-4000-8000-000000000402',
+          1,
+          1,
+          '{}',
+          0,
+          null,
+          1,
+        ],
+      );
+      await source.close();
+      final raw = sqlite.sqlite3.open(file.path);
+      raw.execute('ALTER TABLE analytics_event_queue DROP COLUMN user_id');
+      raw.execute(
+        'ALTER TABLE analytics_event_queue DROP COLUMN identity_scope',
+      );
+      raw.execute('PRAGMA user_version = 4');
+      raw.close();
+
+      final upgraded = AppDatabase(NativeDatabase(file));
+      final event = await upgraded
+          .select(upgraded.analyticsEventQueue)
+          .getSingle();
+      expect(event.eventId, '10000000-0000-4000-8000-000000000401');
+      expect(event.userId, isNull);
+      expect(event.identityScope, 'anonymous_legacy');
+      expect(event.schemaVersion, 1);
+      expect(
+        (await upgraded.customSelect('PRAGMA user_version').getSingle())
+            .read<int>('user_version'),
+        5,
+      );
+      await upgraded.close();
+      await directory.delete(recursive: true);
+    },
+  );
+
+  test(
+    'schema 3 to 5 preserves ledger facts and creates an empty analytics queue',
     () async {
       final directory = await Directory.systemTemp.createTemp('schema-3-to-4-');
       final file = File('${directory.path}/ledger.sqlite');
@@ -165,7 +216,7 @@ void main() {
       final version = await upgraded
           .customSelect('PRAGMA user_version')
           .getSingle();
-      expect(version.read<int>('user_version'), 4);
+      expect(version.read<int>('user_version'), 5);
       expect(
         await upgraded.customSelect('PRAGMA foreign_key_check').get(),
         isEmpty,

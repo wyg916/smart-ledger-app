@@ -20,9 +20,17 @@ final class AnalyticsQueueRepository {
   Future<String> enqueue({
     required String name,
     required String sessionId,
+    String? userId,
+    String identityScope = 'anonymous_legacy',
+    int schemaVersion = 1,
     Map<String, Object> properties = const {},
   }) async {
     validateTelemetryEvent(name, properties);
+    if (schemaVersion == 2 &&
+        identityScope == 'authenticated' &&
+        userId == null) {
+      throw ArgumentError('Authenticated telemetry requires userId');
+    }
     final now = _clock.nowUtc();
     final id = _ids.next();
     await _database.transaction(() async {
@@ -48,6 +56,9 @@ final class AnalyticsQueueRepository {
               eventName: name,
               sessionId: sessionId,
               occurredAtMs: now.millisecondsSinceEpoch,
+              schemaVersion: Value(schemaVersion),
+              userId: Value(userId),
+              identityScope: Value(identityScope),
               propertiesJson: Value(jsonEncode(properties)),
               createdAtMs: now.millisecondsSinceEpoch,
             ),
@@ -82,6 +93,9 @@ final class AnalyticsQueueRepository {
             properties: (jsonDecode(row.propertiesJson) as Map<String, dynamic>)
                 .cast<String, Object>(),
             attemptCount: row.attemptCount,
+            schemaVersion: row.schemaVersion,
+            userId: row.userId,
+            identityScope: row.identityScope,
           ),
         )
         .toList(growable: false);

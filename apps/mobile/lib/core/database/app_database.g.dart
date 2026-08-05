@@ -5534,6 +5534,27 @@ class $AnalyticsEventQueueTable extends AnalyticsEventQueue
     requiredDuringInsert: false,
     defaultValue: const Constant(1),
   );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _identityScopeMeta = const VerificationMeta(
+    'identityScope',
+  );
+  @override
+  late final GeneratedColumn<String> identityScope = GeneratedColumn<String>(
+    'identity_scope',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('anonymous_legacy'),
+  );
   static const VerificationMeta _propertiesJsonMeta = const VerificationMeta(
     'propertiesJson',
   );
@@ -5587,6 +5608,8 @@ class $AnalyticsEventQueueTable extends AnalyticsEventQueue
     sessionId,
     occurredAtMs,
     schemaVersion,
+    userId,
+    identityScope,
     propertiesJson,
     attemptCount,
     nextRetryAtMs,
@@ -5645,6 +5668,21 @@ class $AnalyticsEventQueueTable extends AnalyticsEventQueue
         schemaVersion.isAcceptableOrUnknown(
           data['schema_version']!,
           _schemaVersionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    }
+    if (data.containsKey('identity_scope')) {
+      context.handle(
+        _identityScopeMeta,
+        identityScope.isAcceptableOrUnknown(
+          data['identity_scope']!,
+          _identityScopeMeta,
         ),
       );
     }
@@ -5718,6 +5756,14 @@ class $AnalyticsEventQueueTable extends AnalyticsEventQueue
         DriftSqlType.int,
         data['${effectivePrefix}schema_version'],
       )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      ),
+      identityScope: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}identity_scope'],
+      )!,
       propertiesJson: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}properties_json'],
@@ -5750,6 +5796,8 @@ class AnalyticsEventQueueData extends DataClass
   final String sessionId;
   final int occurredAtMs;
   final int schemaVersion;
+  final String? userId;
+  final String identityScope;
   final String propertiesJson;
   final int attemptCount;
   final int? nextRetryAtMs;
@@ -5760,6 +5808,8 @@ class AnalyticsEventQueueData extends DataClass
     required this.sessionId,
     required this.occurredAtMs,
     required this.schemaVersion,
+    this.userId,
+    required this.identityScope,
     required this.propertiesJson,
     required this.attemptCount,
     this.nextRetryAtMs,
@@ -5773,6 +5823,10 @@ class AnalyticsEventQueueData extends DataClass
     map['session_id'] = Variable<String>(sessionId);
     map['occurred_at_ms'] = Variable<int>(occurredAtMs);
     map['schema_version'] = Variable<int>(schemaVersion);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
+    map['identity_scope'] = Variable<String>(identityScope);
     map['properties_json'] = Variable<String>(propertiesJson);
     map['attempt_count'] = Variable<int>(attemptCount);
     if (!nullToAbsent || nextRetryAtMs != null) {
@@ -5789,6 +5843,10 @@ class AnalyticsEventQueueData extends DataClass
       sessionId: Value(sessionId),
       occurredAtMs: Value(occurredAtMs),
       schemaVersion: Value(schemaVersion),
+      userId: userId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(userId),
+      identityScope: Value(identityScope),
       propertiesJson: Value(propertiesJson),
       attemptCount: Value(attemptCount),
       nextRetryAtMs: nextRetryAtMs == null && nullToAbsent
@@ -5809,6 +5867,8 @@ class AnalyticsEventQueueData extends DataClass
       sessionId: serializer.fromJson<String>(json['sessionId']),
       occurredAtMs: serializer.fromJson<int>(json['occurredAtMs']),
       schemaVersion: serializer.fromJson<int>(json['schemaVersion']),
+      userId: serializer.fromJson<String?>(json['userId']),
+      identityScope: serializer.fromJson<String>(json['identityScope']),
       propertiesJson: serializer.fromJson<String>(json['propertiesJson']),
       attemptCount: serializer.fromJson<int>(json['attemptCount']),
       nextRetryAtMs: serializer.fromJson<int?>(json['nextRetryAtMs']),
@@ -5824,6 +5884,8 @@ class AnalyticsEventQueueData extends DataClass
       'sessionId': serializer.toJson<String>(sessionId),
       'occurredAtMs': serializer.toJson<int>(occurredAtMs),
       'schemaVersion': serializer.toJson<int>(schemaVersion),
+      'userId': serializer.toJson<String?>(userId),
+      'identityScope': serializer.toJson<String>(identityScope),
       'propertiesJson': serializer.toJson<String>(propertiesJson),
       'attemptCount': serializer.toJson<int>(attemptCount),
       'nextRetryAtMs': serializer.toJson<int?>(nextRetryAtMs),
@@ -5837,6 +5899,8 @@ class AnalyticsEventQueueData extends DataClass
     String? sessionId,
     int? occurredAtMs,
     int? schemaVersion,
+    Value<String?> userId = const Value.absent(),
+    String? identityScope,
     String? propertiesJson,
     int? attemptCount,
     Value<int?> nextRetryAtMs = const Value.absent(),
@@ -5847,6 +5911,8 @@ class AnalyticsEventQueueData extends DataClass
     sessionId: sessionId ?? this.sessionId,
     occurredAtMs: occurredAtMs ?? this.occurredAtMs,
     schemaVersion: schemaVersion ?? this.schemaVersion,
+    userId: userId.present ? userId.value : this.userId,
+    identityScope: identityScope ?? this.identityScope,
     propertiesJson: propertiesJson ?? this.propertiesJson,
     attemptCount: attemptCount ?? this.attemptCount,
     nextRetryAtMs: nextRetryAtMs.present
@@ -5865,6 +5931,10 @@ class AnalyticsEventQueueData extends DataClass
       schemaVersion: data.schemaVersion.present
           ? data.schemaVersion.value
           : this.schemaVersion,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      identityScope: data.identityScope.present
+          ? data.identityScope.value
+          : this.identityScope,
       propertiesJson: data.propertiesJson.present
           ? data.propertiesJson.value
           : this.propertiesJson,
@@ -5888,6 +5958,8 @@ class AnalyticsEventQueueData extends DataClass
           ..write('sessionId: $sessionId, ')
           ..write('occurredAtMs: $occurredAtMs, ')
           ..write('schemaVersion: $schemaVersion, ')
+          ..write('userId: $userId, ')
+          ..write('identityScope: $identityScope, ')
           ..write('propertiesJson: $propertiesJson, ')
           ..write('attemptCount: $attemptCount, ')
           ..write('nextRetryAtMs: $nextRetryAtMs, ')
@@ -5903,6 +5975,8 @@ class AnalyticsEventQueueData extends DataClass
     sessionId,
     occurredAtMs,
     schemaVersion,
+    userId,
+    identityScope,
     propertiesJson,
     attemptCount,
     nextRetryAtMs,
@@ -5917,6 +5991,8 @@ class AnalyticsEventQueueData extends DataClass
           other.sessionId == this.sessionId &&
           other.occurredAtMs == this.occurredAtMs &&
           other.schemaVersion == this.schemaVersion &&
+          other.userId == this.userId &&
+          other.identityScope == this.identityScope &&
           other.propertiesJson == this.propertiesJson &&
           other.attemptCount == this.attemptCount &&
           other.nextRetryAtMs == this.nextRetryAtMs &&
@@ -5930,6 +6006,8 @@ class AnalyticsEventQueueCompanion
   final Value<String> sessionId;
   final Value<int> occurredAtMs;
   final Value<int> schemaVersion;
+  final Value<String?> userId;
+  final Value<String> identityScope;
   final Value<String> propertiesJson;
   final Value<int> attemptCount;
   final Value<int?> nextRetryAtMs;
@@ -5941,6 +6019,8 @@ class AnalyticsEventQueueCompanion
     this.sessionId = const Value.absent(),
     this.occurredAtMs = const Value.absent(),
     this.schemaVersion = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.identityScope = const Value.absent(),
     this.propertiesJson = const Value.absent(),
     this.attemptCount = const Value.absent(),
     this.nextRetryAtMs = const Value.absent(),
@@ -5953,6 +6033,8 @@ class AnalyticsEventQueueCompanion
     required String sessionId,
     required int occurredAtMs,
     this.schemaVersion = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.identityScope = const Value.absent(),
     this.propertiesJson = const Value.absent(),
     this.attemptCount = const Value.absent(),
     this.nextRetryAtMs = const Value.absent(),
@@ -5969,6 +6051,8 @@ class AnalyticsEventQueueCompanion
     Expression<String>? sessionId,
     Expression<int>? occurredAtMs,
     Expression<int>? schemaVersion,
+    Expression<String>? userId,
+    Expression<String>? identityScope,
     Expression<String>? propertiesJson,
     Expression<int>? attemptCount,
     Expression<int>? nextRetryAtMs,
@@ -5981,6 +6065,8 @@ class AnalyticsEventQueueCompanion
       if (sessionId != null) 'session_id': sessionId,
       if (occurredAtMs != null) 'occurred_at_ms': occurredAtMs,
       if (schemaVersion != null) 'schema_version': schemaVersion,
+      if (userId != null) 'user_id': userId,
+      if (identityScope != null) 'identity_scope': identityScope,
       if (propertiesJson != null) 'properties_json': propertiesJson,
       if (attemptCount != null) 'attempt_count': attemptCount,
       if (nextRetryAtMs != null) 'next_retry_at_ms': nextRetryAtMs,
@@ -5995,6 +6081,8 @@ class AnalyticsEventQueueCompanion
     Value<String>? sessionId,
     Value<int>? occurredAtMs,
     Value<int>? schemaVersion,
+    Value<String?>? userId,
+    Value<String>? identityScope,
     Value<String>? propertiesJson,
     Value<int>? attemptCount,
     Value<int?>? nextRetryAtMs,
@@ -6007,6 +6095,8 @@ class AnalyticsEventQueueCompanion
       sessionId: sessionId ?? this.sessionId,
       occurredAtMs: occurredAtMs ?? this.occurredAtMs,
       schemaVersion: schemaVersion ?? this.schemaVersion,
+      userId: userId ?? this.userId,
+      identityScope: identityScope ?? this.identityScope,
       propertiesJson: propertiesJson ?? this.propertiesJson,
       attemptCount: attemptCount ?? this.attemptCount,
       nextRetryAtMs: nextRetryAtMs ?? this.nextRetryAtMs,
@@ -6032,6 +6122,12 @@ class AnalyticsEventQueueCompanion
     }
     if (schemaVersion.present) {
       map['schema_version'] = Variable<int>(schemaVersion.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (identityScope.present) {
+      map['identity_scope'] = Variable<String>(identityScope.value);
     }
     if (propertiesJson.present) {
       map['properties_json'] = Variable<String>(propertiesJson.value);
@@ -6059,6 +6155,8 @@ class AnalyticsEventQueueCompanion
           ..write('sessionId: $sessionId, ')
           ..write('occurredAtMs: $occurredAtMs, ')
           ..write('schemaVersion: $schemaVersion, ')
+          ..write('userId: $userId, ')
+          ..write('identityScope: $identityScope, ')
           ..write('propertiesJson: $propertiesJson, ')
           ..write('attemptCount: $attemptCount, ')
           ..write('nextRetryAtMs: $nextRetryAtMs, ')
@@ -10222,6 +10320,8 @@ typedef $$AnalyticsEventQueueTableCreateCompanionBuilder =
       required String sessionId,
       required int occurredAtMs,
       Value<int> schemaVersion,
+      Value<String?> userId,
+      Value<String> identityScope,
       Value<String> propertiesJson,
       Value<int> attemptCount,
       Value<int?> nextRetryAtMs,
@@ -10235,6 +10335,8 @@ typedef $$AnalyticsEventQueueTableUpdateCompanionBuilder =
       Value<String> sessionId,
       Value<int> occurredAtMs,
       Value<int> schemaVersion,
+      Value<String?> userId,
+      Value<String> identityScope,
       Value<String> propertiesJson,
       Value<int> attemptCount,
       Value<int?> nextRetryAtMs,
@@ -10273,6 +10375,16 @@ class $$AnalyticsEventQueueTableFilterComposer
 
   ColumnFilters<int> get schemaVersion => $composableBuilder(
     column: $table.schemaVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get identityScope => $composableBuilder(
+    column: $table.identityScope,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -10331,6 +10443,16 @@ class $$AnalyticsEventQueueTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get identityScope => $composableBuilder(
+    column: $table.identityScope,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get propertiesJson => $composableBuilder(
     column: $table.propertiesJson,
     builder: (column) => ColumnOrderings(column),
@@ -10377,6 +10499,14 @@ class $$AnalyticsEventQueueTableAnnotationComposer
 
   GeneratedColumn<int> get schemaVersion => $composableBuilder(
     column: $table.schemaVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<String> get identityScope => $composableBuilder(
+    column: $table.identityScope,
     builder: (column) => column,
   );
 
@@ -10449,6 +10579,8 @@ class $$AnalyticsEventQueueTableTableManager
                 Value<String> sessionId = const Value.absent(),
                 Value<int> occurredAtMs = const Value.absent(),
                 Value<int> schemaVersion = const Value.absent(),
+                Value<String?> userId = const Value.absent(),
+                Value<String> identityScope = const Value.absent(),
                 Value<String> propertiesJson = const Value.absent(),
                 Value<int> attemptCount = const Value.absent(),
                 Value<int?> nextRetryAtMs = const Value.absent(),
@@ -10460,6 +10592,8 @@ class $$AnalyticsEventQueueTableTableManager
                 sessionId: sessionId,
                 occurredAtMs: occurredAtMs,
                 schemaVersion: schemaVersion,
+                userId: userId,
+                identityScope: identityScope,
                 propertiesJson: propertiesJson,
                 attemptCount: attemptCount,
                 nextRetryAtMs: nextRetryAtMs,
@@ -10473,6 +10607,8 @@ class $$AnalyticsEventQueueTableTableManager
                 required String sessionId,
                 required int occurredAtMs,
                 Value<int> schemaVersion = const Value.absent(),
+                Value<String?> userId = const Value.absent(),
+                Value<String> identityScope = const Value.absent(),
                 Value<String> propertiesJson = const Value.absent(),
                 Value<int> attemptCount = const Value.absent(),
                 Value<int?> nextRetryAtMs = const Value.absent(),
@@ -10484,6 +10620,8 @@ class $$AnalyticsEventQueueTableTableManager
                 sessionId: sessionId,
                 occurredAtMs: occurredAtMs,
                 schemaVersion: schemaVersion,
+                userId: userId,
+                identityScope: identityScope,
                 propertiesJson: propertiesJson,
                 attemptCount: attemptCount,
                 nextRetryAtMs: nextRetryAtMs,

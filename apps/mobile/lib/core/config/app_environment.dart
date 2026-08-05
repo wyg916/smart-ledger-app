@@ -27,6 +27,11 @@ const apiBaseUrl = String.fromEnvironment(
   defaultValue: 'https://www.znjz.site',
 );
 const appVersion = '1.0.0';
+const applicationId = 'com.wyg916.smartledger';
+const releaseChannel = String.fromEnvironment(
+  'RELEASE_CHANNEL',
+  defaultValue: 'direct',
+);
 
 void validateAppConfiguration() {
   final environment = AppEnvironment.fromName(_configuredEnvironment);

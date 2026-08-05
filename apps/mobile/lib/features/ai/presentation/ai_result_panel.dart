@@ -1,7 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smart_ledger/app/ledger_theme.dart';
 import 'package:smart_ledger/app/ledger_visuals.dart';
 import 'package:smart_ledger/features/ai/domain/ai_models.dart';
+
+class AiQuotaPanel extends StatelessWidget {
+  const AiQuotaPanel({super.key, required this.quota});
+
+  final AsyncValue<AiQuotaStatus> quota;
+
+  @override
+  Widget build(BuildContext context) => quota.when(
+    loading: () => const Card(
+      key: Key('ai-quota-loading'),
+      child: Padding(
+        padding: EdgeInsets.all(12),
+        child: LinearProgressIndicator(),
+      ),
+    ),
+    error: (_, _) => const Card(
+      key: Key('ai-quota-unavailable'),
+      child: ListTile(
+        leading: Icon(Icons.cloud_off_outlined),
+        title: Text('无法获取AI额度'),
+        subtitle: Text('本地记账、预算和统计仍可正常使用。'),
+      ),
+    ),
+    data: (value) => Card(
+      key: const Key('ai-quota-status'),
+      child: ListTile(
+        leading: const Icon(Icons.auto_awesome_outlined),
+        title: Text(
+          '今日剩余 ${value.dailyRemaining}/${value.dailyLimit} 次 · '
+          '本周剩余 ${value.weeklyRemaining}/${value.weeklyLimit} 次',
+          key: const Key('ai-quota-remaining'),
+        ),
+        subtitle: Text(
+          value.isExhausted
+              ? value.exhaustedMessage
+              : '下次日额度恢复：${_resetLabel(value.nextDailyResetAt)}',
+          key: const Key('ai-quota-reset'),
+        ),
+      ),
+    ),
+  );
+
+  static String _resetLabel(DateTime value) {
+    final local = value.toLocal();
+    return '${local.month.toString().padLeft(2, '0')}-'
+        '${local.day.toString().padLeft(2, '0')} '
+        '${local.hour.toString().padLeft(2, '0')}:'
+        '${local.minute.toString().padLeft(2, '0')}';
+  }
+}
 
 class AiResultPanel extends StatelessWidget {
   const AiResultPanel({super.key, required this.result});
@@ -69,7 +120,7 @@ class AiFailurePanel extends StatelessWidget {
     required this.onRetry,
   });
   final AiFailure failure;
-  final VoidCallback onRetry;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) => Card(

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:smart_ledger/core/config/app_environment.dart';
 import 'package:smart_ledger/features/identity/domain/anonymous_identity.dart';
 import 'package:smart_ledger/features/telemetry/domain/telemetry_event.dart';
 
@@ -11,7 +12,11 @@ abstract interface class TelemetryApiClient {
     AnonymousIdentity identity, {
     required String userAccessToken,
   });
-  Future<void> startSession(AnonymousIdentity identity, String token);
+  Future<void> startSession(
+    AnonymousIdentity identity,
+    String token, {
+    required String userId,
+  });
   Future<void> endSession(AnonymousIdentity identity, String token);
   Future<void> uploadBatch(List<QueuedTelemetryEvent> events, String token);
 }
@@ -31,7 +36,10 @@ final class HttpTelemetryApiClient implements TelemetryApiClient {
       'installation_id': identity.installationId,
       'anonymous_actor_id': identity.actorId,
       'platform': Platform.isAndroid ? 'android' : 'ios',
-      'app_version': '1.0.0',
+      'app_version': appVersion,
+      'android_version': _safeAndroidVersion(),
+      'application_id': applicationId,
+      'release_channel': releaseChannel,
     }, token: userAccessToken);
     return (jsonDecode(response.body)
             as Map<String, Object?>)['installation_token']!
@@ -39,11 +47,17 @@ final class HttpTelemetryApiClient implements TelemetryApiClient {
   }
 
   @override
-  Future<void> startSession(AnonymousIdentity identity, String token) =>
-      _post('/api/v1/telemetry/sessions/start', {
-        'session_id': identity.sessionId,
-        'started_at': DateTime.now().toUtc().toIso8601String(),
-      }, token: token);
+  Future<void> startSession(
+    AnonymousIdentity identity,
+    String token, {
+    required String userId,
+  }) => _post('/api/v1/telemetry/sessions/start', {
+    'session_id': identity.sessionId,
+    'started_at': DateTime.now().toUtc().toIso8601String(),
+    'schema_version': 2,
+    'user_id': userId,
+    'identity_scope': 'authenticated',
+  }, token: token);
 
   @override
   Future<void> endSession(AnonymousIdentity identity, String token) =>
@@ -57,6 +71,17 @@ final class HttpTelemetryApiClient implements TelemetryApiClient {
       _post('/api/v1/telemetry/events/batch', {
         'events': events.map((event) => event.toJson()).toList(),
       }, token: token);
+
+  String _safeAndroidVersion() {
+    if (!Platform.isAndroid) return 'unknown';
+    final safe = Platform.operatingSystemVersion.replaceAll(
+      RegExp(r'[^A-Za-z0-9._ -]'),
+      ' ',
+    );
+    final compact = safe.replaceAll(RegExp(r'\s+'), ' ').trim();
+    if (compact.isEmpty) return 'unknown';
+    return compact.length > 32 ? compact.substring(0, 32) : compact;
+  }
 
   Future<http.Response> _post(
     String path,

@@ -15,6 +15,7 @@ import 'package:smart_ledger/features/quick_entry/domain/transaction_draft.dart'
 import 'package:smart_ledger/features/telemetry/presentation/telemetry_providers.dart';
 import 'package:smart_ledger/features/transactions/domain/ledger_transaction.dart';
 import 'package:smart_ledger/features/transactions/presentation/ledger_providers.dart';
+import 'package:uuid/uuid.dart';
 
 class NaturalLanguageEntryPanel extends ConsumerStatefulWidget {
   const NaturalLanguageEntryPanel({
@@ -117,14 +118,25 @@ class _NaturalLanguageEntryPanelState
         draft = local;
       } else {
         try {
+          _record('ai_parse_transaction_submitted');
           draft = await ref
               .read(aiApiClientProvider)
               .parseTransaction(
                 text: text,
                 timeZoneId: timeZoneId,
                 categories: enabled,
+                requestId: const Uuid().v4(),
               );
-        } on AiFailure {
+          _record('ai_parse_transaction_success');
+          ref.invalidate(aiQuotaProvider);
+        } on AiFailure catch (failure) {
+          _record(
+            'ai_parse_transaction_failed',
+            properties: {'failure_kind': failure.kind.name},
+          );
+          if (failure.kind == AiFailureKind.quotaExceeded) {
+            ref.invalidate(aiQuotaProvider);
+          }
           if (local == null) rethrow;
           draft = local;
         }

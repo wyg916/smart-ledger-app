@@ -17,6 +17,7 @@ abstract interface class AuthApiClient {
   Future<AuthSession> phoneLogin({
     required String token,
     required String installationId,
+    required String timezone,
     String? carrier,
   });
   Future<String> createWechatState(String installationId);
@@ -24,11 +25,13 @@ abstract interface class AuthApiClient {
     required String code,
     required String state,
     required String installationId,
+    required String timezone,
   });
   Future<AuthSession> reviewLogin({
     required String username,
     required String password,
     required String installationId,
+    required String timezone,
   });
   Future<AuthSession> refresh(String refreshToken);
   Future<List<String>> me(String accessToken);
@@ -54,11 +57,13 @@ final class HttpAuthApiClient implements AuthApiClient {
   Future<AuthSession> phoneLogin({
     required String token,
     required String installationId,
+    required String timezone,
     String? carrier,
   }) async => _session(
     await _post('/api/v1/auth/phone/one-click', {
       'token': token,
       'installation_id': installationId,
+      'timezone': timezone,
       'carrier': ?carrier,
     }),
   );
@@ -76,11 +81,13 @@ final class HttpAuthApiClient implements AuthApiClient {
     required String code,
     required String state,
     required String installationId,
+    required String timezone,
   }) async => _session(
     await _post('/api/v1/auth/wechat', {
       'code': code,
       'state': state,
       'installation_id': installationId,
+      'timezone': timezone,
     }),
   );
 
@@ -89,11 +96,13 @@ final class HttpAuthApiClient implements AuthApiClient {
     required String username,
     required String password,
     required String installationId,
+    required String timezone,
   }) async => _session(
     await _post('/api/v1/auth/review-login', {
       'username': username,
       'password': password,
       'installation_id': installationId,
+      'timezone': timezone,
     }),
   );
 

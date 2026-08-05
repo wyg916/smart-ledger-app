@@ -9,9 +9,11 @@ import 'package:smart_ledger/app/ledger_visuals.dart';
 import 'package:smart_ledger/core/money/money.dart';
 import 'package:smart_ledger/features/ai/domain/ai_models.dart';
 import 'package:smart_ledger/features/ai/presentation/ai_providers.dart';
+import 'package:smart_ledger/features/ai/presentation/ai_result_panel.dart';
 import 'package:smart_ledger/features/home/presentation/home_providers.dart';
 import 'package:smart_ledger/features/telemetry/presentation/telemetry_providers.dart';
 import 'package:smart_ledger/features/transactions/domain/ledger_transaction.dart';
+import 'package:uuid/uuid.dart';
 
 class AiAssistantPage extends ConsumerStatefulWidget {
   const AiAssistantPage({super.key});
@@ -33,6 +35,7 @@ class _AiAssistantPageState extends ConsumerState<AiAssistantPage> {
   bool _loading = false;
   String? _error;
   int _requestId = 0;
+  String? _lastChatOperationId;
 
   @override
   void dispose() {
@@ -43,6 +46,8 @@ class _AiAssistantPageState extends ConsumerState<AiAssistantPage> {
 
   @override
   Widget build(BuildContext context) {
+    final quota = ref.watch(aiQuotaProvider);
+    final quotaExhausted = quota.valueOrNull?.isExhausted ?? false;
     return Scaffold(
       appBar: AppBar(
         title: const Text('AI 小伙伴'),
@@ -64,6 +69,7 @@ class _AiAssistantPageState extends ConsumerState<AiAssistantPage> {
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
               children: [
                 const _IntroCard(),
+                AiQuotaPanel(quota: quota),
                 const _LegacyTools(),
                 _ContextChooser(
                   includeToday: _includeToday,
@@ -85,7 +91,9 @@ class _AiAssistantPageState extends ConsumerState<AiAssistantPage> {
                     ])
                       ActionChip(
                         label: Text(prompt),
-                        onPressed: _loading ? null : () => _send(prompt),
+                        onPressed: _loading || quotaExhausted
+                            ? null
+                            : () => _send(prompt),
                       ),
                   ],
                 ),
@@ -125,7 +133,7 @@ class _AiAssistantPageState extends ConsumerState<AiAssistantPage> {
                             ),
                           ),
                           TextButton(
-                            onPressed: _retry,
+                            onPressed: quotaExhausted ? null : _retry,
                             child: const Text('重试'),
                           ),
                         ],
@@ -145,7 +153,7 @@ class _AiAssistantPageState extends ConsumerState<AiAssistantPage> {
                   IconButton.filledTonal(
                     key: const Key('ai-image-picker'),
                     tooltip: '选择财务截图',
-                    onPressed: _loading ? null : _pickImage,
+                    onPressed: _loading || quotaExhausted ? null : _pickImage,
                     icon: const Icon(Icons.add_photo_alternate_outlined),
                   ),
                   const SizedBox(width: 8),
@@ -158,7 +166,9 @@ class _AiAssistantPageState extends ConsumerState<AiAssistantPage> {
                       minLines: 1,
                       maxLength: 2000,
                       textInputAction: TextInputAction.send,
-                      onSubmitted: _loading ? null : (_) => _send(),
+                      onSubmitted: _loading || quotaExhausted
+                          ? null
+                          : (_) => _send(),
                       decoration: const InputDecoration(
                         hintText: '问问账本小伙伴…',
                         counterText: '',
@@ -169,7 +179,11 @@ class _AiAssistantPageState extends ConsumerState<AiAssistantPage> {
                   IconButton.filled(
                     key: const Key('ai-chat-submit'),
                     tooltip: _loading ? '停止等待' : '发送',
-                    onPressed: _loading ? _stop : _send,
+                    onPressed: _loading
+                        ? _stop
+                        : quotaExhausted
+                        ? null
+                        : _send,
                     icon: Icon(
                       _loading
                           ? Icons.stop_rounded
@@ -185,11 +199,13 @@ class _AiAssistantPageState extends ConsumerState<AiAssistantPage> {
     );
   }
 
-  Future<void> _send([String? preset]) async {
+  Future<void> _send([String? preset, String? retryRequestId]) async {
     final content = (preset ?? _controller.text).trim();
     if (content.isEmpty || _loading) return;
     _controller.clear();
     final requestId = ++_requestId;
+    final operationId = retryRequestId ?? const Uuid().v4();
+    _lastChatOperationId = operationId;
     setState(() {
       _messages.add(ChatMessage(role: ChatRole.user, content: content));
       if (_messages.length > 16) {
@@ -209,6 +225,7 @@ class _AiAssistantPageState extends ConsumerState<AiAssistantPage> {
           .chat(
             messages: List.unmodifiable(_messages),
             context: _buildContext(),
+            requestId: operationId,
           );
       if (!mounted || requestId != _requestId) return;
       setState(() {
@@ -224,6 +241,7 @@ class _AiAssistantPageState extends ConsumerState<AiAssistantPage> {
         'ai_chat_success',
         properties: {'message_count': _messages.length},
       );
+      ref.invalidate(aiQuotaProvider);
     } on AiFailure catch (failure) {
       if (!mounted || requestId != _requestId) return;
       setState(() => _error = failure.message);
@@ -231,6 +249,9 @@ class _AiAssistantPageState extends ConsumerState<AiAssistantPage> {
         'ai_chat_failed',
         properties: {'failure_kind': failure.kind.name},
       );
+      if (failure.kind == AiFailureKind.quotaExceeded) {
+        ref.invalidate(aiQuotaProvider);
+      }
     } catch (_) {
       if (!mounted || requestId != _requestId) return;
       setState(() => _error = 'AI 暂时没有回应，请稍后再试');
@@ -297,10 +318,12 @@ class _AiAssistantPageState extends ConsumerState<AiAssistantPage> {
             bytes: image.bytes,
             filename: image.filename,
             mimeType: image.mimeType,
+            requestId: const Uuid().v4(),
           );
       if (!mounted || requestId != _requestId) return;
       setState(() => _imageResult = result);
       _record('image_analysis_success', properties: const {'has_image': true});
+      ref.invalidate(aiQuotaProvider);
     } on FormatException catch (error) {
       if (mounted && requestId == _requestId) {
         setState(() => _error = error.message.toString());
@@ -317,6 +340,9 @@ class _AiAssistantPageState extends ConsumerState<AiAssistantPage> {
         'image_analysis_failed',
         properties: {'failure_kind': failure.kind.name},
       );
+      if (failure.kind == AiFailureKind.quotaExceeded) {
+        ref.invalidate(aiQuotaProvider);
+      }
     } catch (_) {
       if (mounted && requestId == _requestId) {
         setState(() => _error = '图片分析暂不可用，请稍后重试');
@@ -349,7 +375,7 @@ class _AiAssistantPageState extends ConsumerState<AiAssistantPage> {
       _messages.removeAt(index);
       _error = null;
     });
-    if (content.isNotEmpty) _send(content);
+    if (content.isNotEmpty) _send(content, _lastChatOperationId);
   }
 
   void _newSession() {
@@ -361,6 +387,7 @@ class _AiAssistantPageState extends ConsumerState<AiAssistantPage> {
       _preview = null;
       _error = null;
       _loading = false;
+      _lastChatOperationId = null;
     });
   }
 

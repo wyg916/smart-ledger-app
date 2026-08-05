@@ -19,6 +19,7 @@ final class TelemetryCoordinator implements TelemetryRecorder {
     this._identityService,
     this._identity,
     this._userAccessToken,
+    this._userId,
   );
 
   final AnalyticsQueueRepository _queue;
@@ -26,8 +27,10 @@ final class TelemetryCoordinator implements TelemetryRecorder {
   final AnonymousIdentityService _identityService;
   AnonymousIdentity _identity;
   final String _userAccessToken;
+  final String _userId;
   bool _flushing = false;
   bool _sessionStarted = false;
+  bool _registeredForUser = false;
 
   @override
   Future<void> record(
@@ -37,6 +40,9 @@ final class TelemetryCoordinator implements TelemetryRecorder {
     await _queue.enqueue(
       name: name,
       sessionId: _identity.sessionId,
+      userId: _userId,
+      identityScope: 'authenticated',
+      schemaVersion: 2,
       properties: properties,
     );
     unawaited(flush());
@@ -87,16 +93,18 @@ final class TelemetryCoordinator implements TelemetryRecorder {
 
   Future<String> _ensureSession() async {
     var token = _identity.installationToken;
-    if (token == null) {
+    if (!_registeredForUser) {
       token = await _client.registerInstallation(
         _identity,
         userAccessToken: _userAccessToken,
       );
       await _identityService.saveInstallationToken(token);
       _identity = _identity.copyWith(installationToken: token);
+      _registeredForUser = true;
     }
+    if (token == null) throw StateError('Telemetry installation token missing');
     if (!_sessionStarted) {
-      await _client.startSession(_identity, token);
+      await _client.startSession(_identity, token, userId: _userId);
       _sessionStarted = true;
     }
     return token;

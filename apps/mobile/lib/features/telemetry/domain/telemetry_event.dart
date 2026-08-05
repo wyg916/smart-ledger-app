@@ -3,6 +3,19 @@ const telemetryEventNames = <String>{
   'session_start',
   'session_end',
   'home_viewed',
+  'login_page_viewed',
+  'phone_login_started',
+  'phone_login_cancelled',
+  'phone_login_failed',
+  'phone_login_succeeded',
+  'wechat_login_started',
+  'wechat_login_cancelled',
+  'wechat_login_failed',
+  'wechat_login_succeeded',
+  'review_login_succeeded',
+  'logout_completed',
+  'account_deletion_started',
+  'account_deletion_completed',
   'transaction_created',
   'transaction_edited',
   'transaction_deleted',
@@ -18,6 +31,18 @@ const telemetryEventNames = <String>{
   'image_analysis_submitted',
   'image_analysis_success',
   'image_analysis_failed',
+  'monthly_summary_submitted',
+  'monthly_summary_success',
+  'monthly_summary_failed',
+  'budget_review_submitted',
+  'budget_review_success',
+  'budget_review_failed',
+  'financial_plan_submitted',
+  'financial_plan_success',
+  'financial_plan_failed',
+  'ai_parse_transaction_submitted',
+  'ai_parse_transaction_success',
+  'ai_parse_transaction_failed',
 };
 
 const telemetryPropertyNames = <String>{
@@ -27,6 +52,8 @@ const telemetryPropertyNames = <String>{
   'view_mode',
   'message_count',
   'has_image',
+  'feature',
+  'network_type',
 };
 
 final class QueuedTelemetryEvent {
@@ -37,6 +64,9 @@ final class QueuedTelemetryEvent {
     required this.occurredAtUtc,
     required this.properties,
     required this.attemptCount,
+    required this.schemaVersion,
+    required this.userId,
+    required this.identityScope,
   });
 
   final String eventId;
@@ -45,13 +75,18 @@ final class QueuedTelemetryEvent {
   final DateTime occurredAtUtc;
   final Map<String, Object> properties;
   final int attemptCount;
+  final int schemaVersion;
+  final String? userId;
+  final String identityScope;
 
   Map<String, Object> toJson() => {
     'event_id': eventId,
     'event_name': name,
     'session_id': sessionId,
     'occurred_at': occurredAtUtc.toIso8601String(),
-    'schema_version': 1,
+    'schema_version': schemaVersion,
+    'user_id': ?userId,
+    'identity_scope': identityScope,
     'properties': properties,
   };
 }

@@ -9,6 +9,7 @@ import 'package:smart_ledger/features/analytics/domain/ledger_analytics.dart';
 import 'package:smart_ledger/features/analytics/presentation/analytics_providers.dart';
 import 'package:smart_ledger/features/budgets/domain/ledger_budget.dart';
 import 'package:smart_ledger/features/budgets/presentation/budget_providers.dart';
+import 'package:uuid/uuid.dart';
 
 class AiBudgetReviewPage extends ConsumerStatefulWidget {
   const AiBudgetReviewPage({super.key});
@@ -21,11 +22,16 @@ class _AiBudgetReviewPageState extends ConsumerState<AiBudgetReviewPage> {
   bool _loading = false;
   AiResult? _result;
   AiFailure? _failure;
+  String? _operationRequestId;
 
   Future<void> _run(
     AnalyticsSnapshot snapshot,
-    List<LedgerBudget> budgets,
-  ) async {
+    List<LedgerBudget> budgets, {
+    bool retry = false,
+  }) async {
+    if (!retry || _operationRequestId == null) {
+      _operationRequestId = const Uuid().v4();
+    }
     setState(() {
       _loading = true;
       _failure = null;
@@ -36,12 +42,18 @@ class _AiBudgetReviewPageState extends ConsumerState<AiBudgetReviewPage> {
         budgets,
         daysRemaining: _daysRemaining(snapshot),
       );
-      final result = await ref.read(aiApiClientProvider).budgetReview(request);
+      final result = await ref
+          .read(aiApiClientProvider)
+          .budgetReview(request, requestId: _operationRequestId);
       if (!mounted) return;
       setState(() => _result = result);
+      ref.invalidate(aiQuotaProvider);
     } on AiFailure catch (failure) {
       if (!mounted) return;
       setState(() => _failure = failure);
+      if (failure.kind == AiFailureKind.quotaExceeded) {
+        ref.invalidate(aiQuotaProvider);
+      }
     } catch (_) {
       if (!mounted) return;
       setState(
@@ -70,6 +82,8 @@ class _AiBudgetReviewPageState extends ConsumerState<AiBudgetReviewPage> {
   Widget build(BuildContext context) {
     final analytics = ref.watch(analyticsProvider);
     final budgets = ref.watch(monthlyBudgetsProvider);
+    final quota = ref.watch(aiQuotaProvider);
+    final exhausted = quota.valueOrNull?.isExhausted ?? false;
     return Scaffold(
       appBar: AppBar(title: const Text('预算执行解释')),
       body: analytics.when(
@@ -85,6 +99,7 @@ class _AiBudgetReviewPageState extends ConsumerState<AiBudgetReviewPage> {
             return ListView(
               padding: const EdgeInsets.all(16),
               children: [
+                AiQuotaPanel(quota: quota),
                 Card(
                   key: const Key('budget-deterministic'),
                   child: Padding(
@@ -99,7 +114,9 @@ class _AiBudgetReviewPageState extends ConsumerState<AiBudgetReviewPage> {
                 ),
                 FilledButton(
                   key: const Key('generate-budget-ai'),
-                  onPressed: _loading ? null : () => _run(snapshot, items),
+                  onPressed: _loading || exhausted
+                      ? null
+                      : () => _run(snapshot, items),
                   child: const Text('生成预算解释'),
                 ),
                 if (_loading)
@@ -113,7 +130,9 @@ class _AiBudgetReviewPageState extends ConsumerState<AiBudgetReviewPage> {
                 if (_failure case final failure?)
                   AiFailurePanel(
                     failure: failure,
-                    onRetry: () => _run(snapshot, items),
+                    onRetry: exhausted
+                        ? null
+                        : () => _run(snapshot, items, retry: true),
                   ),
                 if (_result case final result?) AiResultPanel(result: result),
               ],

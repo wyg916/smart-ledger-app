@@ -17,6 +17,7 @@ import 'package:smart_ledger/features/ai/domain/ai_request_factories.dart';
 import 'package:smart_ledger/features/ai/domain/ai_requests.dart';
 import 'package:smart_ledger/features/ai/presentation/ai_financial_plan_page.dart';
 import 'package:smart_ledger/features/ai/presentation/ai_providers.dart';
+import 'package:smart_ledger/features/ai/presentation/ai_result_panel.dart';
 import 'package:smart_ledger/features/analytics/domain/ledger_analytics.dart';
 import 'package:smart_ledger/features/categories/domain/ledger_category.dart';
 import 'package:smart_ledger/features/quick_entry/domain/transaction_draft.dart';
@@ -153,12 +154,157 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(Key('ai-failure-${kind.name}')), findsOneWidget);
       expect(find.byKey(const Key('ai-fallback')), findsOneWidget);
+      await tester.ensureVisible(find.byKey(const Key('ai-retry')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('ai-retry')));
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('ai-success')), findsOneWidget);
       expect(client.planCalls, 2);
+      expect(client.planRequestIds.toSet(), hasLength(1));
+      expect(client.planRequestIds.first, isNotEmpty);
     });
   }
+
+  test('quota DTO parses reset timestamps and remaining counts', () {
+    final quota = AiQuotaStatus.fromJson({
+      'plan_code': 'free',
+      'daily_limit': 2,
+      'daily_used': 1,
+      'daily_remaining': 1,
+      'weekly_limit': 10,
+      'weekly_used': 4,
+      'weekly_remaining': 6,
+      'next_daily_reset_at': '2026-08-05T16:00:00Z',
+      'next_weekly_reset_at': '2026-08-09T16:00:00Z',
+      'user_timezone': 'Asia/Shanghai',
+    });
+    expect(quota.dailyRemaining, 1);
+    expect(quota.weeklyRemaining, 6);
+    expect(quota.nextDailyResetAt.isUtc, isTrue);
+    expect(quota.isExhausted, isFalse);
+  });
+
+  testWidgets('quota panel shows daily and weekly remaining without tokens', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: AiQuotaPanel(
+            quota: AsyncData(_quota(dailyRemaining: 1, weeklyRemaining: 7)),
+          ),
+        ),
+      ),
+    );
+    expect(find.textContaining('今日剩余 1/2 次'), findsOneWidget);
+    expect(find.textContaining('本周剩余 7/10 次'), findsOneWidget);
+    expect(find.textContaining('Token'), findsNothing);
+    expect(find.textContaining('access'), findsNothing);
+  });
+
+  testWidgets(
+    'exhausted quota disables AI generation and shows recovery copy',
+    (tester) async {
+      final client = _FakeAiClient(
+        quotaValue: _quota(dailyRemaining: 0, weeklyRemaining: 8),
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [aiApiClientProvider.overrideWithValue(client)],
+          child: const MaterialApp(home: AiFinancialPlanPage()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining('今日剩余 0/2 次'), findsOneWidget);
+      expect(find.text('今日AI次数已用完，明日恢复。'), findsOneWidget);
+      final button = tester.widget<FilledButton>(
+        find.byKey(const Key('generate-plan-ai')),
+      );
+      expect(button.onPressed, isNull);
+      expect(client.planCalls, 0);
+    },
+  );
+
+  testWidgets('weekly exhaustion and offline quota have distinct safe UI', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: AiQuotaPanel(
+            quota: AsyncData(_quota(dailyRemaining: 2, weeklyRemaining: 0)),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('本周AI次数已用完，下周一恢复。'), findsOneWidget);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: AiQuotaPanel(
+            quota: AsyncValue<AiQuotaStatus>.error(
+              const SocketException('offline'),
+              StackTrace.empty,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('无法获取AI额度'), findsOneWidget);
+    expect(find.textContaining('本地记账、预算和统计仍可正常使用'), findsOneWidget);
+  });
+
+  test('HTTP client distinguishes product quota from provider 429', () async {
+    final requestIds = <String>[];
+    final client = HttpAiApiClient(
+      MockClient((request) async {
+        requestIds.add(request.headers['x-request-id'] ?? '');
+        return http.Response(
+          jsonEncode({
+            'error': {'code': 'AI_QUOTA_EXCEEDED', 'message': 'internal'},
+            'plan_code': 'free',
+            'daily_limit': 2,
+            'daily_used': 2,
+            'daily_remaining': 0,
+            'weekly_limit': 10,
+            'weekly_used': 2,
+            'weekly_remaining': 8,
+            'next_daily_reset_at': '2026-08-05T16:00:00Z',
+            'next_weekly_reset_at': '2026-08-09T16:00:00Z',
+            'user_timezone': 'Asia/Shanghai',
+          }),
+          429,
+        );
+      }),
+      'http://local.test',
+    );
+    const requestId = '00000000-0000-4000-8000-000000000321';
+    for (var index = 0; index < 2; index++) {
+      await expectLater(
+        client.financialPlan(
+          financialPlanAiRequest(
+            goalName: '应急金',
+            targetMinor: 1000,
+            deadlineMonths: 2,
+            currentMinor: 0,
+            monthlyContributionMinor: 100,
+            riskPreference: 'balanced',
+          ),
+          requestId: requestId,
+        ),
+        throwsA(
+          isA<AiFailure>()
+              .having(
+                (error) => error.kind,
+                'kind',
+                AiFailureKind.quotaExceeded,
+              )
+              .having((error) => error.message, 'message', '今日AI次数已用完，明日恢复。'),
+        ),
+      );
+    }
+    expect(requestIds, [requestId, requestId]);
+  });
 
   test('HTTP client maps rate limit and never exposes upstream body', () async {
     final client = HttpAiApiClient(
@@ -249,9 +395,16 @@ AiResult _result() => const AiResult(
 );
 
 class _FakeAiClient implements AiApiClient {
-  _FakeAiClient({List<AiFailure>? failures}) : failures = failures ?? [];
+  _FakeAiClient({List<AiFailure>? failures, AiQuotaStatus? quotaValue})
+    : failures = failures ?? [],
+      quotaValue = quotaValue ?? _quota();
   final List<AiFailure> failures;
+  final AiQuotaStatus quotaValue;
   int planCalls = 0;
+  final List<String> planRequestIds = [];
+
+  @override
+  Future<AiQuotaStatus> quota() async => quotaValue;
 
   Future<AiResult> _next() async {
     if (failures.isNotEmpty) throw failures.removeAt(0);
@@ -259,14 +412,22 @@ class _FakeAiClient implements AiApiClient {
   }
 
   @override
-  Future<AiResult> monthlySummary(MonthlyAiRequest request) => _next();
+  Future<AiResult> monthlySummary(
+    MonthlyAiRequest request, {
+    String? requestId,
+  }) => _next();
 
   @override
-  Future<AiResult> budgetReview(BudgetAiRequest request) => _next();
+  Future<AiResult> budgetReview(BudgetAiRequest request, {String? requestId}) =>
+      _next();
 
   @override
-  Future<AiResult> financialPlan(FinancialPlanAiRequest request) {
+  Future<AiResult> financialPlan(
+    FinancialPlanAiRequest request, {
+    String? requestId,
+  }) {
     planCalls++;
+    planRequestIds.add(requestId ?? '');
     return _next();
   }
 
@@ -274,6 +435,7 @@ class _FakeAiClient implements AiApiClient {
   Future<ChatResult> chat({
     required List<ChatMessage> messages,
     Map<String, String> context = const {},
+    String? requestId,
   }) => throw UnimplementedError();
 
   @override
@@ -281,6 +443,7 @@ class _FakeAiClient implements AiApiClient {
     required String text,
     required String timeZoneId,
     required List<LedgerCategory> categories,
+    String? requestId,
   }) => throw UnimplementedError();
 
   @override
@@ -288,6 +451,7 @@ class _FakeAiClient implements AiApiClient {
     required Uint8List bytes,
     required String filename,
     required String mimeType,
+    String? requestId,
   }) => throw UnimplementedError();
 }
 
@@ -296,17 +460,27 @@ class _CompletingAiClient implements AiApiClient {
   final Completer<AiResult> completer;
 
   @override
-  Future<AiResult> financialPlan(FinancialPlanAiRequest request) =>
+  Future<AiQuotaStatus> quota() async => _quota();
+
+  @override
+  Future<AiResult> financialPlan(
+    FinancialPlanAiRequest request, {
+    String? requestId,
+  }) => completer.future;
+  @override
+  Future<AiResult> budgetReview(BudgetAiRequest request, {String? requestId}) =>
       completer.future;
   @override
-  Future<AiResult> budgetReview(BudgetAiRequest request) => completer.future;
-  @override
-  Future<AiResult> monthlySummary(MonthlyAiRequest request) => completer.future;
+  Future<AiResult> monthlySummary(
+    MonthlyAiRequest request, {
+    String? requestId,
+  }) => completer.future;
 
   @override
   Future<ChatResult> chat({
     required List<ChatMessage> messages,
     Map<String, String> context = const {},
+    String? requestId,
   }) => throw UnimplementedError();
 
   @override
@@ -314,6 +488,7 @@ class _CompletingAiClient implements AiApiClient {
     required String text,
     required String timeZoneId,
     required List<LedgerCategory> categories,
+    String? requestId,
   }) => throw UnimplementedError();
 
   @override
@@ -321,7 +496,24 @@ class _CompletingAiClient implements AiApiClient {
     required Uint8List bytes,
     required String filename,
     required String mimeType,
+    String? requestId,
   }) => throw UnimplementedError();
+}
+
+AiQuotaStatus _quota({int dailyRemaining = 2, int weeklyRemaining = 10}) {
+  final now = DateTime.now().toUtc();
+  return AiQuotaStatus(
+    planCode: 'free',
+    dailyLimit: 2,
+    dailyUsed: 2 - dailyRemaining,
+    dailyRemaining: dailyRemaining,
+    weeklyLimit: 10,
+    weeklyUsed: 10 - weeklyRemaining,
+    weeklyRemaining: weeklyRemaining,
+    nextDailyResetAt: now.add(const Duration(days: 1)),
+    nextWeeklyResetAt: now.add(const Duration(days: 7)),
+    userTimeZone: 'Asia/Shanghai',
+  );
 }
 
 Future<LedgerTestHarness> _pumpApp(

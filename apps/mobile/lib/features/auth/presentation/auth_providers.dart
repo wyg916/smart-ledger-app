@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:smart_ledger/core/config/app_environment.dart';
+import 'package:smart_ledger/core/time/ledger_time.dart';
 import 'package:smart_ledger/features/auth/data/auth_api_client.dart';
 import 'package:smart_ledger/features/auth/data/auth_platform_gateway.dart';
 import 'package:smart_ledger/features/auth/data/auth_session_store.dart';
@@ -31,7 +32,9 @@ final authApiClientProvider = Provider<AuthApiClient>(
 );
 
 final authPlatformGatewayProvider = Provider<AuthPlatformGateway>((ref) {
-  if (Platform.environment['FLUTTER_TEST'] == 'true') {
+  final environment = ref.watch(appEnvironmentProvider);
+  if (Platform.environment['FLUTTER_TEST'] == 'true' ||
+      environment != AppEnvironment.production) {
     return const FakeAuthPlatformGateway();
   }
   return const MethodChannelAuthPlatformGateway();
@@ -50,6 +53,7 @@ final authControllerProvider = StateNotifierProvider<AuthController, AuthState>(
       ref.watch(authPlatformGatewayProvider),
       ref.watch(anonymousIdentityServiceProvider),
       ref.watch(localDataIsolationServiceProvider),
+      timeZone: const DeviceLedgerTimeZone(),
       skipRemoteRestore: isTest,
       skipBindingCheck: isTest,
     );
@@ -60,4 +64,8 @@ final authControllerProvider = StateNotifierProvider<AuthController, AuthState>(
 
 final authenticatedAccessTokenProvider = Provider<String?>(
   (ref) => ref.watch(authControllerProvider).session?.accessToken,
+);
+
+final authenticatedUserIdProvider = Provider<String?>(
+  (ref) => ref.watch(authControllerProvider).session?.userId,
 );

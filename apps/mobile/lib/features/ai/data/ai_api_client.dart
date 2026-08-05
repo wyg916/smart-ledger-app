@@ -10,24 +10,35 @@ import 'package:smart_ledger/features/ai/domain/ai_requests.dart';
 import 'package:smart_ledger/features/categories/domain/ledger_category.dart';
 import 'package:smart_ledger/features/quick_entry/domain/transaction_draft.dart';
 import 'package:smart_ledger/features/transactions/domain/ledger_transaction.dart';
+import 'package:uuid/uuid.dart';
 
 abstract interface class AiApiClient {
-  Future<AiResult> monthlySummary(MonthlyAiRequest request);
-  Future<AiResult> budgetReview(BudgetAiRequest request);
-  Future<AiResult> financialPlan(FinancialPlanAiRequest request);
+  Future<AiQuotaStatus> quota();
+  Future<AiResult> monthlySummary(
+    MonthlyAiRequest request, {
+    String? requestId,
+  });
+  Future<AiResult> budgetReview(BudgetAiRequest request, {String? requestId});
+  Future<AiResult> financialPlan(
+    FinancialPlanAiRequest request, {
+    String? requestId,
+  });
   Future<ChatResult> chat({
     required List<ChatMessage> messages,
     Map<String, String> context = const {},
+    String? requestId,
   });
   Future<TransactionDraft> parseTransaction({
     required String text,
     required String timeZoneId,
     required List<LedgerCategory> categories,
+    String? requestId,
   });
   Future<ImageAnalysisResult> analyzeImage({
     required Uint8List bytes,
     required String filename,
     required String mimeType,
+    String? requestId,
   });
 }
 
@@ -39,21 +50,30 @@ final class HttpAiApiClient implements AiApiClient {
   final String? Function()? _accessToken;
 
   @override
-  Future<AiResult> monthlySummary(MonthlyAiRequest request) =>
-      _post('monthly-summary', request.toJson());
+  Future<AiQuotaStatus> quota() async =>
+      AiQuotaStatus.fromJson(await _getJson('quota'));
 
   @override
-  Future<AiResult> budgetReview(BudgetAiRequest request) =>
-      _post('budget-review', request.toJson());
+  Future<AiResult> monthlySummary(
+    MonthlyAiRequest request, {
+    String? requestId,
+  }) => _post('monthly-summary', request.toJson(), requestId: requestId);
 
   @override
-  Future<AiResult> financialPlan(FinancialPlanAiRequest request) =>
-      _post('financial-plan', request.toJson());
+  Future<AiResult> budgetReview(BudgetAiRequest request, {String? requestId}) =>
+      _post('budget-review', request.toJson(), requestId: requestId);
+
+  @override
+  Future<AiResult> financialPlan(
+    FinancialPlanAiRequest request, {
+    String? requestId,
+  }) => _post('financial-plan', request.toJson(), requestId: requestId);
 
   @override
   Future<ChatResult> chat({
     required List<ChatMessage> messages,
     Map<String, String> context = const {},
+    String? requestId,
   }) async {
     final body = await _postJson('chat', {
       'messages': messages
@@ -61,7 +81,7 @@ final class HttpAiApiClient implements AiApiClient {
           .map((message) => message.toJson())
           .toList(),
       'context': context,
-    });
+    }, requestId: requestId);
     final result = body['result']! as Map<String, Object?>;
     return ChatResult(
       title: result['title']! as String,
@@ -78,6 +98,7 @@ final class HttpAiApiClient implements AiApiClient {
     required String text,
     required String timeZoneId,
     required List<LedgerCategory> categories,
+    String? requestId,
   }) async {
     final body = await _postJson('parse-transaction', {
       'text': text,
@@ -91,7 +112,7 @@ final class HttpAiApiClient implements AiApiClient {
             },
           )
           .toList(),
-    });
+    }, requestId: requestId);
     final result = body['result']! as Map<String, Object?>;
     return TransactionDraft(
       type: LedgerTransactionType.values.byName(
@@ -115,6 +136,7 @@ final class HttpAiApiClient implements AiApiClient {
     required Uint8List bytes,
     required String filename,
     required String mimeType,
+    String? requestId,
   }) async {
     if (_baseUrl.isEmpty) {
       throw const AiFailure(AiFailureKind.disabled, 'AI 服务地址未配置');
@@ -128,6 +150,7 @@ final class HttpAiApiClient implements AiApiClient {
             )
             ..headers.addAll({
               if (token != null) 'authorization': 'Bearer $token',
+              'x-request-id': requestId ?? const Uuid().v4(),
             })
             ..files.add(
               http.MultipartFile.fromBytes(
@@ -165,15 +188,20 @@ final class HttpAiApiClient implements AiApiClient {
     }
   }
 
-  Future<AiResult> _post(String path, Map<String, Object?> payload) async {
-    final body = await _postJson(path, payload);
+  Future<AiResult> _post(
+    String path,
+    Map<String, Object?> payload, {
+    String? requestId,
+  }) async {
+    final body = await _postJson(path, payload, requestId: requestId);
     return _decodeMap(body);
   }
 
   Future<Map<String, Object?>> _postJson(
     String path,
-    Map<String, Object?> payload,
-  ) async {
+    Map<String, Object?> payload, {
+    String? requestId,
+  }) async {
     if (_baseUrl.isEmpty) {
       throw const AiFailure(AiFailureKind.disabled, 'AI 服务地址未配置');
     }
@@ -185,6 +213,7 @@ final class HttpAiApiClient implements AiApiClient {
             headers: {
               'content-type': 'application/json',
               if (token != null) 'authorization': 'Bearer $token',
+              'x-request-id': requestId ?? const Uuid().v4(),
             },
             body: jsonEncode(payload),
           )
@@ -204,8 +233,43 @@ final class HttpAiApiClient implements AiApiClient {
     }
   }
 
+  Future<Map<String, Object?>> _getJson(String path) async {
+    if (_baseUrl.isEmpty) {
+      throw const AiFailure(AiFailureKind.disabled, 'AI 服务地址未配置');
+    }
+    try {
+      final token = _accessToken?.call();
+      final response = await _client
+          .get(
+            Uri.parse('$_baseUrl/api/v1/ai/$path'),
+            headers: {if (token != null) 'authorization': 'Bearer $token'},
+          )
+          .timeout(const Duration(seconds: 12));
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, Object?>;
+      }
+      throw _failureFor(response.statusCode, response.body);
+    } on TimeoutException {
+      throw const AiFailure(AiFailureKind.timeout, 'AI 额度请求超时');
+    } on SocketException {
+      throw const AiFailure(AiFailureKind.offline, '无法获取AI额度');
+    } on http.ClientException {
+      throw const AiFailure(AiFailureKind.offline, '无法获取AI额度');
+    } on FormatException {
+      throw const AiFailure(AiFailureKind.invalidResponse, 'AI 额度格式无效');
+    }
+  }
+
   AiFailure _failureFor(int statusCode, String body) {
     final code = _errorCode(body);
+    if (code == 'AI_QUOTA_EXCEEDED') {
+      final quota = _quotaFromError(body);
+      return AiFailure(
+        AiFailureKind.quotaExceeded,
+        quota?.exhaustedMessage ?? 'AI次数已用完，请在额度恢复后再试。',
+        quota: quota,
+      );
+    }
     if (statusCode == 429 || code == 'AI_RATE_LIMITED') {
       return const AiFailure(AiFailureKind.rateLimited, '请求过于频繁，请稍后重试');
     }
@@ -219,6 +283,16 @@ final class HttpAiApiClient implements AiApiClient {
       return const AiFailure(AiFailureKind.timeout, 'AI 请求超时');
     }
     return const AiFailure(AiFailureKind.unavailable, 'AI 服务暂不可用');
+  }
+
+  AiQuotaStatus? _quotaFromError(String body) {
+    try {
+      return AiQuotaStatus.fromJson(
+        (jsonDecode(body) as Map).cast<String, Object?>(),
+      );
+    } on Object {
+      return null;
+    }
   }
 
   String? _errorCode(String body) {
